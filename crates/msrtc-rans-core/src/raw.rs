@@ -234,26 +234,18 @@ macro_rules! generate_rans_impl {
 
             /// Put a raw symbol (start, freq, scale_bits) using division.
             ///
-            /// Panics if `scale_bits >= 32` (overflow at `1u32 << scale_bits`).
-            /// Use `try_put_raw` for a `Result`-returning checked variant.
+            /// Panics if parameters are invalid. Use `try_put_raw` for a
+            /// `Result`-returning checked variant.
             #[inline]
             pub fn put_raw(&mut self, start: Freq, freq: Freq, scale_bits: Freq) {
-                assert!(
-                    scale_bits < 32,
-                    "scale_bits={} causes overflow at 1u32<<scale_bits (use try_put_raw)",
-                    scale_bits
-                );
-                self.put_raw_unchecked(start, freq, scale_bits);
+                self.try_put_raw(start, freq, scale_bits)
+                    .expect("invalid raw rANS encoder parameters");
             }
 
-            /// Internal unchecked raw put — caller must ensure `scale_bits < 32`.
+            /// Internal unchecked raw put — caller must ensure `scale_bits < 32`
+            /// and that `start`/`freq` are valid.
             #[inline]
             pub(crate) fn put_raw_unchecked(&mut self, start: Freq, freq: Freq, scale_bits: Freq) {
-                debug_assert!(
-                    0 < scale_bits && scale_bits as u32 <= $max_scale_bits,
-                    "invalid scale_bits"
-                );
-                debug_assert!(0 < scale_bits && scale_bits as u32 <= $max_scale_bits);
                 debug_assert!(start < (1u32 << scale_bits));
                 debug_assert!(freq > 0 && freq <= (1u32 << scale_bits) - start);
 
@@ -438,21 +430,18 @@ macro_rules! generate_rans_impl {
             /// Uses transactional state: computes into a local variable and only
             /// assigns to `self.state` after renormalization succeeds.
             ///
-            /// Panics if `scale_bits >= 32` (overflow at `1u32 << scale_bits`).
-            /// Use `try_advance` for a `Result`-returning checked variant.
+            /// Panics if parameters are invalid. Use `try_advance` for a
+            /// `Result`-returning checked variant.
             ///
             /// Equivalent to: `RansDecoder::Advance(start, freq, scale_bits)`.
             #[inline]
             pub fn advance(&mut self, start: Freq, freq: Freq, scale_bits: Freq) -> bool {
-                assert!(
-                    scale_bits < 32,
-                    "scale_bits={} causes overflow (use try_advance)",
-                    scale_bits
-                );
-                self.advance_unchecked(start, freq, scale_bits)
+                self.try_advance(start, freq, scale_bits)
+                    .expect("invalid raw rANS decoder parameters")
             }
 
-            /// Internal unchecked advance — caller must ensure `scale_bits < 32`.
+            /// Internal unchecked advance — caller must ensure `scale_bits < 32`
+            /// and that `start`/`freq` are valid.
             #[inline]
             pub(crate) fn advance_unchecked(
                 &mut self,
@@ -460,9 +449,10 @@ macro_rules! generate_rans_impl {
                 freq: Freq,
                 scale_bits: Freq,
             ) -> bool {
+                debug_assert!(start < (1u32 << scale_bits));
+                debug_assert!(freq > 0 && freq <= (1u32 << scale_bits) - start);
+
                 let scale = 1u32 << scale_bits;
-                debug_assert!(start < scale);
-                debug_assert!(freq > 0 && freq <= scale - start);
 
                 let x = self.state;
                 let mask = (scale - 1) as $state_ty;
@@ -504,6 +494,10 @@ macro_rules! generate_rans_impl {
                         provided: scale_bits as u32,
                         max_safe: core::cmp::min($max_scale_bits, 31),
                     });
+                }
+                let scale = 1u32 << scale_bits;
+                if start >= scale || freq == 0 || freq > scale - start {
+                    return Err(crate::error::RawRansError::InvalidParameters);
                 }
                 Ok(self.advance_unchecked(start, freq, scale_bits))
             }
