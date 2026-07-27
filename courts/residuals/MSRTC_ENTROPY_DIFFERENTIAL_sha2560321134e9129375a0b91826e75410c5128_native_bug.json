@@ -29,6 +29,6 @@
     "differing_bytes": 14
   },
   "classification": "native_bug",
-  "resolution": "open",
+  "resolution": "fixed",
   "environment_sha256": "46468179807a79223b98282f9cba2bffa78eab9c1402677dc9f94336a75e77eb"
 }
