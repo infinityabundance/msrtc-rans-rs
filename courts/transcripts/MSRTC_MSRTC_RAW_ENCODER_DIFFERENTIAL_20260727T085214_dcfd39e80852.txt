@@ -2,11 +2,11 @@ MSRTC Court Transcript
 =====================
 
 Court:       MSRTC.RAW.ENCODER.DIFFERENTIAL
-Run ID:      20260727T062641_e07622e65125
-Timestamp:   20260727T062641
-Rust Commit: e07622e65125ca4d14f93cb144a66c0d90f2e4cc
+Run ID:      20260727T085214_dcfd39e80852
+Timestamp:   20260727T085214
+Rust Commit: dcfd39e80852facc2c7b7f882c9e3be6b01f3310
 Oracle Cmt:  0500356a8d6146dd8dc8911022cbeca19675614f
-Environment: a0049279eef8bd0854bb33dab32cf42e98c928afd5d9755ace662eb5e4849eca
+Environment: c7ccf2abb290203e9937b9397384793560db70061a93a760f456adda16a6c014
 
 Cases: 8 total, 8 pass, 0 residual, 0 skipped
 Result: PASS
