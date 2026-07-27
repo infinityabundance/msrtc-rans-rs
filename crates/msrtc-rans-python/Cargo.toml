@@ -3,6 +3,7 @@ name = "msrtc-rans-python"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "Python extension module for msrtc_rans (published as wheel, not crate)"
 
 [lib]

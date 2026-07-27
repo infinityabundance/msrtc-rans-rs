@@ -3,6 +3,7 @@ name = "msrtc-rans-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "Deterministic no_std rANS primitives for msrtc_rans entropy coder"
 
 [features]
