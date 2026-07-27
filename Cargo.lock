@@ -117,21 +117,21 @@ dependencies = [
 
 [[package]]
 name = "msrtc-rans"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "msrtc-rans-core",
 ]
 
 [[package]]
 name = "msrtc-rans-bench"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "msrtc-rans-core",
 ]
 
 [[package]]
 name = "msrtc-rans-casefile"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "rand",
  "rand_chacha",
@@ -142,11 +142,11 @@ dependencies = [
 
 [[package]]
 name = "msrtc-rans-core"
-version = "0.1.2"
+version = "0.2.0"
 
 [[package]]
 name = "msrtc-rans-court"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "msrtc-rans",
  "msrtc-rans-casefile",
@@ -158,11 +158,11 @@ dependencies = [
 
 [[package]]
 name = "msrtc-rans-oracle"
-version = "0.1.2"
+version = "0.2.0"
 
 [[package]]
 name = "msrtc-rans-python"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "msrtc-rans",
  "msrtc-rans-core",
@@ -421,7 +421,7 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
 name = "xtask"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",

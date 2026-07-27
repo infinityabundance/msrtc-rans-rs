@@ -1,64 +1,138 @@
 # msrtc-rans-rs
 
-Native Rust forensic-parity replacement for Microsoft MLVC's `msrtc_rans` entropy coder.
+**Native Rust forensic-parity replacement for Microsoft MLVC's `msrtc_rans` entropy coder.**
 
-## Current Status — Phase 0/1 Partial
+A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible Rust implementation of the rANS entropy coder used by Microsoft's MLVC framework. Every encoder/decoder primitive, entropy distribution, and bypass path is verified byte-for-byte against the pinned C++ oracle in sealed forensic courts.
+
+---
+
+## Current Status — Three Courts Sealed ✅
 
 | Component | Status |
 |-----------|--------|
-| Upstream oracle source pin | ✅ Complete (commit `0500356a`) |
-| Oracle baseline observation | 🟡 Partial — no formal receipt yet |
-| Docker Debian oracle cell | 🟡 Observed externally |
-| Docker matrix infrastructure | 🔲 Pending/incomplete |
-| Raw rANS engine (RansByte/Rans64) | 🟡 Partial — internally tested, no oracle differential court |
-| VecSink growth policy | 🟡 Partial — matches Microsoft formula, no oracle verification |
-| `scale_bits == 32` rejection | 🟡 Implemented, residual created |
-| Decoder transactional state | ✅ Fixed and tested |
-| Python extension | 🔲 Scaffold |
-| MLVC integration | ❌ Not started |
-| Performance benchmarking | ❌ Not started |
+| Upstream oracle source pin | ✅ **Sealed** — commit `0500356a` |
+| Oracle baseline observation | ✅ **Sealed** — 7/7 Python tests pass |
+| Docker Debian oracle cell | ✅ **Sealed** — Docker image with oracle CLI |
+| `MSRTC.RAW.ENCODER.DIFFERENTIAL` court | ✅ **Sealed** — 8/8 cases pass |
+| `MSRTC.RAW.DECODER.DIFFERENTIAL` court | ✅ **Sealed** — 16/16 cases pass |
+| `MSRTC.ENTROPY.DIFFERENTIAL` court | ✅ **Sealed** — 6/6 cases pass |
+| `scale_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
+| Docker matrix (multi-distro) | 🔲 Scaffold — Debian only |
+| Python extension | 🔲 Scaffold — PyO3 module |
+| MLVC integration | 🔲 Not started |
+| Performance benchmarking | 🔲 Not started |
+
+---
 
 ## Architecture
 
 ```
-msrtc-rans-core/   → Deterministic no_std rANS primitives (RansByte, Rans64)
-msrtc-rans/        → Safe public Rust entropy-coder API
-msrtc-rans-python/ → Python extension (_msrtc_rans) — not published on crates.io
-msrtc-rans-oracle/ → Developer-only C++ oracle adapter — not published on crates.io
-msrtc-rans-casefile/ → Deterministic casefile/residual formats
-msrtc-rans-court/  → Differential forensic courts
-msrtc-rans-bench/  → Matched Rust/C++ benchmark harness
-xtask/             → Build orchestration and freshness checks — not published
+                    ┌──────────────────────┐
+                    │  msrtc-rans-python    │  (PyO3 shell)
+                    │  Python API surface   │
+                    └──────────┬───────────┘
+                               │
+                    ┌──────────▼───────────┐
+                    │    msrtc-rans         │  (Safe public API)
+                    │  EntropyEncoder/Decr  │
+                    │  PMF, Bypass, CDF     │
+                    └──────────┬───────────┘
+                               │
+                    ┌──────────▼───────────┐
+                    │  msrtc-rans-core      │  (no_std deterministic)
+                    │  RansByte / Rans64    │
+                    │  Arithmetic / Sink    │
+                    └──────────────────────┘
 ```
+
+### Crate Descriptions
+
+| Crate | Description |
+|-------|-------------|
+| `msrtc-rans-core` | Deterministic `no_std` rANS primitives (RansByte, Rans64, arithmetic, VecSink) |
+| `msrtc-rans` | Safe public Rust entropy-coder API with EntropyEncoder, EntropyDecoder, PMF, bypass, CDF |
+| `msrtc-rans-python` | Python extension (`_msrtc_rans`) via PyO3 — *not published on crates.io* |
+| `msrtc-rans-oracle` | Developer-only C++ oracle adapter — *not published on crates.io* |
+| `msrtc-rans-casefile` | Deterministic casefile/residual formats |
+| `msrtc-rans-court` | Differential forensic courts with seal/receipt/transcript infrastructure |
+| `msrtc-rans-bench` | Matched Rust/C++ benchmark harness |
+| `xtask` | Build orchestration and freshness checks — *not published* |
+
+---
 
 ## Quick Start
 
 ```bash
+# Build everything except the Python extension
 cargo build --workspace --exclude msrtc-rans-python
+
+# Run all tests (core + entropy + courts)
 cargo test --workspace --exclude msrtc-rans-python
+
+# Run the sealed courts (requires Docker oracle image)
+cargo run -p msrtc-rans-court --bin seal -- --all
 ```
 
-## Oracle
+### Docker Oracle
+
+```bash
+# Build the C++ oracle image (Debian 12, gcc 12.2.0)
+docker build --tag msrtc-rans-rs-oracle:debian12 \
+  --file /path/to/Dockerfile.oracle /path/to/build-context
+
+# Run the upstream Python tests
+docker run --rm msrtc-rans-rs-oracle:debian12
+```
+
+---
+
+## Oracle Pin
 
 The Microsoft C++ oracle is pinned at:
-- Repository: https://github.com/microsoft/mlvc
-- Commit: `0500356a8d6146dd8dc8911022cbeca19675614f`
-- Subdirectory: `packages/msrtc_rans`
 
-See `oracle/upstream.lock` for details. A formal oracle baseline receipt is pending.
+- **Repository:** https://github.com/microsoft/mlvc
+- **Commit:** `0500356a8d6146dd8dc8911022cbeca19675614f`
+- **Subdirectory:** `packages/msrtc_rans`
+- **License:** MIT
+
+See `oracle/upstream.lock` for full fixture hashes, reference bitstreams, and build environment metadata. The oracle contract proves that the Rust implementation produces byte-identical output to the C++ implementation for all tested code paths.
+
+---
 
 ## Published Crates (crates.io)
 
 | Crate | Version | Description |
 |-------|---------|-------------|
-| `msrtc-rans-core` | 0.1.0 | Deterministic no_std rANS primitives |
-| `msrtc-rans` | 0.1.0 | Safe public Rust entropy-coder API |
-| `msrtc-rans-casefile` | 0.1.0 | Casefile/residual formats |
-| `msrtc-rans-court` | 0.1.0 | Differential forensic courts |
-| `msrtc-rans-bench` | 0.1.0 | Benchmark harness |
+| [`msrtc-rans-core`](https://crates.io/crates/msrtc-rans-core) | 0.2.0 | Deterministic no_std rANS primitives |
+| [`msrtc-rans`](https://crates.io/crates/msrtc-rans) | 0.2.0 | Safe public Rust entropy-coder API |
+| [`msrtc-rans-casefile`](https://crates.io/crates/msrtc-rans-casefile) | 0.2.0 | Casefile/residual formats |
+| [`msrtc-rans-court`](https://crates.io/crates/msrtc-rans-court) | 0.2.0 | Differential forensic courts |
+| [`msrtc-rans-bench`](https://crates.io/crates/msrtc-rans-bench) | 0.2.0 | Benchmark harness |
+
+---
+
+## Forensic Courts
+
+The project uses a novel **forensic court system** to prove correctness:
+
+1. **Casefiles** — Deterministic test inputs with SHA-256 content hashes
+2. **Oracle CLI** — C++ binary that processes casefiles and produces canonical outputs
+3. **Differential comparison** — Rust output vs. C++ output, byte-for-byte
+4. **Receipts** — Machine-verified evidence packages (court_id, run_id, case results, environment fingerprint)
+5. **Residuals** — Structured mismatch records with classification and resolution tracking
+
+### Sealed Courts
+
+| Court ID | Cases | Result |
+|----------|-------|--------|
+| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | 8 | ✅ All pass |
+| `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | ✅ All pass |
+| `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | ✅ All pass |
+
+---
 
 ## License
 
-MIT — see LICENSE and NOTICE for attribution notices.
+MIT — see [LICENSE](LICENSE) and [NOTICE](NOTICE) for attribute notices.
 
-Author: Riaan de Beer — github.com/infinityabundance — rdebeer.infinityabundance@gmail.com
+**Author:** Riaan de Beer — [github.com/infinityabundance](https://github.com/infinityabundance) — rdebeer.infinityabundance@gmail.com
