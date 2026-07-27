@@ -233,8 +233,26 @@ macro_rules! generate_rans_impl {
             }
 
             /// Put a raw symbol (start, freq, scale_bits) using division.
+            ///
+            /// Panics if `scale_bits >= 32` (overflow at `1u32 << scale_bits`).
+            /// Use `try_put_raw` for a `Result`-returning checked variant.
             #[inline]
             pub fn put_raw(&mut self, start: Freq, freq: Freq, scale_bits: Freq) {
+                assert!(
+                    scale_bits < 32,
+                    "scale_bits={} causes overflow at 1u32<<scale_bits (use try_put_raw)",
+                    scale_bits
+                );
+                self.put_raw_unchecked(start, freq, scale_bits);
+            }
+
+            /// Internal unchecked raw put — caller must ensure `scale_bits < 32`.
+            #[inline]
+            pub(crate) fn put_raw_unchecked(&mut self, start: Freq, freq: Freq, scale_bits: Freq) {
+                debug_assert!(
+                    0 < scale_bits && scale_bits as u32 <= $max_scale_bits,
+                    "invalid scale_bits"
+                );
                 debug_assert!(0 < scale_bits && scale_bits as u32 <= $max_scale_bits);
                 debug_assert!(start < (1u32 << scale_bits));
                 debug_assert!(freq > 0 && freq <= (1u32 << scale_bits) - start);
@@ -273,7 +291,7 @@ macro_rules! generate_rans_impl {
                 if freq == 0 || freq > scale - start {
                     return Err(crate::error::RawRansError::InvalidParameters);
                 }
-                self.put_raw(start, freq, scale_bits);
+                self.put_raw_unchecked(start, freq, scale_bits);
                 Ok(())
             }
 
@@ -379,20 +397,69 @@ macro_rules! generate_rans_impl {
             }
 
             /// Get the next symbol frequency (low `scale_bits` of state).
+            ///
+            /// Panics if `scale_bits >= 32` (overflow at `1u32 << scale_bits`).
+            /// Use `try_get` for a `Result`-returning checked variant.
             #[inline]
             pub fn get(&self, scale_bits: Freq) -> Freq {
+                assert!(
+                    scale_bits < 32,
+                    "scale_bits={} causes overflow (use try_get)",
+                    scale_bits
+                );
+                self.get_unchecked(scale_bits)
+            }
+
+            /// Get the next symbol frequency, unchecked.
+            /// Caller must ensure `scale_bits < 32`.
+            #[inline]
+            pub(crate) fn get_unchecked(&self, scale_bits: Freq) -> Freq {
                 let mask = (1u32 << scale_bits) - 1;
                 (self.state as Freq) & mask
             }
 
-            /// Advance the decoder past a symbol.
+            /// Get the next symbol frequency with bounds checking.
+            #[inline]
+            pub fn try_get(
+                &self,
+                scale_bits: Freq,
+            ) -> core::result::Result<Freq, crate::error::RawRansError> {
+                if scale_bits < 2 || scale_bits > $max_scale_bits || scale_bits >= 32 {
+                    return Err(crate::error::RawRansError::InvalidScaleBits {
+                        provided: scale_bits as u32,
+                        max_safe: core::cmp::min($max_scale_bits, 31),
+                    });
+                }
+                Ok(self.get_unchecked(scale_bits))
+            }
+
+            /// Advance the decoder past a symbol (public checked wrapper).
             ///
             /// Uses transactional state: computes into a local variable and only
             /// assigns to `self.state` after renormalization succeeds.
             ///
+            /// Panics if `scale_bits >= 32` (overflow at `1u32 << scale_bits`).
+            /// Use `try_advance` for a `Result`-returning checked variant.
+            ///
             /// Equivalent to: `RansDecoder::Advance(start, freq, scale_bits)`.
             #[inline]
             pub fn advance(&mut self, start: Freq, freq: Freq, scale_bits: Freq) -> bool {
+                assert!(
+                    scale_bits < 32,
+                    "scale_bits={} causes overflow (use try_advance)",
+                    scale_bits
+                );
+                self.advance_unchecked(start, freq, scale_bits)
+            }
+
+            /// Internal unchecked advance — caller must ensure `scale_bits < 32`.
+            #[inline]
+            pub(crate) fn advance_unchecked(
+                &mut self,
+                start: Freq,
+                freq: Freq,
+                scale_bits: Freq,
+            ) -> bool {
                 let scale = 1u32 << scale_bits;
                 debug_assert!(start < scale);
                 debug_assert!(freq > 0 && freq <= scale - start);
@@ -422,6 +489,23 @@ macro_rules! generate_rans_impl {
                 // All reads succeeded — commit the new state
                 self.state = x_new;
                 true
+            }
+
+            /// Advance the decoder with bounds checking on `scale_bits`.
+            #[inline]
+            pub fn try_advance(
+                &mut self,
+                start: Freq,
+                freq: Freq,
+                scale_bits: Freq,
+            ) -> core::result::Result<bool, crate::error::RawRansError> {
+                if scale_bits < 2 || scale_bits > $max_scale_bits || scale_bits >= 32 {
+                    return Err(crate::error::RawRansError::InvalidScaleBits {
+                        provided: scale_bits as u32,
+                        max_safe: core::cmp::min($max_scale_bits, 31),
+                    });
+                }
+                Ok(self.advance_unchecked(start, freq, scale_bits))
             }
 
             /// Advance using a prepared decoder symbol.

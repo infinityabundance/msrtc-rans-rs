@@ -3,7 +3,7 @@
   "court_id": "MSRTC.RAW.SCALE32",
   "case_id": "SCALE32-REJECTION-RESIDUAL",
   "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
-  "rust_commit": "1623647",
+  "rust_commit": "b4a81709488ccd92ee40c7ac83e15eee7bd0f7f3",
   "seed": 0,
   "variant": "Rans64",
   "symbol_bits": 32,

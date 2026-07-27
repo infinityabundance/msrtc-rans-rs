@@ -20,8 +20,13 @@
 | `RansDecoder::CheckEOF` | `partial` | Trivial state check |
 | `Mul64Hi` | `partial` | Verified via u128; no oracle comparison |
 | Reciprocal preparation | `partial` | Verified vs exact division; no oracle comparison |
-| Buffer growth (VecSink) | `divergent` | Allocation formula differs from Microsoft max-step policy; content relocation is fixed |
+| Buffer growth (VecSink) | `partial` | Formula and suffix relocation match Microsoft; oracle allocation court pending |
 | Truncated-stream handling | `partial` | Now transactional; no oracle comparison |
+| `try_new()` (checked symbol) | `partial` | Rejects scale_bits outside [2, 31] |
+| `try_put_raw()` (checked encoder) | `partial` | Rejects scale_bits >= 32 |
+| `try_get()` (checked decoder) | `partial` | Rejects scale_bits >= 32 |
+| `try_advance()` (checked decoder) | `partial` | Rejects scale_bits >= 32 |
+| `RawRansError` type | `partial` | Error types for checked API |
 
 ## Python Public Surface
 
@@ -38,7 +43,7 @@
 
 | Category | Full | Partial | Scaffold | Divergent | Deferred | N/A |
 |----------|------|---------|----------|-----------|----------|-----|
-| C++ rANS primitives | 0 | 12 | 0 | 1 | 0 | 0 |
+| C++ rANS primitives | 0 | 18 | 0 | 0 | 0 | 0 |
 | C++ entropy coder | 0 | 0 | 7 | 0 | 0 | 0 |
 | Python API | 0 | 0 | 6 | 0 | 0 | 0 |
-| **Total** | **0** | **12** | **13** | **1** | **0** | **0** |
+| **Total** | **0** | **18** | **13** | **0** | **0** | **0** |

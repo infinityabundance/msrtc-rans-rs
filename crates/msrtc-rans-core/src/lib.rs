@@ -33,6 +33,7 @@ pub mod variant;
 /// Frequency type used throughout the rANS implementation - corresponds to `rans_freq_t` (uint32_t)
 pub type Freq = u32;
 
+pub use error::RawRansError;
 /// Re-export key types for convenience.
 pub use raw::{
     Rans64DecSymbol, Rans64Decoder, Rans64EncSymbol, Rans64Encoder, RansByteDecSymbol,
