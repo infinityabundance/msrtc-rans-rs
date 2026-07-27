@@ -34,19 +34,44 @@
 - **Cases:** 8 (4 RansByte + 4 Rans64, covering raw + prepared modes, single + multiple symbols, freq=1 edge case)
 - **Oracle CLI:** `raw_oracle_cli`
 - **Run ID:** `20260727T082625_7b5fc52f91d1`
+- **Sealed at commit:** `dcfd39e80852`
+- **Receipt:** `courts/receipts/MSRTC_MSRTC_RAW_ENCODER_DIFFERENTIAL_20260727T082625_7b5fc52f91d1.json`
 
 ### MSRTC.RAW.DECODER.DIFFERENTIAL
 - **Cases:** 16 (Rust encode → C++ decode and C++ encode → Rust decode, both RansByte and Rans64, multiple symbol configurations)
 - **Oracle CLI:** `decoder_oracle_cli`
 - **Run ID:** `20260727T082628_7b5fc52f91d1`
+- **Sealed at commit:** `dcfd39e80852`
+- **Receipt:** `courts/receipts/MSRTC_MSRTC_RAW_DECODER_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 
 ### MSRTC.ENTROPY.DIFFERENTIAL
 - **Cases:** 6 (encoder differential + roundtrip + C++ encode/Rust decode cross-validation, RansByte + Rans64)
 - **Oracle CLI:** `oracle_cli`
 - **Run ID:** `20260727T082628_7b5fc52f91d1`
+- **Sealed at commit:** `dcfd39e80852`
+- **Receipt:** `courts/receipts/MSRTC_MSRTC_ENTROPY_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 
 ## Receipt Files
 
 - `courts/receipts/MSRTC_MSRTC_RAW_ENCODER_DIFFERENTIAL_20260727T082625_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_RAW_DECODER_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_ENTROPY_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
+
+## Evidence Chain
+
+```
+upstream.lock (pinned commit + fixture hashes)
+    │
+    ▼
+Docker image (build environment + oracle CLI)
+    │
+    ▼
+Casefiles (deterministic test inputs, content-addressed by SHA-256)
+    │
+    ▼
+Differential Court (Rust vs C++ byte comparison)
+    │
+    ├── Receipt (JSON: court_id, run_id, per-case hashes)
+    ├── Transcript (TXT: human-readable case report)
+    └── Manifest (JSON: linked receipt + transcript hash)
+```

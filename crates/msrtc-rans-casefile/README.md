@@ -2,9 +2,9 @@
 
 **Deterministic casefile and residual formats for the msrtc_rans forensic courts.**
 
-This crate defines the structured data formats used for casefiles (deterministic test inputs and expected outputs), residuals (structured mismatch records), receipts (sealed court evidence), and transcripts (human-readable court proceedings).
+This crate defines the structured data formats used for casefiles (deterministic test inputs and expected outputs), residuals (structured mismatch records), receipts (sealed court evidence), and transcripts (human-readable court proceedings). Used by the differential court system in `msrtc-rans-court`.
 
-## Status
+## Status — Phase 3 Sealed ✅
 
 | Component | Status |
 |-----------|--------|
@@ -13,6 +13,8 @@ This crate defines the structured data formats used for casefiles (deterministic
 | `InputHashes` fields | ✅ Stable |
 | `ResidualClassification` enum | ✅ 9 variants |
 | `ResolutionState` enum | ✅ 6 states |
+
+All schemas are production-stable and used by the three sealed differential courts.
 
 ## Contents
 

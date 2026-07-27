@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Deterministic no_std rANS primitives for msrtc_rans entropy coder"
+documentation = "https://docs.rs/msrtc-rans-core"
 
 [features]
 default = []

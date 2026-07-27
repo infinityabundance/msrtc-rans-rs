@@ -59,6 +59,7 @@ The forensic court system (`msrtc-rans-court`) provides differential testing:
 | `MSRTC.RAW.ENCODER.DIFFERENTIAL` | Raw encoder (RansByte + Rans64) vs C++ | ✅ Sealed (8 cases) |
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` | Raw decoder (Rust→C++ and C++→Rust cross-validation) | ✅ Sealed (16 cases) |
 | `MSRTC.ENTROPY.DIFFERENTIAL` | Full entropy coder (encoder diff, roundtrip, cross-validate) | ✅ Sealed (6 cases) |
+| `MSRTC.ORACLE.BASELINE` | Oracle Python test baseline | 🟡 Partial (observed only) |
 | `MSRTC.RAW.RANSBYTE` | RansByte-specific differential court | 🔲 Scaffold |
 | `MSRTC.RAW.RANS64` | Rans64-specific differential court | 🔲 Scaffold |
 | `MSRTC.RECIPROCAL` | Reciprocal arithmetic three-way comparison | 🔲 Scaffold |
@@ -100,3 +101,12 @@ All mismatches are preserved as structured residuals in `courts/residuals/`. See
 | `intentional_safety_divergence` | Rust intentionally rejects UB |
 | `environmental` | Divergence due to environment |
 | `unclassified` | Not yet investigated |
+
+## Current Phase 3 Sealed State
+
+Three differential courts sealed at commit `dcfd39e80852`:
+- **Encoder differential:** 8/8 cases passing
+- **Decoder differential:** 16/16 cases passing
+- **Entropy differential:** 6/6 cases passing
+
+Test suite: 102 defined, 99 active, 3 ignored. All published crates at version 0.2.1.

@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Differential forensic courts for msrtc_rans parity verification"
+documentation = "https://docs.rs/msrtc-rans-court"
 
 [dependencies]
 msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.2" }

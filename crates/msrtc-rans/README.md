@@ -4,18 +4,18 @@
 
 This crate provides the high-level entropy coder API, wrapping the raw rANS primitives from `msrtc-rans-core` with PMF validation, CDF table construction, bypass coding, and distribution descriptors.
 
-## Status
+## Status — Phase 3 Sealed ✅
 
 | Feature | Status |
 |---------|--------|
-| `EntropyEncoder` | ✅ Implemented |
-| `EntropyDecoder` | ✅ Implemented |
-| PMF validation | ✅ Implemented |
-| CDF table construction | ✅ Implemented |
-| Bypass coding (variable-width) | ✅ Implemented |
+| `EntropyEncoder` | ✅ Implemented and courted |
+| `EntropyDecoder` | ✅ Implemented and courted |
+| PMF validation | ✅ Implemented and courted |
+| CDF table construction | ✅ Implemented and courted |
+| Bypass coding (variable-width) | ✅ Implemented and courted |
 | Entropy differential court | ✅ Sealed (6/6 cases) |
 
-The full entropy encode/decode pipeline (PMF → CDF → bypass) has been verified byte-for-byte against the pinned Microsoft C++ oracle.
+The full entropy encode/decode pipeline (PMF → CDF → bypass) has been verified byte-for-byte against the pinned Microsoft C++ oracle. All 30 entropy tests plus 1 doc-test pass.
 
 ## Features
 
@@ -28,6 +28,8 @@ The full entropy encode/decode pipeline (PMF → CDF → bypass) has been verifi
 - Re-exports all `msrtc-rans-core` types and traits
 
 ## Usage
+
+### Entropy Encoding/Decoding
 
 ```rust
 use msrtc_rans::entropy::EntropyEncoder;
@@ -46,6 +48,36 @@ encoder.initialize(&pmf_lengths, &pmf_offsets, &pmf_table, symbol_bits, bypass_b
 
 let values = vec![-2i32, 1i32, 0i32, 1i32];
 let encoded = encoder.encode(&values).expect("encode");
+
+// Decode
+use msrtc_rans::entropy::EntropyDecoder;
+use msrtc_rans_core::RansByte;
+
+let mut decoder = EntropyDecoder::<RansByte>::new();
+decoder.initialize(&pmf_lengths, &pmf_offsets, &pmf_table, symbol_bits, bypass_bits)
+    .expect("valid PMF");
+
+let decoded = decoder.decode(&encoded).expect("decode");
+assert_eq!(decoded, values);
+```
+
+### Raw rANS (re-exported from msrtc-rans-core)
+
+```rust
+use msrtc_rans::{RansByteEncoder, RansByteDecoder};
+use msrtc_rans::{VecSink, SliceSource};
+
+let sink = VecSink::<u8>::new(64);
+let mut encoder = RansByteEncoder::new(sink);
+encoder.put_raw(0, 128, 8);
+encoder.flush();
+let encoded = encoder.into_sink().encoded().to_vec();
+
+let source = SliceSource::new(&encoded);
+let mut decoder = RansByteDecoder::new(source);
+assert!(decoder.init());
+assert!(decoder.advance(0, 128, 8));
+assert!(decoder.check_eof());
 ```
 
 ## Repository

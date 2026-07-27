@@ -1,5 +1,5 @@
 # msrtc-rans-rs Surface Inventory
-*Generated: 2026-07-27* — **Phase 3 — Full Entropy Coder Differential**
+*Generated: 2026-07-27* — **Phase 3 — Full Entropy Coder Differential — Three Courts Sealed**
 
 ## Upstream Commit
 `0500356a8d6146dd8dc8911022cbeca19675614f` (Microsoft/mlvc)
@@ -15,12 +15,12 @@
 | `RansEncoder::Flush` | ⚠️ `partial` | Sealed via RAW.ENCODER.DIFFERENTIAL |
 | `RansEncoder::Reset` | ⚠️ `partial` | Trivial state reset |
 | `RansDecoder::Init` | ⚠️ `partial` | Sealed via RAW.DECODER.DIFFERENTIAL |
-| `RansDecoder::Get` | ⚠️ `partial` | Trivial mask operation |
+| `RansDecoder::Get` | ⚠️ `partial` | Sealed via RAW.DECODER.DIFFERENTIAL |
 | `RansDecoder::Advance` | ⚠️ `partial` | Transactional; sealed via RAW.DECODER.DIFFERENTIAL |
-| `RansDecoder::CheckEOF` | ⚠️ `partial` | Trivial state check |
+| `RansDecoder::CheckEOF` | ⚠️ `partial` | Sealed via RAW.DECODER.DIFFERENTIAL |
 | `Mul64Hi` | ⚠️ `partial` | Verified via u128 widening multiply; reciprocal arithmetic tested |
 | Reciprocal preparation | ⚠️ `partial` | Verified vs exact division |
-| Buffer growth (VecSink) | ⚠️ `partial` | Growth formula suffixes match Microsoft; allocation court pending |
+| Buffer growth (VecSink) | ⚠️ `partial` | Growth formula suffixes match Microsoft; verified fixed |
 | Truncated-stream handling | ⚠️ `partial` | Transactional design verified |
 | `try_new()` (checked symbol) | ⚠️ `partial` | Rejects scale_bits outside [2, 31] |
 | `try_put_raw()` (checked encoder) | ⚠️ `partial` | Rejects scale_bits >= 32 |

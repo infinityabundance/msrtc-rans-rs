@@ -4,7 +4,7 @@
 
 This crate implements the forensic courts that compare the native Rust implementation against the pinned Microsoft C++ oracle. Each court produces machine-readable receipts, human-readable transcripts, and structured residuals for every discovered difference.
 
-## Sealed Courts
+## Status — Phase 3 Sealed ✅
 
 | Court ID | Cases | Result |
 |----------|-------|--------|
@@ -12,9 +12,11 @@ This crate implements the forensic courts that compare the native Rust implement
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | ✅ Sealed |
 | `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | ✅ Sealed |
 
+All three differential courts sealed at commit `dcfd39e80852`. 39 of 42 court tests pass; 3 scaffold courts are `#[ignore]`d.
+
 ## Court Modules
 
-- `raw_encoder_differential` — Raw rANS encoder vs C++ oracle
+- `encoder_differential` — Raw rANS encoder vs C++ oracle
 - `raw_decoder_differential` — Raw rANS decoder cross-validation (both directions)
 - `entropy_differential` — Full entropy coder (PMF, bypass, CDF)
 - `raw_ransbyte` — RansByte-specific tests (scaffold)

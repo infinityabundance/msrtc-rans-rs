@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Safe public Rust entropy-coder API for msrtc_rans"
+documentation = "https://docs.rs/msrtc-rans"
 
 [features]
 default = []

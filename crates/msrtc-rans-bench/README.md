@@ -4,9 +4,14 @@
 
 This crate provides benchmarking infrastructure that runs the Rust implementation under matched conditions. Currently a scaffold with `BenchConfig` types defined; full benchmark execution is planned for a future phase.
 
-## Status
+## Status — Phase 3 Sealed ✅
 
-🔲 Scaffold — basic types defined, no executable benchmarks yet.
+| Component | Status |
+|-----------|--------|
+| `BenchConfig` types | 🔲 Scaffold |
+| Executable benchmarks | 🔲 Not started |
+
+While all three differential courts are sealed (encoder 8/8, decoder 16/16, entropy 6/6), performance benchmarking has not yet been executed.
 
 ## Repository
 

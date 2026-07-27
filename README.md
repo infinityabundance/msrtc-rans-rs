@@ -17,10 +17,22 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` court | ✅ **Sealed** — 16/16 cases pass |
 | `MSRTC.ENTROPY.DIFFERENTIAL` court | ✅ **Sealed** — 6/6 cases pass |
 | `scale_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
+| `symbol_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
+| `bypass_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | Docker matrix (multi-distro) | 🔲 Scaffold — Debian only |
 | Python extension | 🔲 Scaffold — PyO3 module |
 | MLVC integration | 🔲 Not started |
 | Performance benchmarking | 🔲 Not started |
+
+### Test Suite
+
+| Metric | Count |
+|--------|-------|
+| Total test functions defined | 102 |
+| Active tests | 99 |
+| Ignored tests | 3 |
+| Differential court cases (sealed) | 30 |
+| Receipts sealed | 3 |
 
 ---
 
@@ -101,13 +113,13 @@ See `oracle/upstream.lock` for full fixture hashes, reference bitstreams, and bu
 
 ## Published Crates (crates.io)
 
-| Crate | Version | Description |
-|-------|---------|-------------|
-| [`msrtc-rans-core`](https://crates.io/crates/msrtc-rans-core) | 0.2.0 | Deterministic no_std rANS primitives |
-| [`msrtc-rans`](https://crates.io/crates/msrtc-rans) | 0.2.0 | Safe public Rust entropy-coder API |
-| [`msrtc-rans-casefile`](https://crates.io/crates/msrtc-rans-casefile) | 0.2.0 | Casefile/residual formats |
-| [`msrtc-rans-court`](https://crates.io/crates/msrtc-rans-court) | 0.2.0 | Differential forensic courts |
-| [`msrtc-rans-bench`](https://crates.io/crates/msrtc-rans-bench) | 0.2.0 | Benchmark harness |
+| Crate | Version | Documentation | Description |
+|-------|---------|---------------|-------------|
+| [`msrtc-rans-core`](https://crates.io/crates/msrtc-rans-core) | 0.2.1 | [docs.rs](https://docs.rs/msrtc-rans-core) | Deterministic no_std rANS primitives |
+| [`msrtc-rans`](https://crates.io/crates/msrtc-rans) | 0.2.1 | [docs.rs](https://docs.rs/msrtc-rans) | Safe public Rust entropy-coder API |
+| [`msrtc-rans-casefile`](https://crates.io/crates/msrtc-rans-casefile) | 0.2.1 | [docs.rs](https://docs.rs/msrtc-rans-casefile) | Casefile/residual formats |
+| [`msrtc-rans-court`](https://crates.io/crates/msrtc-rans-court) | 0.2.1 | [docs.rs](https://docs.rs/msrtc-rans-court) | Differential forensic courts |
+| [`msrtc-rans-bench`](https://crates.io/crates/msrtc-rans-bench) | 0.2.1 | [docs.rs](https://docs.rs/msrtc-rans-bench) | Benchmark harness |
 
 ---
 

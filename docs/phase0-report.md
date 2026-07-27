@@ -1,15 +1,16 @@
-# msrtc-rans-rs — Phase 3 Implementation Report
+# msrtc-rans-rs — Phase 3 Final Report
 
 **Date:** 2026-07-27
 **Phase:** 3 — Full Entropy Coder with Differential Verification
 **Upstream oracle commit:** `0500356a8d6146dd8dc8911022cbeca19675614f`
-**Workspace version:** 0.1.2 (→ 0.2.0)
+**Workspace version:** 0.2.0 (→ 0.2.1)
+**Sealed at:** `dcfd39e80852`
 
 ---
 
 ## Executive Summary
 
-Phase 3 delivers the **complete entropy coder** — PMF validation, CDF table construction, bypass coding, and full encode/decode pipeline — with **three sealed differential courts** proving byte-identical output to the Microsoft C++ oracle. The project has transitioned from a raw rANS primitive implementation to a fully differential-tested entropy coding library.
+Phase 3 delivers the **complete entropy coder** — PMF validation, CDF table construction, bypass coding, and full encode/decode pipeline — with **three sealed differential courts** proving byte-identical output to the Microsoft C++ oracle. The project has transitioned from a raw rANS primitive implementation to a fully differential-tested entropy coding library with 102 test functions (99 active, 3 ignored).
 
 ---
 
@@ -30,7 +31,7 @@ Phase 3 delivers the **complete entropy coder** — PMF validation, CDF table co
 
 ### Entropy Tests
 
-- **49 test functions** covering:
+- **30 test functions** covering:
   - Encoder/decoder initialization (both variants)
   - PMF validation (rejects invalid inputs)
   - Reference bitstream match (encode matches oracle hex)
@@ -148,7 +149,7 @@ cargo run -p msrtc-rans-court --bin seal -- --entropy
 
 # Verify all tests pass
 cargo test --workspace --exclude msrtc-rans-python
-# 81 tests passed (49 entropy + 19 core + 13 court)
+# 99 tests passed (30 core + 30 entropy + 39 court), 3 ignored
 
 # Lint check
 cargo clippy --workspace --exclude msrtc-rans-python --all-targets -- -D warnings
@@ -161,10 +162,10 @@ cargo fmt --check
 
 | Crate | Test Count | Status |
 |-------|-----------|--------|
-| `msrtc-rans-core` | ~19 | ✅ All pass |
-| `msrtc-rans` (entropy) | ~49 | ✅ All pass |
-| `msrtc-rans-court` | ~13 | ✅ All pass |
-| **Total** | **~81** | **✅ All pass** |
+| `msrtc-rans-core` | 30 | ✅ All pass |
+| `msrtc-rans` (entropy) | 30 + 1 doc (ignored) | ✅ All pass |
+| `msrtc-rans-court` | 42 (39 pass, 3 ignored) | ✅ 39 pass, 3 ignored |
+| **Total** | **102 defined (99 active, 3 ignored)** | **✅ All active pass** |
 
 ---
 

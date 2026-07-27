@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Matched Rust benchmark harness for msrtc_rans"
+documentation = "https://docs.rs/msrtc-rans-bench"
 
 [dependencies]
 msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.2" }

@@ -4,14 +4,14 @@
 
 This crate implements the raw rANS encoding and decoding primitives used by Microsoft MLVC's `msrtc_rans` package. The arithmetic (reciprocal preparation, Mul64Hi, fast division) is structurally faithful to the C++ implementation.
 
-## Status
+## Status — Phase 3 Sealed ✅
 
 | Court | Status |
 |-------|--------|
 | Raw encoder differential | ✅ Sealed (8/8 cases) |
 | Raw decoder differential | ✅ Sealed (16/16 cases) |
 
-Both `RansByteEncoder` / `RansByteDecoder` (u32 state, u8 unit) and `Rans64Encoder` / `Rans64Decoder` (u64 state, u32 unit) have been verified byte-for-byte against the pinned Microsoft C++ oracle.
+Both `RansByteEncoder` / `RansByteDecoder` (u32 state, u8 unit) and `Rans64Encoder` / `Rans64Decoder` (u64 state, u32 unit) have been verified byte-for-byte against the pinned Microsoft C++ oracle. All 30 core tests pass.
 
 ## Features
 

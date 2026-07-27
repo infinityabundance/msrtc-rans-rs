@@ -1,5 +1,5 @@
 # msrtc-rans-rs Claim Index
-*Generated: 2026-07-27* — **Phase 3 — Three Courts Sealed**
+*Generated: 2026-07-27* — **Phase 3 — Three Courts Sealed — All Verified**
 
 ## Verified Claims (backed by differential court receipts)
 
@@ -17,6 +17,8 @@
 | Decoder advance is now transactional | Truncated-stream path preserved | ✅ **Fixed** |
 | `Source::Outcome` abstraction removed | Simplified to `bool` | ✅ **Cleaned** |
 | Encoder rejects scale_bits >= 32 | Verified in unit tests | ✅ **Intentional safety divergence** |
+| Rust rejects symbol_bits == 32 | Verified in unit tests | ✅ **Intentional safety divergence** |
+| Rust rejects bypass_bits == 32 | Verified in unit tests | ✅ **Intentional safety divergence** |
 
 ## Claims NOT Made
 

@@ -5,17 +5,9 @@
 
 All behavioural mismatches between the Rust implementation and the pinned Microsoft C++ oracle are captured as structured residuals in `courts/residuals/`. Residuals are classified by type, assigned a resolution state, and tracked through the resolution lifecycle.
 
-## Residual Files
-
-Residuals are stored as JSON files in `courts/residuals/`:
-
-| File | Court | Classification | Resolution |
-|------|-------|---------------|------------|
-| `MSRTC_RAW_SCALE32.json` | `MSRTC.RAW.SCALE32` | `oracle_undefined_or_assert_only` → `intentional_safety_divergence` | `open` |
-| `MSRTC_ENTROPY_DIFFERENTIAL_sha25687cf...native_bug.json` | `MSRTC.ENTROPY.DIFFERENTIAL` | `native_bug` | **resolved** — court now passes |
-| `MSRTC_ENTROPY_DIFFERENTIAL_sha2560321...native_bug.json` | `MSRTC.ENTROPY.DIFFERENTIAL` | `native_bug` | **resolved** — court now passes |
-
 ## Active Residuals
+
+Three active residuals remain, all classified as **intentional safety divergences** — Rust is correct to reject these inputs; the C++ oracle has undefined behaviour.
 
 ### MSRTC.RAW.SCALE32 — Intentional Safety Divergence
 
@@ -48,14 +40,24 @@ Residuals are stored as JSON files in `courts/residuals/`:
 - **Original issue:** Rust entropy encoder produced 11 bytes vs C++ oracle's 12 bytes for RansByte test case
 - **Root cause:** Fixed in commit `db4a5e7` — entropy court wiring, overflow protection fixes
 - **Current status:** `MSRTC.ENTROPY.DIFFERENTIAL` passes 6/6, receipt sealed
-- **Resolution:** Resolved — stale residual file preserved for audit trail
+- **Resolution:** **Resolved** — stale residual file preserved for audit trail
 
 ### Entropy Differential — Rans64 native mismatch (seed 1)
 
 - **Original issue:** Rust entropy encoder produced 12 bytes vs C++ oracle's 16 bytes for Rans64 test case
 - **Root cause:** Fixed in commit `db4a5e7` — entropy court wiring, overflow protection fixes
 - **Current status:** `MSRTC.ENTROPY.DIFFERENTIAL` passes 6/6, receipt sealed
-- **Resolution:** Resolved — stale residual file preserved for audit trail
+- **Resolution:** **Resolved** — stale residual file preserved for audit trail
+
+## Residual Files
+
+Residuals are stored as JSON files in `courts/residuals/`:
+
+| File | Court | Classification | Resolution |
+|------|-------|---------------|------------|
+| `MSRTC_RAW_SCALE32.json` | `MSRTC.RAW.SCALE32` | `oracle_undefined_or_assert_only` → `intentional_safety_divergence` | `open` |
+| `MSRTC_ENTROPY_DIFFERENTIAL_sha25687cf...native_bug.json` | `MSRTC.ENTROPY.DIFFERENTIAL` | `native_bug` | **resolved** — court now passes |
+| `MSRTC_ENTROPY_DIFFERENTIAL_sha2560321...native_bug.json` | `MSRTC.ENTROPY.DIFFERENTIAL` | `native_bug` | **resolved** — court now passes |
 
 ## Resolution States
 
