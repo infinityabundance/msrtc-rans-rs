@@ -17,6 +17,11 @@ fn main() {
         result.pass_count, result.residual_count, result.skipped_count, result.case_count
     );
 
+    if !result.is_sealable() {
+        eprintln!("❌ {} is NOT sealable.", court.id());
+        std::process::exit(1);
+    }
+
     match msrtc_rans_court::seal::seal(&result) {
         Ok(receipt) => {
             println!("Sealed:");
@@ -29,18 +34,11 @@ fn main() {
             println!("  Receipt:   {}/receipts/{}.json", base.display(), stem);
             println!("  Transcript: {}/transcripts/{}.txt", base.display(), stem);
             println!("  Manifest:  {}/manifests/{}.json", base.display(), stem);
+            println!("\n✅ {} is SEALED.", court.id());
         }
         Err(e) => {
             eprintln!("Seal failed: {}", e);
             std::process::exit(1);
         }
-    }
-
-    if result.is_sealable() {
-        println!("\n✅ {} is SEALED.", court.id());
-        std::process::exit(0);
-    } else {
-        eprintln!("\n❌ {} is NOT sealable.", court.id());
-        std::process::exit(1);
     }
 }

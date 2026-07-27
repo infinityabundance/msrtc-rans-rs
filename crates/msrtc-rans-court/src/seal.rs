@@ -60,12 +60,21 @@ pub struct CaseSummary {
     pub native_sha256: String,
 }
 
-/// Produce the three sealed artefacts for a court's result:
+/// Seal a court result — only proceeds if the court is sealable.
+pub fn seal(result: &CourtResult) -> Result<Receipt, String> {
+    if !result.is_sealable() {
+        return Err("court not sealable".into());
+    }
+    write_run_artifacts(result).map_err(|e| format!("write_run_artifacts: {}", e))
+}
+
+/// Low-level writer: produce the three sealed artefacts for a court's result without
+/// checking sealability. Callers should verify `result.is_sealable()` themselves.
 ///
 /// 1. `courts/receipts/MSRTC_<COURT>_<run_id>.json`
 /// 2. `courts/transcripts/MSRTC_<COURT>_<run_id>.txt`
 /// 3. `courts/manifests/MSRTC_<COURT>_<run_id>.json`
-pub fn seal(result: &CourtResult) -> std::io::Result<Receipt> {
+pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
     let rust_commit = git_commit();
     let timestamp = formatted_timestamp();
     let run_id = format!("{}_{}", timestamp, short_commit(&rust_commit));
@@ -112,8 +121,11 @@ pub fn seal(result: &CourtResult) -> std::io::Result<Receipt> {
         docker_image_digest: docker_digest,
         environment_sha256: environment_sha256(),
         commands: vec![
-            format!("cargo run --bin {} -- court", result.court_id),
-            "docker run -i --rm msrtc-rans-rs-oracle:debian12".to_string(),
+            format!("cargo run -p msrtc-rans-court --bin seal"),
+            format!(
+                "docker run -i --rm {} /workspace/bin/raw_oracle_cli /dev/stdin",
+                oracle::ORACLE_IMAGE
+            ),
         ],
         cases,
     };
@@ -127,25 +139,27 @@ pub fn seal(result: &CourtResult) -> std::io::Result<Receipt> {
     let court_slug = result.court_id.replace('.', "_");
     let stem = format!("MSRTC_{}_{}", court_slug, run_id);
 
-    // --- Receipt ---
+    // --- Receipt (build in-memory first for hashing) ---
     let receipt_dir = base.join("receipts");
     std::fs::create_dir_all(&receipt_dir)?;
     let receipt_path = receipt_dir.join(format!("{}.json", stem));
     let receipt_json = serde_json::to_string_pretty(&receipt)?;
+    let receipt_sha256 = sha256(receipt_json.as_bytes());
     std::fs::write(&receipt_path, &receipt_json)?;
 
-    // --- Transcript ---
+    // --- Transcript (build in-memory first for hashing) ---
     let transcript_dir = base.join("transcripts");
     std::fs::create_dir_all(&transcript_dir)?;
     let transcript_path = transcript_dir.join(format!("{}.txt", stem));
     let transcript = build_transcript(result, &receipt);
+    let transcript_sha256 = sha256(transcript.as_bytes());
     std::fs::write(&transcript_path, &transcript)?;
 
     // --- Manifest ---
     let manifest_dir = base.join("manifests");
     std::fs::create_dir_all(&manifest_dir)?;
     let manifest_path = manifest_dir.join(format!("{}.json", stem));
-    let manifest = build_manifest(result, &receipt);
+    let manifest = build_manifest(result, &receipt, &receipt_sha256, &transcript_sha256);
     let manifest_json = serde_json::to_string_pretty(&manifest)?;
     std::fs::write(&manifest_path, &manifest_json)?;
 
@@ -267,7 +281,12 @@ fn build_transcript(result: &CourtResult, receipt: &Receipt) -> String {
     String::from_utf8(buf).unwrap_or_else(|_| "transcript encoding error".to_string())
 }
 
-fn build_manifest(result: &CourtResult, receipt: &Receipt) -> serde_json::Value {
+fn build_manifest(
+    result: &CourtResult,
+    receipt: &Receipt,
+    receipt_sha256: &str,
+    transcript_sha256: &str,
+) -> serde_json::Value {
     serde_json::json!({
         "schema_version": 1,
         "court_id": result.court_id,
@@ -280,7 +299,9 @@ fn build_manifest(result: &CourtResult, receipt: &Receipt) -> serde_json::Value 
         "result": receipt.result,
         "rust_commit": receipt.rust_commit,
         "oracle_commit": receipt.oracle_commit,
+        "oracle_image_digest": receipt.docker_image_digest,
         "environment_sha256": receipt.environment_sha256,
-        "docker_image_digest": receipt.docker_image_digest,
+        "receipt_sha256": receipt_sha256,
+        "transcript_sha256": transcript_sha256,
     })
 }

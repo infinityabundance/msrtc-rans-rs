@@ -19,13 +19,13 @@
 //! The court is retained as the integration target for Phase 3.
 
 use msrtc_rans_casefile::{
-    DifferentialResult, InputHashes, NativeResult, OracleResult,
+    Comparison, DifferentialResult, InputHashes, NativeResult, OracleResult,
     classification::{ResidualClassification, ResolutionState},
     sha256,
 };
 
 use crate::oracle::{
-    self, compare_bytes, environment_sha256, git_commit, hash_i32_array, write_residual,
+    self, compare_bytes, environment_sha256, git_commit, hash_i32_array, try_write_residual,
 };
 use crate::{Court, CourtResult, CourtStatus};
 
@@ -160,8 +160,19 @@ impl Court for EntropyDifferentialCourt {
             };
 
             if !exact {
-                if let Err(e) = write_residual(&result) {
-                    eprintln!("Failed to write residual for {}: {}", result.case_id, e);
+                if let Err(_e) = try_write_residual(&result) {
+                    let failure_result = DifferentialResult {
+                        case_id: format!("residual_persistence_failure:{}", result.case_id),
+                        classification: ResidualClassification::Environmental,
+                        comparison: Comparison {
+                            exact: false,
+                            first_differing_offset: None,
+                            differing_bytes: None,
+                        },
+                        ..result.clone()
+                    };
+                    results.push(failure_result);
+                    continue;
                 }
             }
             results.push(result);

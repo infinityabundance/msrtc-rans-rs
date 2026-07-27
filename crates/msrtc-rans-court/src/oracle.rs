@@ -13,6 +13,7 @@
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use msrtc_rans_casefile::{
     Comparison, DifferentialResult, classification::ResidualClassification, sha256,
@@ -44,14 +45,43 @@ pub struct OracleResponse {
     pub raw_output: Vec<u8>,
 }
 
+/// Generate a unique run-scoped container name for Docker oracle containers.
+pub fn generate_run_id() -> String {
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+    let count = COUNTER.fetch_add(1, Ordering::Relaxed);
+    format!("msrtc-rans-rs-oracle-run-{}-{}", short_git_commit(), count)
+}
+
+fn short_git_commit() -> String {
+    let full = git_commit();
+    let clean = full.strip_suffix("-dirty").unwrap_or(&full);
+    clean.chars().take(12).collect()
+}
+
+/// Shared Docker arguments for oracle containers.
+pub fn docker_run_args() -> Vec<&'static str> {
+    vec![
+        "-i",
+        "--rm",
+        "--label",
+        "org.infinityabundance.project=msrtc-rans-rs",
+        "--label",
+        "org.infinityabundance.purpose=oracle",
+        "--label",
+        "org.infinityabundance.disposable=true",
+    ]
+}
+
 /// Run the oracle CLI inside Docker with the given binary casefile data.
 /// Returns the parsed metadata and raw bitstream.
 pub fn run_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
+    let container_name = generate_run_id();
     let mut child = Command::new("docker")
+        .args(["run"])
+        .args(docker_run_args())
         .args([
-            "run",
-            "-i",
-            "--rm",
+            "--name",
+            &container_name,
             ORACLE_IMAGE,
             "/workspace/bin/oracle_cli",
             "/dev/stdin",
@@ -92,11 +122,13 @@ pub fn run_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
 
 /// Run the raw oracle CLI inside Docker with the given binary input.
 pub fn run_raw_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
+    let container_name = generate_run_id();
     let mut child = Command::new("docker")
+        .args(["run"])
+        .args(docker_run_args())
         .args([
-            "run",
-            "-i",
-            "--rm",
+            "--name",
+            &container_name,
             ORACLE_IMAGE,
             "/workspace/bin/raw_oracle_cli",
             "/dev/stdin",
@@ -134,8 +166,22 @@ pub fn run_raw_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
     validate_oracle_response(last_line, &bitstream)
 }
 
+fn hex_decode(hex: &str) -> Result<Vec<u8>, String> {
+    let hex = hex.trim();
+    if hex.len() % 2 != 0 {
+        return Err("odd hex length".into());
+    }
+    let mut bytes = Vec::with_capacity(hex.len() / 2);
+    for i in (0..hex.len()).step_by(2) {
+        let byte = u8::from_str_radix(&hex[i..i + 2], 16)
+            .map_err(|_| format!("invalid hex at position {}", i))?;
+        bytes.push(byte);
+    }
+    Ok(bytes)
+}
+
 /// Parse the JSON metadata line from the oracle CLI and validate it against
-/// the actual stdout bytes (length and SHA-256).
+/// the actual stdout bytes (length, SHA-256, and hex string decoding).
 pub fn validate_oracle_response(
     json_line: &str,
     stdout_bytes: &[u8],
@@ -168,6 +214,16 @@ pub fn validate_oracle_response(
         return Err(format!(
             "oracle_sha256_mismatch: reported {} but computed {}",
             sha, actual_sha
+        ));
+    }
+
+    // Validate: hex decode must match stdout bytes
+    let decoded_hex = hex_decode(&hex)?;
+    if decoded_hex != stdout_bytes {
+        return Err(format!(
+            "oracle_hex_mismatch: decoded {} bytes but stdout has {} bytes",
+            decoded_hex.len(),
+            stdout_bytes.len()
         ));
     }
 
@@ -311,6 +367,11 @@ pub fn write_residual(result: &DifferentialResult) -> std::io::Result<()> {
     let json = serde_json::to_string_pretty(result)?;
     std::fs::write(&path, json)?;
     Ok(())
+}
+
+/// Try to write a residual and return a string error on failure.
+pub fn try_write_residual(result: &DifferentialResult) -> Result<(), String> {
+    write_residual(result).map_err(|e| format!("residual_write_failed: {}", e))
 }
 
 // ---------------------------------------------------------------------------

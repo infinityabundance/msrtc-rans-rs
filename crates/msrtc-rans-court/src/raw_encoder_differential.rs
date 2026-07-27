@@ -13,7 +13,7 @@
 //! mismatch.
 
 use msrtc_rans_casefile::{
-    DifferentialResult, InputHashes, NativeResult, OracleResult,
+    Comparison, DifferentialResult, InputHashes, NativeResult, OracleResult,
     classification::{ResidualClassification, ResolutionState},
     sha256,
 };
@@ -22,7 +22,7 @@ use msrtc_rans_core::{
     Freq, Rans64EncSymbol, Rans64Encoder, RansByteEncSymbol, RansByteEncoder, error::RawRansError,
 };
 
-use crate::oracle::{self, compare_bytes, environment_sha256, git_commit, write_residual};
+use crate::oracle::{self, compare_bytes, environment_sha256, git_commit, try_write_residual};
 use crate::{Court, CourtResult, CourtStatus};
 
 /// A single raw primitive test case.
@@ -245,8 +245,20 @@ impl Court for RawEncoderDifferentialCourt {
 
             // Persist residuals
             if !exact {
-                if let Err(e) = write_residual(&result) {
-                    eprintln!("Failed to write residual for {}: {}", result.case_id, e);
+                if let Err(_e) = try_write_residual(&result) {
+                    let failure_result = DifferentialResult {
+                        case_id: format!("residual_persistence_failure:{}", result.case_id),
+                        classification: ResidualClassification::Environmental,
+                        comparison: Comparison {
+                            exact: false,
+                            first_differing_offset: None,
+                            differing_bytes: None,
+                        },
+                        ..result.clone()
+                    };
+                    // Overwrite result with the failure so the court count is accurate
+                    results.push(failure_result);
+                    continue;
                 }
             }
 
