@@ -1,5 +1,6 @@
-// Copyright (c) Infinity Abundance.
+// Copyright (c) 2026 Riaan de Beer
 // Licensed under the MIT license.
+// Author: Riaan de Beer - github.com/infinityabundance - rdebeer.infinityabundance@gmail.com
 // Derived from Microsoft MLVC msrtc_rans (MIT)
 // See NOTICE file for attribution.
 

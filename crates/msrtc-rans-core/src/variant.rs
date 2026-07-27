@@ -1,5 +1,6 @@
-// Copyright (c) Infinity Abundance.
+// Copyright (c) 2026 Riaan de Beer
 // Licensed under the MIT license.
+// Author: Riaan de Beer - github.com/infinityabundance - rdebeer.infinityabundance@gmail.com
 
 //! RANS variant definitions and macros.
 //!
