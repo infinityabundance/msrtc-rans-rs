@@ -7,6 +7,7 @@ description = "Safe public Rust entropy-coder API for msrtc_rans"
 
 [features]
 default = []
+std = []
 
 [dependencies]
 msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.1" }

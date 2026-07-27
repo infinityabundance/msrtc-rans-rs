@@ -14,5 +14,10 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+extern crate alloc;
+
 /// Re-export the core rANS primitives.
 pub use msrtc_rans_core::*;
+
+/// Entropy encoder/decoder (high-level PMF/bypass/CDF pipeline).
+pub mod entropy;
