@@ -6,7 +6,7 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 
 ---
 
-## Current Status — Three Courts Sealed ✅
+## Current Status — Phase 6 Complete ✅
 
 | Component | Status |
 |-----------|--------|
@@ -20,7 +20,7 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | `symbol_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `bypass_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | Docker matrix (multi-distro) | 🔲 Scaffold — Debian only |
-| Python extension | 🔲 Scaffold — PyO3 module |
+| Python extension | ✅ **Working** — all 7 upstream tests pass |
 | MLVC integration | 🔲 Not started |
 | Performance benchmarking | 🔲 Not started |
 

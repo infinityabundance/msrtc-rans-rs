@@ -1,5 +1,5 @@
 # msrtc-rans-rs Surface Inventory
-*Generated: 2026-07-27* — **Phase 3 — Full Entropy Coder Differential — Three Courts Sealed**
+*Generated: 2026-07-27* — **Phase 6 — Python Extension Complete**
 
 ## Upstream Commit
 `0500356a8d6146dd8dc8911022cbeca19675614f` (Microsoft/mlvc)
@@ -53,12 +53,12 @@
 
 | Surface | Status | Notes |
 |---------|--------|-------|
-| `RansVariant.IntEnum` | 🔲 `scaffold` | Type exists; discriminants not yet courted |
-| `RansEncoderStream` | 🔲 `scaffold` | Not implemented |
-| `RansDecoderStream` | 🔲 `scaffold` | Not implemented |
-| `EntropyEncoder` | 🔲 `scaffold` | Not implemented |
-| `EntropyDecoder` | 🔲 `scaffold` | Not implemented |
-| `_msrtc_rans` module | 🔲 `scaffold` | PyO3 module scaffold |
+| `RansVariant.IntEnum` | ⚠️ `partial` | Implemented with `RansByte=1`, `Rans64=0` |
+| `RansEncoderStream` | ⚠️ `partial` | Persistent encoder state; supports push/flush/reset |
+| `RansDecoderStream` | ⚠️ `partial` | Byte-offset stream with open/close/isOpen/decodeEOF |
+| `EntropyEncoder` | ⚠️ `partial` | Full encode/push API with PMF initialization |
+| `EntropyDecoder` | ⚠️ `partial` | Full decode API with stream and buffer modes |
+| `_msrtc_rans` module | ⚠️ `partial` | PyO3 extension module; all 7 upstream tests pass |
 
 ## Coverage Summary
 
@@ -66,5 +66,5 @@
 |----------|------|---------|----------|-----------|----------|-----|
 | C++ rANS primitives | 0 | 18 | 0 | 0 | 0 | 0 |
 | C++ entropy coder | 0 | 14 | 0 | 2 | 0 | 0 |
-| Python API | 0 | 0 | 6 | 0 | 0 | 0 |
-| **Total** | **0** | **32** | **6** | **2** | **0** | **0** |
+| Python API | 0 | 6 | 0 | 0 | 0 | 0 |
+| **Total** | **0** | **38** | **0** | **2** | **0** | **0** |

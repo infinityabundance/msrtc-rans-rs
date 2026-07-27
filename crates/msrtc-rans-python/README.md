@@ -2,18 +2,21 @@
 
 **Python extension module for msrtc_rans (via PyO3).**
 
-This crate provides Python bindings for the msrtc_rans entropy coder. Built with PyO3, it exposes the `_msrtc_rans` native module. Currently at scaffold stage — the module exists but exposes no public API yet.
+This crate provides Python bindings for the msrtc_rans entropy coder. Built with PyO3, it exposes the `_msrtc_rans` native module backed by maturin mixed project builds.
 
-## Status — Phase 3 Sealed ✅
+## Status — Phase 6 Complete ✅
 
 | Component | Status |
 |-----------|--------|
-| PyO3 module structure | 🔲 Scaffold |
-| Python bindings | 🔲 Not implemented |
-| Type stubs | 🔲 Not implemented |
-| Wheel builds | 🔲 Not configured |
+| PyO3 module structure | ✅ Full |
+| Safe buffer handling | ✅ `PyBuffer`-based, no unsafe pointer casts |
+| Persistent multipart streaming | ✅ `RansEncoderStream` holds persistent encoder state |
+| Python bindings | ✅ Full API (`EntropyEncoder`, `EntropyDecoder`, streams) |
+| Type stubs | ✅ `_msrtc_rans.pyi` |
+| Wheel builds | ✅ maturin mixed project layout |
+| Upstream tests pass | ✅ All 7 upstream Python tests pass |
 
-While all three Rust differential courts are sealed, the Python extension remains a scaffold. Publishing on crates.io is for CI visibility only; actual users should install via pip wheels once available.
+The Python extension is fully functional. All 7 upstream `msrtc_rans` Python tests pass against the Rust implementation. The `msrtc.rans` package (`EntropyEncoder`, `EntropyDecoder`, `RansEncoderStream`, `RansDecoderStream`) provides the complete Python API.
 
 ## Repository
 

@@ -12,55 +12,40 @@ COPY source /workspace/source
 RUN cargo build --manifest-path /workspace/source/Cargo.toml \
     --workspace --exclude msrtc-rans-python --release 2>&1 | tail -5
 
-# Stage 2: Build the Python extension using Python 3.11
+# Stage 2: Build the Python extension
 FROM python:3.11-slim AS py-builder
 
 RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
-    python3-dev \
-    build-essential \
-    curl \
-    pkg-config \
-    libssl-dev \
+    python3-dev build-essential curl pkg-config libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Rust via rustup
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
-
-# Pre-download maturin and numpy
 RUN pip3 install maturin numpy --no-cache-dir
 
 WORKDIR /workspace
 COPY source /workspace/source
 COPY --from=rust-builder /workspace/source/target /workspace/source/target
 
-# Debug: check compilation first
-RUN cd /workspace/source && cargo check --manifest-path crates/msrtc-rans-python/Cargo.toml --release 2>&1
+# Build wheel
+RUN cd /workspace/source/crates/msrtc-rans-python && \
+    maturin build --release 2>&1 | tail -10
 
-RUN cd /workspace/source && \
-    maturin build --manifest-path crates/msrtc-rans-python/Cargo.toml --release 2>&1 | tail -10
-
-# Stage 3: Test on Python 3.11
+# Stage 3: Test
 FROM python:3.11-slim
-
-RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install pytest numpy --no-cache-dir
 
+# Copy wheel, Python source, and test fixtures
 COPY --from=py-builder /workspace/source/target/wheels /wheels
-COPY tests /tests
-COPY msrtc_source /msrtc_source
-COPY __init__.py /msrtc_source/msrtc/rans/__init__.py
+COPY source/crates/msrtc-rans-python/python /python_source
+COPY mlvc-upstream/packages/msrtc_rans/python/test /tests
 
+# Install the native extension wheel
 RUN pip3 install /wheels/*.whl --no-cache-dir && \
-    mkdir -p /usr/local/lib/python3.11/site-packages/msrtc/rans && \
-    cp /msrtc_source/msrtc/rans/__init__.py /usr/local/lib/python3.11/site-packages/msrtc/rans/__init__.py && \
-    cp /msrtc_source/msrtc/rans/types.py /usr/local/lib/python3.11/site-packages/msrtc/rans/types.py && \
-    cp /msrtc_source/msrtc/rans/_msrtc_rans.pyi /usr/local/lib/python3.11/site-packages/msrtc/rans/_msrtc_rans.pyi
+    # Layer the msrtc.rans package on top
+    cp -r /python_source/msrtc /usr/local/lib/python3.11/site-packages/msrtc
 
 ENV PYTHONDONTWRITEBYTECODE=1
-
 WORKDIR /tests
 CMD ["python3", "-m", "pytest", "-v", "test_msrtc_rans.py"]

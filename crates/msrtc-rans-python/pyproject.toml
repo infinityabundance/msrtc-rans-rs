@@ -1,0 +1,15 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "msrtc-rans"
+version = "0.2.3"
+description = "rANS entropy coder implementation — Rust native replacement for Microsoft MLVC msrtc_rans"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.22"]
+
+[tool.maturin]
+features = ["pyo3/extension-module", "pyo3/abi3-py311"]
+module-name = "_msrtc_rans"
+manifest-path = "Cargo.toml"

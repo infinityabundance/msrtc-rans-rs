@@ -399,7 +399,7 @@ impl PyEntropyDecoder {
                 1 => {
                     if let Some(ref decoder) = self.byte_decoder {
                         decoder
-                            .decode_partial(&mut decoded, &indices_vec, &remaining)
+                            .decode_batch(&mut decoded, &indices_vec, &remaining)
                             .map_err(|e| PyValueError::new_err(format!("decode failed: {}", e)))?
                     } else {
                         return Err(PyValueError::new_err("byte decoder not initialized"));
@@ -408,7 +408,7 @@ impl PyEntropyDecoder {
                 0 => {
                     if let Some(ref decoder) = self._64_decoder {
                         decoder
-                            .decode_partial(&mut decoded, &indices_vec, &remaining)
+                            .decode_batch(&mut decoded, &indices_vec, &remaining)
                             .map_err(|e| PyValueError::new_err(format!("decode failed: {}", e)))?
                     } else {
                         return Err(PyValueError::new_err("64 decoder not initialized"));

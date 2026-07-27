@@ -296,20 +296,22 @@ impl<S: EncSymbol> EncoderState<S> {
         Ok(())
     }
 
-    fn encode_to_vec<E: RawEncoder<Symbol = S>>(
+    /// Encode symbols onto an existing encoder (batch/persistent mode).
+    ///
+    /// Unlike `encode_to_vec`, this does NOT flush the encoder or extract units,
+    /// enabling persistent streaming where multiple batches feed the same encoder.
+    fn encode_batch<E: RawEncoder<Symbol = S>>(
         &self,
         indices: &[i32],
         values: &[i32],
-        make_encoder: impl FnOnce() -> E,
-    ) -> Result<Vec<E::Unit>, EntropyError> {
+        encoder: &mut E,
+    ) -> Result<(), EntropyError> {
         if self.symbol_bits == 0 {
             return Err(EntropyError::InvalidState);
         }
         if indices.len() != values.len() {
             return Err(EntropyError::InvalidParams);
         }
-
-        let mut encoder = make_encoder();
 
         // Encode in reverse order (matching C++: iterate from last to first)
         let data_size = indices.len();
@@ -340,15 +342,13 @@ impl<S: EncSymbol> EncoderState<S> {
             let symbol_index: i32;
             if adjusted < 0 || adjusted >= desc.bypass_sentinel {
                 // Out of PMF range — use bypass
-                // Issue 5: use checked_neg and checked_mul for safety
                 let bypass_value: Freq = if adjusted < 0 {
-                    // 2 * (-value) - 1
                     let neg = adjusted.checked_neg().ok_or(EntropyError::InvalidParams)?;
                     2u64.wrapping_mul(neg as u64).wrapping_sub(1) as Freq
                 } else {
                     2u64.wrapping_mul((adjusted - desc.bypass_sentinel) as u64) as Freq
                 };
-                self.encode_bypass_value(&mut encoder, bypass_value);
+                self.encode_bypass_value(encoder, bypass_value);
                 symbol_index = desc.bypass_sentinel;
             } else {
                 symbol_index = adjusted;
@@ -359,6 +359,17 @@ impl<S: EncSymbol> EncoderState<S> {
             idx -= 1;
         }
 
+        Ok(())
+    }
+
+    fn encode_to_vec<E: RawEncoder<Symbol = S>>(
+        &self,
+        indices: &[i32],
+        values: &[i32],
+        make_encoder: impl FnOnce() -> E,
+    ) -> Result<Vec<E::Unit>, EntropyError> {
+        let mut encoder = make_encoder();
+        self.encode_batch(indices, values, &mut encoder)?;
         encoder.flush();
         Ok(encoder.into_units())
     }
@@ -920,6 +931,19 @@ impl<S: EncoderVariantForS> EntropyEncoder<S> {
         )
     }
 
+    /// Encode symbols onto an existing raw encoder for persistent streaming.
+    ///
+    /// Unlike `encode()`, this does NOT flush the encoder or finalize output.
+    /// Call `encoder.flush()` and extract units after all batches are pushed.
+    pub fn encode_batch(
+        &self,
+        indices: &[i32],
+        values: &[i32],
+        encoder: &mut <S as EncoderVariantForS>::RawEnc,
+    ) -> Result<(), EntropyError> {
+        self.state.encode_batch(indices, values, encoder)
+    }
+
     /// One-shot encode: encode `indices`/`values` into `buffer`.
     ///
     /// The encoded bytes are appended to `buffer`.
@@ -1077,6 +1101,69 @@ impl<S: RansParams> EntropyDecoder<S> {
         };
 
         Ok(consumed)
+    }
+
+    /// Decode a batch of symbols from data without requiring EOF.
+    ///
+    /// This is used for multipart stream decoding, where the stream contains
+    /// multiple messages concatenated. The first decoder reads its symbols
+    /// and returns the bytes consumed, leaving the rest for subsequent decoders.
+    ///
+    /// Returns the number of bytes consumed.
+    pub fn decode_batch(
+        &self,
+        values: &mut [i32],
+        indices: &[i32],
+        data: &[u8],
+    ) -> Result<usize, EntropyError> {
+        if self.state.symbol_bits == 0 {
+            return Err(EntropyError::InvalidState);
+        }
+        if values.len() != indices.len() {
+            return Err(EntropyError::InvalidParams);
+        }
+
+        let consumed = match S::NAME {
+            "RansByte" => {
+                let units = data.to_vec();
+                let source = SliceSource::new(&units);
+                let mut decoder = msrtc_rans_core::RansByteDecoder::new(source);
+                if !decoder.init() {
+                    return Err(EntropyError::InvalidStream);
+                }
+                self.state
+                    .decode_inner_byte(&mut decoder, values, indices)?;
+                decoder.source().position()
+            }
+            "Rans64" => {
+                if data.len() % 4 != 0 {
+                    return Err(EntropyError::InvalidStream);
+                }
+                let units = bytes_to_u32_units(data);
+                let source = SliceSource::new(&units);
+                let mut decoder = msrtc_rans_core::Rans64Decoder::new(source);
+                if !decoder.init() {
+                    return Err(EntropyError::InvalidStream);
+                }
+                self.state.decode_inner_64(&mut decoder, values, indices)?;
+                decoder.source().position() * 4
+            }
+            _ => return Err(EntropyError::InvalidParams),
+        };
+
+        Ok(consumed)
+    }
+
+    /// Decode a batch of symbols from a sub-slice of data, returning bytes consumed.
+    ///
+    /// This is an alias for `decode_batch` used by the Python stream decoder.
+    pub fn decode_stream(
+        &self,
+        values: &mut [i32],
+        indices: &[i32],
+        data: &[u8],
+    ) -> Result<usize, EntropyError> {
+        self.decode_batch(values, indices, data)
     }
 }
 
