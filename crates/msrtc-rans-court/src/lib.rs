@@ -102,6 +102,8 @@ pub mod entropy_differential;
 pub mod oracle;
 /// PMF court — MSRTC.PMF
 pub mod pmf;
+/// Raw decoder differential court — MSRTC.RAW.DECODER.DIFFERENTIAL
+pub mod raw_decoder_differential;
 /// Raw encoder differential court — MSRTC.RAW.ENCODER.DIFFERENTIAL
 pub mod raw_encoder_differential;
 /// Raw rANS 64 court — MSRTC.RAW.RANS64

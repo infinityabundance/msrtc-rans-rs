@@ -60,3 +60,16 @@ target_link_libraries(raw_oracle_cli PRIVATE
     msrtc_rans
     OpenSSL::Crypto
 )
+
+# ---- decoder_oracle_cli executable (raw rANS decoder oracle) ---------------
+add_executable(decoder_oracle_cli decoder_oracle_cli.cpp)
+
+target_include_directories(decoder_oracle_cli PRIVATE
+    "${MSRTC_RANS_SRC_DIR}/include"
+    "${MSRTC_RANS_SRC_DIR}/private/include"
+)
+
+target_link_libraries(decoder_oracle_cli PRIVATE
+    msrtc_rans
+    OpenSSL::Crypto
+)

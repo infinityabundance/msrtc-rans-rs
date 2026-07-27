@@ -166,6 +166,127 @@ pub fn run_raw_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
     validate_oracle_response(last_line, &bitstream)
 }
 
+// ---------------------------------------------------------------------------
+// Decoder oracle
+// ---------------------------------------------------------------------------
+
+/// Result of running the decoder oracle CLI.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct DecoderOracleResponse {
+    pub status: String,
+    pub get_values: Vec<u32>,
+    pub eof: bool,
+    pub op_count: u32,
+}
+
+/// Run the decoder oracle CLI inside Docker with the given binary input.
+/// Returns the parsed Get() values and EOF status.
+pub fn run_decoder_oracle(binary: &[u8]) -> Result<DecoderOracleResponse, String> {
+    let container_name = generate_run_id();
+    let mut child = Command::new("docker")
+        .args(["run"])
+        .args(docker_run_args())
+        .args([
+            "--name",
+            &container_name,
+            ORACLE_IMAGE,
+            "/workspace/bin/decoder_oracle_cli",
+            "/dev/stdin",
+        ])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("docker_spawn: {}", e))?;
+
+    if let Some(ref mut stdin) = child.stdin {
+        stdin
+            .write_all(binary)
+            .map_err(|e| format!("stdin_write: {}", e))?;
+    }
+    drop(child.stdin.take());
+
+    let output = child
+        .wait_with_output()
+        .map_err(|e| format!("docker_wait: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!(
+            "decoder_oracle_exit_{}: {}",
+            output.status.code().unwrap_or(-1),
+            stderr.trim()
+        ));
+    }
+
+    let stdout_bytes = output.stdout;
+    let stderr_str = String::from_utf8_lossy(&output.stderr);
+    let last_line = stderr_str.lines().last().unwrap_or("");
+
+    // Parse JSON from stderr
+    let parsed: serde_json::Value = serde_json::from_str(last_line)
+        .map_err(|e| format!("decoder_oracle_json_parse: {} — line: {}", e, last_line))?;
+
+    let status = parsed["status"].as_str().unwrap_or("unknown").to_string();
+    if status != "ok" {
+        let msg = parsed["message"].as_str().unwrap_or("unknown error");
+        return Err(format!("decoder_oracle_error: {}", msg));
+    }
+
+    let get_values: Vec<u32> = parsed["get_values"]
+        .as_array()
+        .ok_or_else(|| "missing get_values array".to_string())?
+        .iter()
+        .map(|v| v.as_u64().unwrap_or(0) as u32)
+        .collect();
+
+    let eof = parsed["eof"].as_bool().unwrap_or(false);
+    let op_count = parsed["op_count"].as_u64().unwrap_or(0) as u32;
+
+    // Validate: stdout should contain get_values (as LE u32 each) + eof flag (as LE u32)
+    let expected_stdout_len = (get_values.len() + 1) * 4;
+    if stdout_bytes.len() != expected_stdout_len {
+        return Err(format!(
+            "decoder_oracle_stdout_size_mismatch: expected {} bytes, got {}",
+            expected_stdout_len,
+            stdout_bytes.len()
+        ));
+    }
+
+    // Parse get_values from stdout to cross-validate
+    let mut decoded_get_values = Vec::with_capacity(get_values.len());
+    for i in 0..get_values.len() {
+        let off = i * 4;
+        let val = u32::from_le_bytes(stdout_bytes[off..off + 4].try_into().unwrap());
+        decoded_get_values.push(val);
+    }
+
+    if decoded_get_values != get_values {
+        return Err(format!(
+            "decoder_oracle_get_values_mismatch: stderr {:?} != stdout {:?}",
+            get_values, decoded_get_values
+        ));
+    }
+
+    // Parse EOF flag from stdout
+    let eof_off = get_values.len() * 4;
+    let stdout_eof = u32::from_le_bytes(stdout_bytes[eof_off..eof_off + 4].try_into().unwrap());
+    let stdout_eof_bool = stdout_eof != 0;
+    if stdout_eof_bool != eof {
+        return Err(format!(
+            "decoder_oracle_eof_mismatch: stderr {} != stdout {}",
+            eof, stdout_eof_bool
+        ));
+    }
+
+    Ok(DecoderOracleResponse {
+        status,
+        get_values,
+        eof,
+        op_count,
+    })
+}
+
 fn hex_decode(hex: &str) -> Result<Vec<u8>, String> {
     let hex = hex.trim();
     if hex.len() % 2 != 0 {
