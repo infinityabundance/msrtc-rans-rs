@@ -160,7 +160,9 @@ impl Court for EntropyDifferentialCourt {
             };
 
             if !exact {
-                let _ = write_residual(&result);
+                if let Err(e) = write_residual(&result) {
+                    eprintln!("Failed to write residual for {}: {}", result.case_id, e);
+                }
             }
             results.push(result);
         }
@@ -188,9 +190,21 @@ impl Court for EntropyDifferentialCourt {
 /// Out-of-range values produce the sentinel symbol but no bypass payload.
 /// This is intentionally incomplete (bypass not yet implemented).
 fn rust_encode_partial(case: &EntropyCase) -> (String, Vec<u8>) {
+    match case.variant {
+        0 => rust_encode_partial_64(case),
+        1 => rust_encode_partial_byte(case),
+        _ => (
+            format!("native_error: unknown variant {}", case.variant),
+            Vec::new(),
+        ),
+    }
+}
+
+/// RansByte branch of `rust_encode_partial`.
+fn rust_encode_partial_byte(case: &EntropyCase) -> (String, Vec<u8>) {
     use msrtc_rans_core::RansByteEncSymbol;
     use msrtc_rans_core::RansByteEncoder;
-    use msrtc_rans_core::sink::{Sink, VecSink};
+    use msrtc_rans_core::sink::VecSink;
 
     let sink = VecSink::<u8>::new(4096);
     let mut encoder = RansByteEncoder::new(sink);
@@ -233,6 +247,61 @@ fn rust_encode_partial(case: &EntropyCase) -> (String, Vec<u8>) {
 
     encoder.flush();
     ("ok".to_string(), encoder.into_sink().encoded().to_vec())
+}
+
+/// Rans64 branch of `rust_encode_partial`.
+/// Uses Rans64Encoder with VecSink<u32>, then converts u32 units to little-endian bytes.
+fn rust_encode_partial_64(case: &EntropyCase) -> (String, Vec<u8>) {
+    use msrtc_rans_core::Rans64EncSymbol;
+    use msrtc_rans_core::Rans64Encoder;
+    use msrtc_rans_core::sink::VecSink;
+
+    let sink = VecSink::<u32>::new(4096);
+    let mut encoder = Rans64Encoder::new(sink);
+
+    for i in (0..case.indices.len()).rev() {
+        let mut idx = case.indices[i];
+        if idx < 0 {
+            continue;
+        }
+        let num_dist = case.pmf_lengths.len();
+        idx = idx.min(num_dist as i32 - 1);
+        let dist_idx = idx as usize;
+        let length = case.pmf_lengths[dist_idx] as usize;
+        let offset = case.pmf_offsets[dist_idx];
+
+        let value = case.values[i] + offset;
+        let sym_idx = if value < 0 || value as usize >= length - 1 {
+            // Bypass sentinel — no bypass payload (known gap)
+            length - 1
+        } else {
+            value as usize
+        };
+
+        let sym_start: usize = case.pmf_lengths[..dist_idx]
+            .iter()
+            .map(|&l| l as usize)
+            .sum();
+        let mut start: u32 = 0;
+        for j in sym_start..(sym_start + sym_idx) {
+            start += case.pmf_table[j] as u32;
+        }
+        let freq = case.pmf_table[sym_start + sym_idx] as u32;
+
+        let sym = match Rans64EncSymbol::try_new(start, freq, case.symbol_bits as u32) {
+            Ok(s) => s,
+            Err(e) => return (format!("native_error: {:?}", e), Vec::new()),
+        };
+        encoder.put(&sym);
+    }
+
+    encoder.flush();
+    let units = encoder.into_sink().encoded().to_vec();
+    let mut bytes = Vec::with_capacity(units.len() * 4);
+    for &u in &units {
+        bytes.extend_from_slice(&u.to_le_bytes());
+    }
+    ("ok".to_string(), bytes)
 }
 
 fn generate_entropy_cases() -> Vec<EntropyCase> {

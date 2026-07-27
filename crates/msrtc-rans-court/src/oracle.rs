@@ -15,9 +15,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use msrtc_rans_casefile::{
-    Comparison, DifferentialResult,
-    classification::ResidualClassification,
-    sha256,
+    Comparison, DifferentialResult, classification::ResidualClassification, sha256,
 };
 
 /// Oracle commit from upstream.lock.
@@ -29,8 +27,8 @@ pub const ORACLE_IMAGE: &str = "msrtc-rans-rs-oracle:debian12";
 /// Schema version for all results.
 pub const SCHEMA_VERSION: u32 = 1;
 
-/// Root path for residual storage (relative to workspace root).
-pub const RESIDUALS_DIR: &str = "../courts/residuals";
+/// Root path for residual storage (absolute, resolved at compile time from CARGO_MANIFEST_DIR).
+pub const RESIDUALS_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../courts/residuals");
 
 // ---------------------------------------------------------------------------
 // Oracle execution
@@ -89,45 +87,7 @@ pub fn run_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
     let stderr_str = String::from_utf8_lossy(&output.stderr);
     let last_line = stderr_str.lines().last().unwrap_or("");
 
-    // Parse the JSON metadata strictly
-    let parsed: serde_json::Value = serde_json::from_str(last_line)
-        .map_err(|e| format!("oracle_json_parse: {} — line: {}", e, last_line))?;
-
-    let status = parsed["status"].as_str().unwrap_or("unknown").to_string();
-    if status != "ok" {
-        let msg = parsed["message"].as_str().unwrap_or("unknown error");
-        return Err(format!("oracle_error: {}", msg));
-    }
-
-    let hex = parsed["hex"].as_str().unwrap_or("").to_string();
-    let sha = parsed["sha256"].as_str().unwrap_or("").to_string();
-    let length = parsed["length"].as_u64().unwrap_or(0) as usize;
-
-    // Validate: reported length must match stdout size
-    if length != bitstream.len() {
-        return Err(format!(
-            "oracle_length_mismatch: reported {} but stdout has {} bytes",
-            length,
-            bitstream.len()
-        ));
-    }
-
-    // Validate: reported SHA-256 must match stdout
-    let actual_sha = sha256(&bitstream);
-    if sha != actual_sha {
-        return Err(format!(
-            "oracle_sha256_mismatch: reported {} but computed {}",
-            sha, actual_sha
-        ));
-    }
-
-    Ok(OracleResponse {
-        status,
-        hex,
-        sha256: sha,
-        length,
-        raw_output: bitstream,
-    })
+    validate_oracle_response(last_line, &bitstream)
 }
 
 /// Run the raw oracle CLI inside Docker with the given binary input.
@@ -171,24 +131,43 @@ pub fn run_raw_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
     let stderr_str = String::from_utf8_lossy(&output.stderr);
     let last_line = stderr_str.lines().last().unwrap_or("");
 
-    let parsed: serde_json::Value = serde_json::from_str(last_line)
-        .map_err(|e| format!("raw_oracle_json_parse: {} — line: {}", e, last_line))?;
+    validate_oracle_response(last_line, &bitstream)
+}
+
+/// Parse the JSON metadata line from the oracle CLI and validate it against
+/// the actual stdout bytes (length and SHA-256).
+pub fn validate_oracle_response(
+    json_line: &str,
+    stdout_bytes: &[u8],
+) -> Result<OracleResponse, String> {
+    let parsed: serde_json::Value = serde_json::from_str(json_line)
+        .map_err(|e| format!("oracle_json_parse: {} — line: {}", e, json_line))?;
 
     let status = parsed["status"].as_str().unwrap_or("unknown").to_string();
     if status != "ok" {
         let msg = parsed["message"].as_str().unwrap_or("unknown error");
-        return Err(format!("raw_oracle_error: {}", msg));
+        return Err(format!("oracle_error: {}", msg));
     }
 
     let hex = parsed["hex"].as_str().unwrap_or("").to_string();
     let sha = parsed["sha256"].as_str().unwrap_or("").to_string();
     let length = parsed["length"].as_u64().unwrap_or(0) as usize;
 
-    if length != bitstream.len() {
+    // Validate: reported length must match stdout size
+    if length != stdout_bytes.len() {
         return Err(format!(
-            "raw_oracle_length_mismatch: reported {} but stdout has {}",
+            "oracle_length_mismatch: reported {} but stdout has {} bytes",
             length,
-            bitstream.len()
+            stdout_bytes.len()
+        ));
+    }
+
+    // Validate: reported SHA-256 must match stdout
+    let actual_sha = sha256(stdout_bytes);
+    if sha != actual_sha {
+        return Err(format!(
+            "oracle_sha256_mismatch: reported {} but computed {}",
+            sha, actual_sha
         ));
     }
 
@@ -197,7 +176,7 @@ pub fn run_raw_oracle(binary: &[u8]) -> Result<OracleResponse, String> {
         hex,
         sha256: sha,
         length,
-        raw_output: bitstream,
+        raw_output: stdout_bytes.to_vec(),
     })
 }
 

@@ -1,7 +1,7 @@
 // Licensed under the MIT license.
 // Author: Riaan de Beer - github.com/infinityabundance - rdebeer.infinityabundance@gmail.com
 
-//! # MSRTC.RAW.DIFFERENTIAL — Raw rANS primitive differential court
+//! # MSRTC.RAW.ENCODER.DIFFERENTIAL — Raw rANS encoder differential court
 //!
 //! Exercises Microsoft's raw `RansEncoder::Put`, `RansEncoder::Put(symbol)`,
 //! and `RansEncoder::Flush` templates directly (no PMF, no bypass, no
@@ -17,7 +17,7 @@ use msrtc_rans_casefile::{
     classification::{ResidualClassification, ResolutionState},
     sha256,
 };
-use msrtc_rans_core::sink::{Sink, VecSink};
+use msrtc_rans_core::sink::VecSink;
 use msrtc_rans_core::{
     Freq, Rans64EncSymbol, Rans64Encoder, RansByteEncSymbol, RansByteEncoder, error::RawRansError,
 };
@@ -39,6 +39,22 @@ pub struct RawCase {
     pub symbols: Vec<(Freq, Freq)>,
 }
 
+/// Raw input hashes for a raw encoder court case.
+/// Uses per-field SHA-256 of canonical little-endian bytes.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct RawInputHashes {
+    /// SHA-256 of variant in LE bytes
+    pub variant_sha256: String,
+    /// SHA-256 of mode in LE bytes
+    pub mode_sha256: String,
+    /// SHA-256 of scale_bits in LE bytes
+    pub scale_bits_sha256: String,
+    /// SHA-256 of all symbols (start,freq tuples) in LE bytes
+    pub symbols_sha256: String,
+    /// SHA-256 of the full casefile binary in LE bytes
+    pub casefile_sha256: String,
+}
+
 impl RawCase {
     /// Serialize to the raw oracle CLI binary format.
     pub fn to_binary(&self) -> Vec<u8> {
@@ -52,6 +68,34 @@ impl RawCase {
             buf.extend_from_slice(&freq.to_le_bytes());
         }
         buf
+    }
+
+    /// Compute raw input hashes for the DifferentialResult.
+    pub fn raw_input_hashes(&self) -> RawInputHashes {
+        let variant_le: Vec<u8> = self.variant.to_le_bytes().to_vec();
+        let mode_le: Vec<u8> = self.mode.to_le_bytes().to_vec();
+        let scale_bits_le: Vec<u8> = self.scale_bits.to_le_bytes().to_vec();
+
+        let mut symbols_le = Vec::new();
+        for &(start, freq) in &self.symbols {
+            symbols_le.extend_from_slice(&start.to_le_bytes());
+            symbols_le.extend_from_slice(&freq.to_le_bytes());
+        }
+
+        let mut casefile_le = Vec::new();
+        casefile_le.extend_from_slice(&variant_le);
+        casefile_le.extend_from_slice(&mode_le);
+        casefile_le.extend_from_slice(&scale_bits_le);
+        casefile_le.extend_from_slice(&(self.symbols.len() as u32).to_le_bytes());
+        casefile_le.extend_from_slice(&symbols_le);
+
+        RawInputHashes {
+            variant_sha256: sha256(&variant_le),
+            mode_sha256: sha256(&mode_le),
+            scale_bits_sha256: sha256(&scale_bits_le),
+            symbols_sha256: sha256(&symbols_le),
+            casefile_sha256: sha256(&casefile_le),
+        }
     }
 
     /// Encode with the Rust raw encoder.
@@ -113,12 +157,12 @@ impl RawCase {
     }
 }
 
-/// MSRTC.RAW.DIFFERENTIAL court.
-pub struct RawDifferentialCourt;
+/// MSRTC.RAW.ENCODER.DIFFERENTIAL court.
+pub struct RawEncoderDifferentialCourt;
 
-impl Court for RawDifferentialCourt {
+impl Court for RawEncoderDifferentialCourt {
     fn id(&self) -> &str {
-        "MSRTC.RAW.DIFFERENTIAL"
+        "MSRTC.RAW.ENCODER.DIFFERENTIAL"
     }
 
     fn run(&self) -> CourtResult {
@@ -168,12 +212,15 @@ impl Court for RawDifferentialCourt {
                 } else {
                     "Rans64".into()
                 },
-                input_hashes: InputHashes {
-                    pmf_lengths_sha256: String::new(),
-                    pmf_offsets_sha256: String::new(),
-                    pmf_table_sha256: String::new(),
-                    indices_sha256: String::new(),
-                    values_sha256: String::new(),
+                input_hashes: {
+                    let rh = case.raw_input_hashes();
+                    InputHashes {
+                        pmf_lengths_sha256: rh.variant_sha256,
+                        pmf_offsets_sha256: rh.mode_sha256,
+                        pmf_table_sha256: rh.scale_bits_sha256,
+                        indices_sha256: rh.symbols_sha256,
+                        values_sha256: rh.casefile_sha256,
+                    }
                 },
                 oracle: OracleResult {
                     status: oracle_status,
@@ -198,7 +245,9 @@ impl Court for RawDifferentialCourt {
 
             // Persist residuals
             if !exact {
-                let _ = write_residual(&result);
+                if let Err(e) = write_residual(&result) {
+                    eprintln!("Failed to write residual for {}: {}", result.case_id, e);
+                }
             }
 
             results.push(result);
@@ -381,7 +430,7 @@ mod tests {
 
     #[test]
     fn test_raw_court_generates_cases() {
-        let court = RawDifferentialCourt;
+        let court = RawEncoderDifferentialCourt;
         let result = court.run();
         assert!(result.case_count > 0, "court must generate cases");
         // This test passes even if Docker is unavailable (cases are still generated)
@@ -390,12 +439,12 @@ mod tests {
     #[test]
     #[ignore = "requires Docker oracle image: msrtc-rans-rs-oracle:debian12"]
     fn test_raw_court_full_differential() {
-        let court = RawDifferentialCourt;
+        let court = RawEncoderDifferentialCourt;
         let result = court.run();
         assert_eq!(
             result.status,
             CourtStatus::Passed,
-            "raw differential court must pass: {} passed, {} residuals",
+            "raw encoder differential court must pass: {} passed, {} residuals",
             result.pass_count,
             result.residual_count
         );

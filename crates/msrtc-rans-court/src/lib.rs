@@ -102,14 +102,16 @@ pub mod entropy_differential;
 pub mod oracle;
 /// PMF court — MSRTC.PMF
 pub mod pmf;
-/// Raw differential court — MSRTC.DIFFERENTIAL
-pub mod raw_differential;
+/// Raw encoder differential court — MSRTC.RAW.ENCODER.DIFFERENTIAL
+pub mod raw_encoder_differential;
 /// Raw rANS 64 court — MSRTC.RAW.RANS64
 pub mod raw_rans64;
 /// Raw rANS byte court — MSRTC.RAW.RANSBYTE
 pub mod raw_ransbyte;
 /// Reciprocal court — MSRTC.RECIPROCAL
 pub mod reciprocal;
+/// Seal and receipt generation
+pub mod seal;
 
 #[cfg(test)]
 mod tests {
