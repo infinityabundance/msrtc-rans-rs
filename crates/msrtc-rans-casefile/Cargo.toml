@@ -1,0 +1,15 @@
+[package]
+name = "msrtc-rans-casefile"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+rand.workspace = true
+rand_chacha.workspace = true
+
+[lints]
+rust.unsafe_code = "forbid"

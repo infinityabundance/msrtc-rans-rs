@@ -1,0 +1,44 @@
+# Upstream MLVC oracle lock
+# Generated: 2026-07-27T04:15:00Z
+# Updated: 2026-07-27T03:53:00Z - Sealed baseline
+
+[upstream]
+repository = "https://github.com/microsoft/mlvc"
+commit = "0500356a8d6146dd8dc8911022cbeca19675614f"
+subdirectory = "packages/msrtc_rans"
+branch = "main"
+license = "MIT"
+
+[oracle_build]
+compiler = "gcc"
+compiler_version = "12.2.0"
+cmake_version = "3.27.9"
+build_type = "Release"
+cxx_standard = 17
+os = "linux"
+architecture = "x86_64"
+python_version = "3.11.2"
+
+[test_results]
+# Upstream Python tests: 7 passed, 0 failed, 0 skipped
+upstream_tests_passed = 7
+
+[reference_bitstreams]
+# RansByte encode test with pmfLengths=[4,6], pmfOffsets=[1,2],
+# pmfTable=[1,3,1,1,1,3,5,3,1,1], values=[-2,1,0,1], indices=[0,1,0,1]
+# symbolBits=16, bypassBits=4
+
+[reference_bitstreams.ransbyte]
+hex = "0500bd040001a10003000b00"
+sha256 = "66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953"
+
+[reference_bitstreams.rans64]
+hex = "0500a1bd04000000110a002f03000300"
+sha256 = "ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e"
+
+[test_fixtures]
+sha256_gaussian_encoder0 = "4da1cd1cea6c572883f8c9a6b8193106f9a7c7eb20e30dcb59968e5f84b8a333"
+sha256_bit_estimator_z0 = "5a067f2571cb1487b6a4b188afd837a30030fb9b37ad7a3a93cfb7fb5417ca35"
+
+[oracle_binary]
+sha256_python_so = "b50a0bda611d8a3fdb4c1fdb77c2d40a191827646407d9c93df12b841ba106f1"

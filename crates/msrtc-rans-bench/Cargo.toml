@@ -1,0 +1,11 @@
+[package]
+name = "msrtc-rans-bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+msrtc-rans-core = { path = "../msrtc-rans-core" }
+
+[lints]
+rust.unsafe_code = "forbid"

@@ -1,0 +1,16 @@
+[package]
+name = "msrtc-rans-court"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+msrtc-rans-core = { path = "../msrtc-rans-core" }
+msrtc-rans = { path = "../msrtc-rans" }
+msrtc-rans-casefile = { path = "../msrtc-rans-casefile" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[lints]
+rust.unsafe_code = "forbid"

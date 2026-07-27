@@ -1,0 +1,20 @@
+[package]
+name = "msrtc-rans-python"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "_msrtc_rans"
+crate-type = ["cdylib"]
+
+[dependencies]
+msrtc-rans-core = { path = "../msrtc-rans-core" }
+msrtc-rans = { path = "../msrtc-rans" }
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py311"] }
+
+[features]
+default = []
+
+[lints]
+rust.unsafe_code = "allow"
