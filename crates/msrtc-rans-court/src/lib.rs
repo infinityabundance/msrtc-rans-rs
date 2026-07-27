@@ -96,6 +96,10 @@ impl CourtResult {
 
 /// Bypass court — MSRTC.BYPASS
 pub mod bypass;
+/// Entropy differential court — MSRTC.ENTROPY.DIFFERENTIAL
+pub mod entropy_differential;
+/// Oracle transport and forensic utilities
+pub mod oracle;
 /// PMF court — MSRTC.PMF
 pub mod pmf;
 /// Raw differential court — MSRTC.DIFFERENTIAL

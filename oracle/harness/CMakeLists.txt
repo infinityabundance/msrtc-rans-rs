@@ -47,3 +47,16 @@ target_link_libraries(oracle_cli PRIVATE
     msrtc_rans
     OpenSSL::Crypto
 )
+
+# ---- raw_oracle_cli executable (raw rANS primitive oracle) -----------------
+add_executable(raw_oracle_cli raw_oracle_cli.cpp)
+
+target_include_directories(raw_oracle_cli PRIVATE
+    "${MSRTC_RANS_SRC_DIR}/include"
+    "${MSRTC_RANS_SRC_DIR}/private/include"
+)
+
+target_link_libraries(raw_oracle_cli PRIVATE
+    msrtc_rans
+    OpenSSL::Crypto
+)
