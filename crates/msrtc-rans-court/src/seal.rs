@@ -107,6 +107,18 @@ pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
         })
         .collect();
 
+    let oracle_cli = match result.court_id.as_str() {
+        "MSRTC.RAW.ENCODER.DIFFERENTIAL" => "/workspace/bin/raw_oracle_cli",
+        "MSRTC.RAW.DECODER.DIFFERENTIAL" => "/workspace/bin/decoder_oracle_cli",
+        _ => "/workspace/bin/oracle_cli",
+    };
+
+    let cargo_arg = if result.court_id.contains("DECODER") {
+        "-- decoder"
+    } else {
+        ""
+    };
+
     let receipt = Receipt {
         court_id: result.court_id.clone(),
         run_id: run_id.clone(),
@@ -121,10 +133,14 @@ pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
         docker_image_digest: docker_digest,
         environment_sha256: environment_sha256(),
         commands: vec![
-            format!("cargo run -p msrtc-rans-court --bin seal"),
             format!(
-                "docker run -i --rm {} /workspace/bin/raw_oracle_cli /dev/stdin",
-                oracle::ORACLE_IMAGE
+                "cargo run -p msrtc-rans-court --bin seal {}",
+                cargo_arg.trim()
+            ),
+            format!(
+                "docker run -i --rm {} {} /dev/stdin",
+                oracle::ORACLE_IMAGE,
+                oracle_cli
             ),
         ],
         cases,

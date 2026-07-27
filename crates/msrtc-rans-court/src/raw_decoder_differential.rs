@@ -24,7 +24,7 @@ use msrtc_rans_core::{
     Freq, Rans64Decoder, Rans64Encoder, RansByteDecoder, RansByteEncoder, error::RawRansError,
 };
 
-use crate::oracle::{self, environment_sha256, git_commit};
+use crate::oracle::{self, environment_sha256, git_commit, try_write_residual};
 use crate::{Court, CourtResult, CourtStatus};
 
 /// A single decoder differential test case.
@@ -204,9 +204,13 @@ impl Court for RawDecoderDifferentialCourt {
                 };
 
                 match result {
-                    Ok(r) => results.push(r),
+                    Ok(r) => {
+                        if !r.comparison.exact {
+                            let _ = oracle::try_write_residual(&r);
+                        }
+                        results.push(r)
+                    }
                     Err(e) => {
-                        // Generate a failure result for infrastructure errors
                         let all_binary = case.to_decoder_oracle_binary(&[]);
                         let all_input_sha = sha256(&all_binary);
                         let err_result = DifferentialResult {
@@ -255,6 +259,7 @@ impl Court for RawDecoderDifferentialCourt {
                             minimized_casefile: None,
                             environment_sha256: environment_sha256(),
                         };
+                        let _ = oracle::try_write_residual(&err_result);
                         results.push(err_result);
                     }
                 }

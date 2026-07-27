@@ -3,7 +3,7 @@
   "court_id": "MSRTC.ENTROPY.DIFFERENTIAL",
   "case_id": "sha256:87cfdcdb642d4b3d977edf764e543bce79d2e216303ccb877fc7fc36c590a9de",
   "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
-  "rust_commit": "ea55a4604b2ac5a4a5c6ab84c7888e509eb47d77-dirty",
+  "rust_commit": "ae0f72e620d0c4f2e3a9309ee55f444f8198b93d-dirty",
   "seed": 0,
   "variant": "RansByte",
   "input_hashes": {
@@ -30,5 +30,5 @@
   },
   "classification": "native_bug",
   "resolution": "open",
-  "environment_sha256": "292f0b488d5f50b7b018a2858923f3d4621b59359ffdf677f47f11542e3ab9df"
+  "environment_sha256": "dd0fae24c3f22da19c6f7ebbd2ed3c0793f17c9e95b3060b16c922a231e59cb8"
 }
