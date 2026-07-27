@@ -3,6 +3,7 @@ name = "msrtc-rans-bench"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Matched Rust benchmark harness for msrtc_rans"
 
 [dependencies]
 msrtc-rans-core = { path = "../msrtc-rans-core" }

@@ -3,6 +3,7 @@ name = "msrtc-rans-casefile"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Deterministic casefile and residual formats for msrtc_rans forensic courts"
 
 [dependencies]
 serde.workspace = true

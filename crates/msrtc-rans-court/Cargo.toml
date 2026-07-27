@@ -3,6 +3,7 @@ name = "msrtc-rans-court"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Differential forensic courts for msrtc_rans parity verification"
 
 [dependencies]
 msrtc-rans-core = { path = "../msrtc-rans-core" }

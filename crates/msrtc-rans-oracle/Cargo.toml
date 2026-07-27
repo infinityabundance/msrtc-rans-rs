@@ -3,10 +3,8 @@ name = "msrtc-rans-oracle"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-
-# This crate is for developer-only test oracle usage.
-# It links and invokes the Microsoft C++ oracle for differential testing.
-# Not intended for production use.
+publish = false
+description = "Developer-only Microsoft C++ oracle adapter for msrtc_rans (not for production use)"
 
 [lints]
 rust.unsafe_code = "allow"

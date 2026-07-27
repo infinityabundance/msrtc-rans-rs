@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish = false
+description = "Build orchestration and freshness checks for msrtc-rans-rs"
 
 [dependencies]
 serde.workspace = true
