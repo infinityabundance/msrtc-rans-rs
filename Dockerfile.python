@@ -1,0 +1,66 @@
+# Stage 1: Build the Rust workspace (excluding python crate)
+FROM rust:latest AS rust-builder
+
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+    python3 python3-dev python3-pip \
+    libpython3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+COPY source /workspace/source
+
+RUN cargo build --manifest-path /workspace/source/Cargo.toml \
+    --workspace --exclude msrtc-rans-python --release 2>&1 | tail -5
+
+# Stage 2: Build the Python extension using Python 3.11
+FROM python:3.11-slim AS py-builder
+
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+    python3-dev \
+    build-essential \
+    curl \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH=/root/.cargo/bin:$PATH
+
+# Pre-download maturin and numpy
+RUN pip3 install maturin numpy --no-cache-dir
+
+WORKDIR /workspace
+COPY source /workspace/source
+COPY --from=rust-builder /workspace/source/target /workspace/source/target
+
+# Debug: check compilation first
+RUN cd /workspace/source && cargo check --manifest-path crates/msrtc-rans-python/Cargo.toml --release 2>&1
+
+RUN cd /workspace/source && \
+    maturin build --manifest-path crates/msrtc-rans-python/Cargo.toml --release 2>&1 | tail -10
+
+# Stage 3: Test on Python 3.11
+FROM python:3.11-slim
+
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install pytest numpy --no-cache-dir
+
+COPY --from=py-builder /workspace/source/target/wheels /wheels
+COPY tests /tests
+COPY msrtc_source /msrtc_source
+COPY __init__.py /msrtc_source/msrtc/rans/__init__.py
+
+RUN pip3 install /wheels/*.whl --no-cache-dir && \
+    mkdir -p /usr/local/lib/python3.11/site-packages/msrtc/rans && \
+    cp /msrtc_source/msrtc/rans/__init__.py /usr/local/lib/python3.11/site-packages/msrtc/rans/__init__.py && \
+    cp /msrtc_source/msrtc/rans/types.py /usr/local/lib/python3.11/site-packages/msrtc/rans/types.py && \
+    cp /msrtc_source/msrtc/rans/_msrtc_rans.pyi /usr/local/lib/python3.11/site-packages/msrtc/rans/_msrtc_rans.pyi
+
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /tests
+CMD ["python3", "-m", "pytest", "-v", "test_msrtc_rans.py"]

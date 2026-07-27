@@ -619,7 +619,7 @@ impl DecoderState {
         Ok(encoded_value as Freq)
     }
 
-    fn decode_inner_byte(
+    pub(crate) fn decode_inner_byte(
         &self,
         decoder: &mut msrtc_rans_core::RansByteDecoder<SliceSource<'_, u8>>,
         values: &mut [i32],
@@ -713,7 +713,7 @@ impl DecoderState {
         Ok(())
     }
 
-    fn decode_inner_64(
+    pub(crate) fn decode_inner_64(
         &self,
         decoder: &mut msrtc_rans_core::Rans64Decoder<SliceSource<'_, u32>>,
         values: &mut [i32],
@@ -1016,6 +1016,67 @@ impl<S: RansParams> EntropyDecoder<S> {
             _ => return Err(EntropyError::InvalidParams),
         };
         self.state.decode_from_slice(values, indices, data, is_byte)
+    }
+
+    /// Decode from a slice but do NOT require the source to be fully exhausted.
+    ///
+    /// This is used when decoding from a `RansDecoderStream` where multiple encoded
+    /// segments are concatenated. The method decodes `values`/`indices` from the
+    /// beginning of `data` and returns the number of bytes consumed.
+    ///
+    /// * `values` — output buffer (must be same length as `indices`)
+    /// * `indices` — distribution indices for each value to decode
+    /// * `data` — encoded byte stream (may contain extra trailing data)
+    ///
+    /// Returns the number of bytes consumed from `data` on success.
+    pub fn decode_partial(
+        &self,
+        values: &mut [i32],
+        indices: &[i32],
+        data: &[u8],
+    ) -> Result<usize, EntropyError> {
+        if self.state.symbol_bits == 0 {
+            return Err(EntropyError::InvalidState);
+        }
+        if values.len() != indices.len() {
+            return Err(EntropyError::InvalidParams);
+        }
+
+        let consumed = match S::NAME {
+            "RansByte" => {
+                let units = data.to_vec();
+                let source = SliceSource::new(&units);
+                let mut decoder = msrtc_rans_core::RansByteDecoder::new(source);
+                if !decoder.init() {
+                    return Err(EntropyError::InvalidStream);
+                }
+                self.state
+                    .decode_inner_byte(&mut decoder, values, indices)?;
+                if !decoder.check_eof() {
+                    return Err(EntropyError::InvalidStream);
+                }
+                decoder.source().position()
+            }
+            "Rans64" => {
+                if data.len() % 4 != 0 {
+                    return Err(EntropyError::InvalidStream);
+                }
+                let units = bytes_to_u32_units(data);
+                let source = SliceSource::new(&units);
+                let mut decoder = msrtc_rans_core::Rans64Decoder::new(source);
+                if !decoder.init() {
+                    return Err(EntropyError::InvalidStream);
+                }
+                self.state.decode_inner_64(&mut decoder, values, indices)?;
+                if !decoder.check_eof() {
+                    return Err(EntropyError::InvalidStream);
+                }
+                decoder.source().position() * 4
+            }
+            _ => return Err(EntropyError::InvalidParams),
+        };
+
+        Ok(consumed)
     }
 }
 
