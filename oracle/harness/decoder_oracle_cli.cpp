@@ -31,6 +31,36 @@
 #include <vector>
 
 #include <msrtc_rans/rans.h>
+#include <msrtc_rans/span.h>
+
+// ---------------------------------------------------------------------------
+// SpanSource — adapter that lets msrtc_rans::span serve as a RansDecoder Source
+// ---------------------------------------------------------------------------
+
+template <typename UnitType>
+struct SpanSource {
+    using unit_t = UnitType;
+
+    msrtc_rans::span<const UnitType> m_data;
+    size_t m_pos;
+
+    SpanSource(msrtc_rans::span<const UnitType> data)
+        : m_data(data), m_pos(0) {}
+
+    bool operator()(UnitType& unit) {
+        if (m_pos >= m_data.size()) {
+            return false;
+        }
+        unit = m_data[m_pos];
+        ++m_pos;
+        return true;
+    }
+
+    bool OnOK() { return true; }
+    bool OnInvalidStream() { return false; }
+    bool IsOpen() const { return true; }
+    bool IsEOF() const { return m_pos >= m_data.size(); }
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -74,10 +104,12 @@ static bool decode_stream(
     get_values.clear();
     get_values.reserve(symbols.size());
 
-    // Create a span over the units
-    msrtc_rans::span<const UnitType> src_span(units.data(), units.size());
+    // Create a source over the units
+    SpanSource<UnitType> src_span(
+        msrtc_rans::span<const UnitType>(units.data(), units.size())
+    );
 
-    msrtc_rans::RansDecoder<StateType, UnitType, msrtc_rans::span<const UnitType>> decoder(src_span);
+    msrtc_rans::RansDecoder<StateType, UnitType, SpanSource<UnitType>> decoder(std::move(src_span));
 
     // Init
     if (!decoder.Init()) {
@@ -209,7 +241,7 @@ int main(int argc, char* argv[])
     }
 
     if (!decode_ok) {
-        std::fprintf(stderr, R"({"status":"error","message":"decode failed (init/advance error)"})" "\n");
+        std::fprintf(stderr, "{\"status\":\"error\",\"message\":\"decode failed (init/advance error)\"}\n");
         return 1;
     }
 

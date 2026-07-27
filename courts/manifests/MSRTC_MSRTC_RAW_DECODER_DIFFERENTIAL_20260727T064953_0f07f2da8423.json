@@ -1,0 +1,17 @@
+{
+  "case_count": 16,
+  "court_id": "MSRTC.RAW.DECODER.DIFFERENTIAL",
+  "environment_sha256": "6f5e954d30b419afba02ec05367233494e25957aa2d1941ccaec6c34ccf24d8c",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "oracle_image_digest": "sha256:a3f8c2416d8b721b8e454eed2e9acdb286d2588b24ac3efaa32c7cd23903a377",
+  "pass_count": 16,
+  "receipt_sha256": "1b61a2c21721167044ca8c8f2486457e9cc721e11059b130eea5898fdf016b4e",
+  "residual_count": 0,
+  "result": "PASS",
+  "run_id": "20260727T064953_0f07f2da8423",
+  "rust_commit": "0f07f2da8423b3de33c2242c4ab0c2e93ae9fe04",
+  "schema_version": 1,
+  "skipped_count": 0,
+  "timestamp": "20260727T064953",
+  "transcript_sha256": "0c79a238817486763ce429752713e96786708e4960526f0d8fb5057a4b0045cd"
+}

@@ -1,14 +1,23 @@
 // Licensed under the MIT license.
 // Author: Riaan de Beer - github.com/infinityabundance - rdebeer.infinityabundance@gmail.com
 
-//! Seal script — runs MSRTC.RAW.ENCODER.DIFFERENTIAL and produces receipt, transcript, manifest.
+//! Seal script — runs a differential court and produces receipt, transcript, manifest.
 //!
-//! Usage: cargo run --bin seal
+//! Usage: cargo run --bin seal [encoder|decoder]
+//!   Default: encoder
 
 use msrtc_rans_court::Court;
 
 fn main() {
-    let court = msrtc_rans_court::raw_encoder_differential::RawEncoderDifferentialCourt;
+    let args: Vec<String> = std::env::args().collect();
+    let which = args.get(1).map(|s| s.as_str()).unwrap_or("encoder");
+
+    let court: Box<dyn Court> = match which {
+        "decoder" => {
+            Box::new(msrtc_rans_court::raw_decoder_differential::RawDecoderDifferentialCourt)
+        }
+        _ => Box::new(msrtc_rans_court::raw_encoder_differential::RawEncoderDifferentialCourt),
+    };
 
     println!("Running {}...", court.id());
     let result = court.run();
@@ -18,23 +27,16 @@ fn main() {
     );
 
     if !result.is_sealable() {
-        eprintln!("❌ {} is NOT sealable.", court.id());
+        eprintln!("\n❌ {} is NOT sealable.", court.id());
         std::process::exit(1);
     }
 
     match msrtc_rans_court::seal::seal(&result) {
         Ok(receipt) => {
             println!("Sealed:");
-            let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("../../courts")
-                .canonicalize()
-                .unwrap_or_else(|_| std::path::PathBuf::from("courts"));
-            let court_slug = result.court_id.replace('.', "_");
-            let stem = format!("MSRTC_{}_{}", court_slug, receipt.run_id);
-            println!("  Receipt:   {}/receipts/{}.json", base.display(), stem);
-            println!("  Transcript: {}/transcripts/{}.txt", base.display(), stem);
-            println!("  Manifest:  {}/manifests/{}.json", base.display(), stem);
-            println!("\n✅ {} is SEALED.", court.id());
+            println!("  Rust commit: {}", receipt.rust_commit);
+            println!("  Run ID: {}", receipt.run_id);
+            println!("✅ {} is SEALED.", court.id());
         }
         Err(e) => {
             eprintln!("Seal failed: {}", e);
