@@ -1,0 +1,15 @@
+{
+  "case_count": 8,
+  "court_id": "MSRTC.RAW.ENCODER.DIFFERENTIAL",
+  "docker_image_digest": "sha256:b7fb013350273239c505ae379d801f2a8cc345523296c9d4fc2c3d7f6074ce7d",
+  "environment_sha256": "77146ec50bbee800b59a3a1211de71e930c57e0d266633ca598113dee68c5225",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "pass_count": 8,
+  "residual_count": 0,
+  "result": "PASS",
+  "run_id": "20260727T061513_1dbf82af9a4e",
+  "rust_commit": "1dbf82af9a4e123b11a643c1db3bb9c4d271e524",
+  "schema_version": 1,
+  "skipped_count": 0,
+  "timestamp": "20260727T061513"
+}
