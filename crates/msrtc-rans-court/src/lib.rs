@@ -98,6 +98,8 @@ impl CourtResult {
 pub mod bypass;
 /// PMF court — MSRTC.PMF
 pub mod pmf;
+/// Raw differential court — MSRTC.DIFFERENTIAL
+pub mod raw_differential;
 /// Raw rANS 64 court — MSRTC.RAW.RANS64
 pub mod raw_rans64;
 /// Raw rANS byte court — MSRTC.RAW.RANSBYTE
