@@ -9,7 +9,7 @@ description = "Safe public Rust entropy-coder API for msrtc_rans"
 default = []
 
 [dependencies]
-msrtc-rans-core = { path = "../msrtc-rans-core" }
+msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.1" }
 
 [lints]
 rust.unsafe_code = "forbid"
