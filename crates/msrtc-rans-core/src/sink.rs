@@ -20,21 +20,33 @@ pub trait Sink<Unit>: Sized {
 }
 
 /// A simple Vec-based sink that stores units in reverse order.
+///
+/// Matches Microsoft's `HeapResizableBuffer` / `ResizableBufferSink`.
+/// Growth policy: `new_size = old_size + min(old_size, max_size_step)`.
 #[derive(Debug)]
 pub struct VecSink<Unit> {
     buffer: Vec<Unit>,
     pos: usize,
+    max_size_step: usize,
 }
 
 impl<Unit: Default + Copy + Clone> VecSink<Unit> {
-    /// Create a new sink with the given initial capacity.
+    /// Create a new sink with the given initial capacity and max growth step.
+    ///
+    /// Default max_size_step is 1 MiB (in units), matching Microsoft's default.
     pub fn new(initial_capacity: usize) -> Self {
+        Self::with_params(initial_capacity, 1024 * 1024)
+    }
+
+    /// Create a sink with explicit initial capacity and max growth step.
+    pub fn with_params(initial_capacity: usize, max_size_step: usize) -> Self {
         let capacity = initial_capacity.max(64);
         let mut buffer = Vec::with_capacity(capacity);
         buffer.resize(capacity, Unit::default());
         Self {
             pos: capacity,
             buffer,
+            max_size_step: max_size_step.max(64),
         }
     }
 
@@ -47,6 +59,7 @@ impl<Unit: Default + Copy + Clone> VecSink<Unit> {
         Self {
             pos: capacity,
             buffer,
+            max_size_step: 1024 * 1024,
         }
     }
 
@@ -72,19 +85,17 @@ impl<Unit: Default + Copy + Clone> VecSink<Unit> {
 
     /// Ensure there's enough room before `pos` to write one more unit.
     ///
-    /// On growth, copies the existing encoded suffix to the end of the new allocation,
-    /// matching Microsoft's `ResizableBufferSink::enlargeBuffer()` which copies the
-    /// content span into `newBuffer.last(content.size())`.
+    /// On growth, copies the existing encoded suffix to the end of the new allocation.
+    /// Growth formula: `new_len = old_len + min(old_len, max_size_step)`.
     fn ensure_space(&mut self) {
         if self.pos == 0 {
             let old_len = self.buffer.len();
-            let content_len = old_len - self.pos; // = old_len (since pos==0)
-            let new_len = old_len + old_len.max(256);
+            let content_len = old_len - self.pos; // = old_len when pos==0
+            let growth = old_len.min(self.max_size_step);
+            let new_len = old_len + growth;
 
-            // Extend the buffer; new elements are zeroed (Unit::default())
             self.buffer.resize(new_len, Unit::default());
 
-            // Move the existing encoded content to the last `content_len` slots
             let new_pos = new_len - content_len;
             self.buffer.copy_within(0..content_len, new_pos);
             self.pos = new_pos;
@@ -204,7 +215,8 @@ mod tests {
 
     #[test]
     fn test_vec_sink_growth_at_320_boundary() {
-        // Growth step is min(old_len, 256) when old_len=320: step=256, new=576
+        // with_exact_capacity sets max_size_step=1024*1024
+        // growth = min(320, 1048576) = 320, new_size = 640
         let mut sink = VecSink::<u8>::with_exact_capacity(320);
         for i in 0..321u16 {
             sink.write(i as u8);
@@ -217,6 +229,40 @@ mod tests {
                 "mismatch at {}",
                 i
             );
+        }
+    }
+
+    #[test]
+    fn test_vec_sink_growth_formula_min_step() {
+        // Verify growth respects max_size_step
+        // With step=256, old=64: growth=min(64,256)=64, new=128
+        // With step=256, old=128: growth=min(128,256)=128, new=256
+        // With step=256, old=256: growth=min(256,256)=256, new=512
+        // With step=256, old=512: growth=min(512,256)=256, new=768
+        let mut sink = VecSink::<u8>::with_params(64, 256);
+        // Fill past first growth
+        for i in 0..200u16 {
+            sink.write(i as u8);
+        }
+        let encoded = sink.encoded();
+        assert_eq!(encoded.len(), 200);
+        for i in 0..200u16 {
+            assert_eq!(encoded[(199 - i) as usize], i as u8, "mismatch at {}", i);
+        }
+    }
+
+    #[test]
+    fn test_vec_sink_growth_formula_capped_step() {
+        // When old_len exceeds max_size_step, growth is capped
+        // step=256, old=1024: growth=256, new=1280
+        let mut sink = VecSink::<u8>::with_params(1024, 256);
+        for i in 0..1500u16 {
+            sink.write(i as u8);
+        }
+        let encoded = sink.encoded();
+        assert_eq!(encoded.len(), 1500);
+        for i in 0..1500u16 {
+            assert_eq!(encoded[(1499 - i) as usize], i as u8, "mismatch at {}", i);
         }
     }
 

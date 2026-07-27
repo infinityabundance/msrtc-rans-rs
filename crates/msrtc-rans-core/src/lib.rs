@@ -24,6 +24,7 @@
 extern crate alloc;
 
 pub mod arithmetic;
+pub mod error;
 pub mod raw;
 pub mod sink;
 pub mod source;

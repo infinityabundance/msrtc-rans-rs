@@ -79,18 +79,18 @@ impl CourtResult {
     }
 
     /// Returns true if the court can be sealed.
-    /// A court is sealable only if:
-    /// - It ran cases (`case_count > 0`)
-    /// - All cases are accounted for (`pass_count + residual_count + skipped_count == case_count`)
-    /// - There are no residuals (`residual_count == 0`)
+    ///
+    /// A court is sealable **only** if:
+    /// - Status is `Passed`
+    /// - At least one case ran (`case_count > 0`)
+    /// - Every case passed (`pass_count == case_count`)
+    /// - No residuals or skips
     pub fn is_sealable(&self) -> bool {
-        if self.case_count == 0 {
-            return false;
-        }
-        if self.pass_count + self.residual_count + self.skipped_count != self.case_count {
-            return false;
-        }
-        self.residual_count == 0
+        self.status == CourtStatus::Passed
+            && self.case_count > 0
+            && self.pass_count == self.case_count
+            && self.residual_count == 0
+            && self.skipped_count == 0
     }
 }
 
@@ -173,5 +173,65 @@ mod tests {
             results: vec![],
         };
         assert!(!r.is_sealable());
+    }
+
+    #[test]
+    fn test_failed_status_with_all_count_passing_is_not_sealable() {
+        // Logically inconsistent: status=Failed but counts say all passed
+        let r = CourtResult {
+            court_id: "MSRTC.TEST".into(),
+            status: CourtStatus::Failed,
+            case_count: 10,
+            pass_count: 10,
+            residual_count: 0,
+            skipped_count: 0,
+            results: vec![],
+        };
+        assert!(
+            !r.is_sealable(),
+            "Failed status must not be sealable even if counts are clean"
+        );
+    }
+
+    #[test]
+    fn test_all_skipped_is_not_sealable() {
+        let r = CourtResult {
+            court_id: "MSRTC.TEST".into(),
+            status: CourtStatus::Skipped,
+            case_count: 10,
+            pass_count: 0,
+            residual_count: 0,
+            skipped_count: 10,
+            results: vec![],
+        };
+        assert!(!r.is_sealable(), "all-skipped court must not be sealable");
+    }
+
+    #[test]
+    fn test_scaffold_with_nonzero_counts_is_not_sealable() {
+        let r = CourtResult {
+            court_id: "MSRTC.TEST".into(),
+            status: CourtStatus::Scaffold,
+            case_count: 5,
+            pass_count: 5,
+            residual_count: 0,
+            skipped_count: 0,
+            results: vec![],
+        };
+        assert!(!r.is_sealable(), "scaffold status must not be sealable");
+    }
+
+    #[test]
+    fn test_passed_with_skipped_is_not_sealable() {
+        let r = CourtResult {
+            court_id: "MSRTC.TEST".into(),
+            status: CourtStatus::Passed,
+            case_count: 10,
+            pass_count: 8,
+            residual_count: 0,
+            skipped_count: 2,
+            results: vec![],
+        };
+        assert!(!r.is_sealable(), "passed with skips must not be sealable");
     }
 }

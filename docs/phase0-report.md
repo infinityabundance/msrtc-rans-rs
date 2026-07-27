@@ -2,7 +2,15 @@
 
 **Upstream oracle commit:** `0500356a8d6146dd8dc8911022cbeca19675614f`
 **Native implementation commit:** *(working tree)*
-**Phase completed:** Phase 0 (Freeze & Inventory) + Phase 1 (Raw rANS Engine)
+**Phase completed:** Phase 0 (Baseline observed) + Phase 1 (Raw rANS Engine, partial)
+
+> **Correction (2026-07-27):** This report was written before the forensic review.
+> The current honest status is **Phase 0 baseline observed, Phase 1 raw engine
+> implemented and internally tested**, with formal evidence sealing, raw oracle
+> parity, and Docker-matrix proof still open. See `docs/generated/claim-index.md`
+> for the current claim accuracy.
+
+The original report text is preserved below for reference.
 
 ## Implemented
 

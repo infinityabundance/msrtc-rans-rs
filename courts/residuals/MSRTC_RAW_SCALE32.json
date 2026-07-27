@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "court_id": "MSRTC.RAW.SCALE32",
+  "case_id": "SCALE32-REJECTION-RESIDUAL",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "rust_commit": "1623647",
+  "seed": 0,
+  "variant": "Rans64",
+  "symbol_bits": 32,
+  "bypass_bits": 0,
+  "inputs": {},
+  "oracle": {
+    "status": "undefined_behavior",
+    "output_sha256": "",
+    "length": 0
+  },
+  "native": {
+    "status": "rejected_with_error",
+    "output_sha256": "",
+    "length": 0
+  },
+  "comparison": {
+    "exact": false,
+    "first_differing_offset": null,
+    "differing_bytes": null
+  },
+  "classification": "oracle_undefined_or_assert_only",
+  "resolution": "open",
+  "minimized_casefile": null,
+  "environment_sha256": ""
+}

@@ -100,6 +100,70 @@ macro_rules! generate_rans_impl {
                 }
             }
 
+            /// Create a new prepared encoder symbol with bounds checking.
+            ///
+            /// Returns `Err(RawRansError::InvalidScaleBits)` if `scale_bits` is outside
+            /// the safe range `[2, min($max_scale_bits, 31)]`. The value 32 is rejected
+            /// because `1u32 << 32` overflows (a defined Rust panic and C++ UB).
+            #[inline]
+            pub fn try_new(
+                start: Freq,
+                freq: Freq,
+                scale_bits: Freq,
+            ) -> core::result::Result<Self, crate::error::RawRansError> {
+                // Bounds check BEFORE computing `1u32 << scale_bits` (which would
+                // overflow at scale_bits=32)
+                if scale_bits < 2 || scale_bits > $max_scale_bits || scale_bits >= 32 {
+                    return Err(crate::error::RawRansError::InvalidScaleBits {
+                        provided: scale_bits as u32,
+                        max_safe: core::cmp::min($max_scale_bits, 31),
+                    });
+                }
+                let scale = 1u32 << scale_bits;
+                if start >= scale {
+                    return Err(crate::error::RawRansError::InvalidParameters);
+                }
+                if freq == 0 || freq > scale - start {
+                    return Err(crate::error::RawRansError::InvalidParameters);
+                }
+
+                let min_bits =
+                    core::cmp::min($state_bits, (core::mem::size_of::<Freq>() * 8 - 1) as u32);
+                let x_max_hi = freq << (min_bits - scale_bits);
+
+                let (freq_rcp, mut freq_rcp_shift, bias) = if freq > 1 {
+                    let shift = arithmetic::reciprocal_shift(freq);
+                    let rcp: $state_ty = if core::mem::size_of::<$state_ty>() >= 8 {
+                        arithmetic::compute_reciprocal_u64(freq) as $state_ty
+                    } else {
+                        arithmetic::compute_reciprocal_u32(freq) as $state_ty
+                    };
+                    (rcp, shift - 1, start)
+                } else {
+                    let rcp: $state_ty = if core::mem::size_of::<$state_ty>() >= 8 {
+                        !0u64 as $state_ty
+                    } else {
+                        !0u32 as $state_ty
+                    };
+                    let bias_adj = start + scale - 1;
+                    (rcp, 0, bias_adj)
+                };
+
+                if core::mem::size_of::<$state_ty>() < 8 {
+                    freq_rcp_shift += (core::mem::size_of::<$state_ty>() * 8) as u32;
+                }
+
+                let freq_cmpl = scale - freq;
+
+                Ok(Self {
+                    x_max_hi,
+                    freq_rcp_shift,
+                    freq_rcp,
+                    freq_cmpl,
+                    bias,
+                })
+            }
+
             /// Compute quotient: fast division using precomputed reciprocal.
             #[inline]
             pub fn quotient(&self, x: $state_ty) -> $state_ty {
@@ -182,6 +246,35 @@ macro_rules! generate_rans_impl {
                 self.state = ((x / freq as $state_ty) << shift)
                     + (start as $state_ty)
                     + (x % freq as $state_ty);
+            }
+
+            /// Put a raw symbol with bounds checking on `scale_bits`.
+            ///
+            /// Returns `Err(RawRansError::InvalidScaleBits)` if `scale_bits` is
+            /// outside the safe range (see `$enc_symbol::try_new`).
+            #[inline]
+            pub fn try_put_raw(
+                &mut self,
+                start: Freq,
+                freq: Freq,
+                scale_bits: Freq,
+            ) -> core::result::Result<(), crate::error::RawRansError> {
+                // Bounds check BEFORE any shift that could overflow
+                if scale_bits < 2 || scale_bits > $max_scale_bits || scale_bits >= 32 {
+                    return Err(crate::error::RawRansError::InvalidScaleBits {
+                        provided: scale_bits as u32,
+                        max_safe: core::cmp::min($max_scale_bits, 31),
+                    });
+                }
+                let scale = 1u32 << scale_bits;
+                if start >= scale {
+                    return Err(crate::error::RawRansError::InvalidParameters);
+                }
+                if freq == 0 || freq > scale - start {
+                    return Err(crate::error::RawRansError::InvalidParameters);
+                }
+                self.put_raw(start, freq, scale_bits);
+                Ok(())
             }
 
             /// Put a prepared symbol (fast reciprocal-multiply path).
@@ -493,5 +586,55 @@ mod tests {
         encoder.put_raw(0, 128, 8);
         encoder.reset();
         assert_eq!(encoder.state(), 1u64 << 31);
+    }
+
+    #[test]
+    fn test_scale_bits_32_rejected_for_try_new() {
+        let result = Rans64EncSymbol::try_new(0, 128, 32);
+        assert!(result.is_err(), "scale_bits=32 must be rejected");
+        if let Err(e) = result {
+            match e {
+                crate::error::RawRansError::InvalidScaleBits { provided, max_safe } => {
+                    assert_eq!(provided, 32);
+                    assert_eq!(max_safe, 31);
+                }
+                _ => panic!("wrong error type"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_scale_bits_32_rejected_for_try_put_raw() {
+        let sink = VecSink::<u32>::new(64);
+        let mut encoder = Rans64Encoder::new(sink);
+        let result = encoder.try_put_raw(0, 128, 32);
+        assert!(result.is_err(), "scale_bits=32 must be rejected");
+    }
+
+    #[test]
+    fn test_scale_bits_31_accepted_for_rans64() {
+        let result = Rans64EncSymbol::try_new(0, 1, 31);
+        assert!(result.is_ok(), "scale_bits=31 must be accepted for Rans64");
+    }
+
+    #[test]
+    fn test_scale_bits_1_rejected() {
+        let result = RansByteEncSymbol::try_new(0, 128, 1);
+        assert!(
+            result.is_err(),
+            "scale_bits=1 must be rejected (minimum is 2)"
+        );
+    }
+
+    #[test]
+    fn test_try_new_rejects_freq_zero() {
+        let result = RansByteEncSymbol::try_new(0, 0, 8);
+        assert!(result.is_err(), "freq=0 must be rejected");
+    }
+
+    #[test]
+    fn test_try_new_accepts_valid_params() {
+        let result = RansByteEncSymbol::try_new(0, 128, 8);
+        assert!(result.is_ok(), "valid params must be accepted");
     }
 }

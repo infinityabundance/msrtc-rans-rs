@@ -20,7 +20,7 @@
 | `RansDecoder::CheckEOF` | `partial` | Trivial state check |
 | `Mul64Hi` | `partial` | Verified via u128; no oracle comparison |
 | Reciprocal preparation | `partial` | Verified vs exact division; no oracle comparison |
-| Buffer growth (VecSink) | `divergent` | Fixed; was corrupting output on first growth |
+| Buffer growth (VecSink) | `divergent` | Allocation formula differs from Microsoft max-step policy; content relocation is fixed |
 | Truncated-stream handling | `partial` | Now transactional; no oracle comparison |
 
 ## Python Public Surface
