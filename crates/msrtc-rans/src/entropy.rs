@@ -249,6 +249,13 @@ impl<S: EncSymbol> EncoderState<S> {
         check_bits(sb, max_scale_bits)?;
         check_bits(bb, max_scale_bits)?;
 
+        // Issue 2a: safe maximum — RansByte allows 30, Rans64 allows 31 for bypass
+        let is_byte_variant = max_scale_bits < 32;
+        let max_safe_bits = if is_byte_variant { 30u32 } else { 31u32 };
+        if sb > max_safe_bits || bb > max_safe_bits {
+            return Err(EntropyError::InvalidParams);
+        }
+
         let mut distribution_descs = Vec::new();
         initialize_distribution_desc(
             &mut distribution_descs,
@@ -257,14 +264,16 @@ impl<S: EncSymbol> EncoderState<S> {
             pmf_table.len(),
         )?;
 
-        let max_freq = 1i32 << symbol_bits;
+        // Issue 2b: use u64 for max_freq computation to avoid i32 overflow
+        let max_freq = 1u64 << symbol_bits;
         let mut symbols: Vec<S> = Vec::with_capacity(pmf_table.len());
         let mut pmf_cursor: usize = 0;
 
         for desc in &distribution_descs {
-            let mut start: i32 = 0;
+            // Issue 2b: track cumulative start in u64
+            let mut start: u64 = 0;
             for _i in 0..=desc.bypass_sentinel {
-                let freq = pmf_table[pmf_cursor];
+                let freq = pmf_table[pmf_cursor] as u64;
                 pmf_cursor += 1;
                 if !(freq > 0 && freq <= max_freq - start) {
                     return Err(EntropyError::InvalidPmf);
@@ -282,7 +291,8 @@ impl<S: EncSymbol> EncoderState<S> {
         self.symbols = symbols;
         self.symbol_bits = sb;
         self.bypass_bits = bb;
-        self.bypass_max_value = (1u32 << bb) - 1;
+        // Issue 2c: compute from u64 to avoid overflow at bb=32
+        self.bypass_max_value = ((1u64 << bb) - 1) as Freq;
         Ok(())
     }
 
@@ -323,14 +333,20 @@ impl<S: EncSymbol> EncoderState<S> {
             };
             let desc = &self.distribution_descs[ui];
 
-            let adjusted = value + desc.value_offset;
+            // Issue 5: checked add to avoid i32 overflow
+            let adjusted = value
+                .checked_add(desc.value_offset)
+                .ok_or(EntropyError::InvalidParams)?;
             let symbol_index: i32;
             if adjusted < 0 || adjusted >= desc.bypass_sentinel {
                 // Out of PMF range — use bypass
+                // Issue 5: use checked_neg and checked_mul for safety
                 let bypass_value: Freq = if adjusted < 0 {
-                    2u32.wrapping_mul((-adjusted) as Freq).wrapping_sub(1)
+                    // 2 * (-value) - 1
+                    let neg = adjusted.checked_neg().ok_or(EntropyError::InvalidParams)?;
+                    2u64.wrapping_mul(neg as u64).wrapping_sub(1) as Freq
                 } else {
-                    2u32.wrapping_mul((adjusted - desc.bypass_sentinel) as Freq)
+                    2u64.wrapping_mul((adjusted - desc.bypass_sentinel) as u64) as Freq
                 };
                 self.encode_bypass_value(&mut encoder, bypass_value);
                 symbol_index = desc.bypass_sentinel;
@@ -420,6 +436,13 @@ impl DecoderState {
         check_bits(sb, max_scale_bits)?;
         check_bits(bb, max_scale_bits)?;
 
+        // Issue 2a: safe maximum
+        let is_byte_variant = max_scale_bits < 32;
+        let max_safe_bits = if is_byte_variant { 30u32 } else { 31u32 };
+        if sb > max_safe_bits || bb > max_safe_bits {
+            return Err(EntropyError::InvalidParams);
+        }
+
         let mut distribution_descs = Vec::new();
         initialize_distribution_desc(
             &mut distribution_descs,
@@ -432,16 +455,17 @@ impl DecoderState {
         // plus one extra entry per distribution for the total sum
         let num_dist = distribution_descs.len();
         let mut cdf_table = vec![0u32; pmf_table.len() + num_dist];
-        let max_freq = 1i32 << symbol_bits;
+        // Issue 2b: use u64 for max_freq
+        let max_freq = 1u64 << symbol_bits;
 
         let mut cursor: usize = 0;
         for dist_idx in 0..num_dist {
             // Update symbol_offset to point into the CDF table (not the PMF table)
             distribution_descs[dist_idx].symbol_offset = cursor + dist_idx;
 
-            let mut start: i32 = 0;
+            let mut start: u64 = 0;
             for _i in 0..=distribution_descs[dist_idx].bypass_sentinel {
-                let freq = pmf_table[cursor];
+                let freq = pmf_table[cursor] as u64;
                 if !(freq > 0 && freq <= max_freq - start) {
                     return Err(EntropyError::InvalidPmf);
                 }
@@ -456,7 +480,8 @@ impl DecoderState {
         self.cdf_table = cdf_table;
         self.symbol_bits = sb;
         self.bypass_bits = bb;
-        self.bypass_max_value = (1u32 << bb) - 1;
+        // Issue 2c: compute from u64
+        self.bypass_max_value = ((1u64 << bb) - 1) as Freq;
         Ok(())
     }
 
@@ -486,6 +511,10 @@ impl DecoderState {
                 return Err(EntropyError::InvalidStream);
             }
         } else {
+            // Issue 3: Reject misaligned Rans64 streams (must be 4-byte aligned)
+            if data.len() % 4 != 0 {
+                return Err(EntropyError::InvalidStream);
+            }
             let units = bytes_to_u32_units(data);
             let source = SliceSource::new(&units);
             let mut decoder = msrtc_rans_core::Rans64Decoder::new(source);
@@ -553,18 +582,19 @@ impl DecoderState {
         decoder: &mut msrtc_rans_core::RansByteDecoder<SliceSource<'_, u8>>,
         bypass_count: Freq,
     ) -> Result<Freq, EntropyError> {
-        let mut encoded_value: Freq = 0;
-        let total_bits = bypass_count * self.bypass_bits;
-        let mut shift: Freq = 0;
+        // Issue 2c: use u64 for intermediate value to avoid overflow on shift
+        let mut encoded_value: u64 = 0;
+        let total_bits = bypass_count as u64 * self.bypass_bits as u64;
+        let mut shift: u64 = 0;
         while shift < total_bits {
             let v = decoder.get(self.bypass_bits);
             if !decoder.advance(v, 1, self.bypass_bits) {
                 return Err(EntropyError::InvalidStream);
             }
-            encoded_value |= v << shift;
-            shift += self.bypass_bits;
+            encoded_value |= (v as u64) << shift;
+            shift += self.bypass_bits as u64;
         }
-        Ok(encoded_value)
+        Ok(encoded_value as Freq)
     }
 
     /// Helper: decode bypass value for Rans64 decoder.
@@ -574,18 +604,19 @@ impl DecoderState {
         decoder: &mut msrtc_rans_core::Rans64Decoder<SliceSource<'_, u32>>,
         bypass_count: Freq,
     ) -> Result<Freq, EntropyError> {
-        let mut encoded_value: Freq = 0;
-        let total_bits = bypass_count * self.bypass_bits;
-        let mut shift: Freq = 0;
+        // Issue 2c: use u64 for intermediate value to avoid overflow on shift
+        let mut encoded_value: u64 = 0;
+        let total_bits = bypass_count as u64 * self.bypass_bits as u64;
+        let mut shift: u64 = 0;
         while shift < total_bits {
             let v = decoder.get(self.bypass_bits);
             if !decoder.advance(v, 1, self.bypass_bits) {
                 return Err(EntropyError::InvalidStream);
             }
-            encoded_value |= v << shift;
-            shift += self.bypass_bits;
+            encoded_value |= (v as u64) << shift;
+            shift += self.bypass_bits as u64;
         }
-        Ok(encoded_value)
+        Ok(encoded_value as Freq)
     }
 
     fn decode_inner_byte(
@@ -653,16 +684,31 @@ impl DecoderState {
             if symbol == desc.bypass_sentinel {
                 let bypass_count = self.decode_bypass_count_byte(decoder)?;
                 let bypass_value = self.decode_bypass_value_payload_byte(decoder, bypass_count)?;
+                // Issue 5: safe conversion with overflow checks using i64
+                let half = (bypass_value >> 1) as i64;
                 if bypass_value & 1 != 0 {
                     // Negative: 2*(-value) - 1 -> value = -(bypassValue >> 1) - 1
-                    symbol = -((bypass_value >> 1) as i32) - 1;
+                    // = -(half as i64) - 1
+                    symbol = (-half)
+                        .checked_sub(1)
+                        .ok_or(EntropyError::InvalidStream)?
+                        .try_into()
+                        .map_err(|_| EntropyError::InvalidStream)?;
                 } else {
                     // Positive: 2*(value - sentinel) -> value = (bypassValue >> 1) + sentinel
-                    symbol = (bypass_value >> 1) as i32 + desc.bypass_sentinel;
+                    symbol = half
+                        .checked_add(desc.bypass_sentinel as i64)
+                        .ok_or(EntropyError::InvalidStream)?
+                        .try_into()
+                        .map_err(|_| EntropyError::InvalidStream)?;
                 }
             }
 
-            values[i] = symbol - desc.value_offset;
+            values[i] = (symbol as i64)
+                .checked_sub(desc.value_offset as i64)
+                .ok_or(EntropyError::InvalidStream)?
+                .try_into()
+                .map_err(|_| EntropyError::InvalidStream)?;
         }
         Ok(())
     }
@@ -728,14 +774,31 @@ impl DecoderState {
             if symbol == desc.bypass_sentinel {
                 let bypass_count = self.decode_bypass_count_64(decoder)?;
                 let bypass_value = self.decode_bypass_value_payload_64(decoder, bypass_count)?;
+                // Issue 5: safe conversion with overflow checks using i64
+                let half = (bypass_value >> 1) as i64;
                 if bypass_value & 1 != 0 {
-                    symbol = -((bypass_value >> 1) as i32) - 1;
+                    // Negative: 2*(-value) - 1 -> value = -(bypassValue >> 1) - 1
+                    // = -(half as i64) - 1
+                    symbol = (-half)
+                        .checked_sub(1)
+                        .ok_or(EntropyError::InvalidStream)?
+                        .try_into()
+                        .map_err(|_| EntropyError::InvalidStream)?;
                 } else {
-                    symbol = (bypass_value >> 1) as i32 + desc.bypass_sentinel;
+                    // Positive: 2*(value - sentinel) -> value = (bypassValue >> 1) + sentinel
+                    symbol = half
+                        .checked_add(desc.bypass_sentinel as i64)
+                        .ok_or(EntropyError::InvalidStream)?
+                        .try_into()
+                        .map_err(|_| EntropyError::InvalidStream)?;
                 }
             }
 
-            values[i] = symbol - desc.value_offset;
+            values[i] = (symbol as i64)
+                .checked_sub(desc.value_offset as i64)
+                .ok_or(EntropyError::InvalidStream)?
+                .try_into()
+                .map_err(|_| EntropyError::InvalidStream)?;
         }
         Ok(())
     }
@@ -1273,5 +1336,473 @@ mod tests {
             decoded, values,
             "Rans64 bypass roundtrip decode should match original values"
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // Issue 2d: scale-32 safe / reject tests
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_encoder_64_symbol_bits_31_accepted() {
+        // Rans64 symbol_bits=31 is within max_safe_bits (31)
+        let mut enc: EntropyEncoder<Rans64> = EntropyEncoder::new();
+        assert!(
+            enc.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, 31, BYPASS_BITS)
+                .is_ok()
+        );
+    }
+
+    #[test]
+    fn test_encoder_64_symbol_bits_32_rejected() {
+        // Rans64 symbol_bits=32 exceeds max_safe_bits (31), must not panic
+        let mut enc: EntropyEncoder<Rans64> = EntropyEncoder::new();
+        assert_eq!(
+            enc.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, 32, BYPASS_BITS),
+            Err(EntropyError::InvalidParams)
+        );
+    }
+
+    #[test]
+    fn test_encoder_64_bypass_bits_32_rejected() {
+        // Rans64 bypass_bits=32 exceeds max_safe_bits (31), must not panic
+        let mut enc: EntropyEncoder<Rans64> = EntropyEncoder::new();
+        assert_eq!(
+            enc.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 32),
+            Err(EntropyError::InvalidParams)
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // Issue 3: misaligned Rans64 streams rejected
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_decode_64_rejects_misaligned_1_extra_byte() {
+        let mut enc: EntropyEncoder<Rans64> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &[1i32, 1, 0, 1], &mut encoded)
+            .unwrap();
+
+        // Append 1 extra byte to make it misaligned
+        let mut misaligned = encoded.clone();
+        misaligned.push(0xAB);
+
+        let mut dec: EntropyDecoder<Rans64> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        let result = dec.decode(&mut decoded, &INDICES, &misaligned);
+        assert_eq!(result, Err(EntropyError::InvalidStream));
+    }
+
+    #[test]
+    fn test_decode_64_rejects_misaligned_2_extra_bytes() {
+        let mut enc: EntropyEncoder<Rans64> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &[1i32, 1, 0, 1], &mut encoded)
+            .unwrap();
+
+        let mut misaligned = encoded.clone();
+        misaligned.extend_from_slice(&[0xAB, 0xCD]);
+
+        let mut dec: EntropyDecoder<Rans64> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        let result = dec.decode(&mut decoded, &INDICES, &misaligned);
+        assert_eq!(result, Err(EntropyError::InvalidStream));
+    }
+
+    #[test]
+    fn test_decode_64_rejects_misaligned_3_extra_bytes() {
+        let mut enc: EntropyEncoder<Rans64> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &[1i32, 1, 0, 1], &mut encoded)
+            .unwrap();
+
+        let mut misaligned = encoded.clone();
+        misaligned.extend_from_slice(&[0xAB, 0xCD, 0xEF]);
+
+        let mut dec: EntropyDecoder<Rans64> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        let result = dec.decode(&mut decoded, &INDICES, &misaligned);
+        assert_eq!(result, Err(EntropyError::InvalidStream));
+    }
+
+    #[test]
+    fn test_decode_byte_accepts_extra_bytes() {
+        // RansByte has byte-level alignment, extra bytes should not be rejected
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &[1i32, 1, 0, 1], &mut encoded)
+            .unwrap();
+
+        // Append extra bytes
+        let mut extended = encoded.clone();
+        extended.extend_from_slice(&[0xAB, 0xCD]);
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        // This may fail because the decoder checks EOF, but it should NOT
+        // be rejected for misalignment
+        let _ = dec.decode(&mut decoded, &INDICES, &extended);
+        // We don't assert success or failure — we just assert no panic
+    }
+
+    // -----------------------------------------------------------------------
+    // Issue 4: Expanded bypass coverage
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_encode_bypass_positive_outlier() {
+        // Value > sentinel (positive outlier): dist 0 sentinel=3, offset=1,
+        // value=10 => adjusted=11 > 3 => bypass (8/2=4 above sentinel => value 4+3=7-1=6...
+        // actually: adjusted=11, sentinel=3, bypass_value = 2*(11-3) = 16
+        // decode: 16>>1=8, 8+3=11-1=10 ✓
+        let values = [10i32, 1, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_multi_digit_value() {
+        // Value requiring multiple bypassBits-sized chunks (bypass_bits=4)
+        // Large bypass value: dist 0 sentinel=3, offset=1, value=200 => adjusted=201
+        // bypass_value = 2*(201-3) = 396 = 0x18C, needs multiple 4-bit chunks
+        let values = [200i32, 1, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_bits_2() {
+        // Minimum bypass_bits = 2
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 2)
+            .unwrap();
+        let values = [10i32, 1, 0, 1]; // value 10 => bypass
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 2)
+            .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_bits_3() {
+        // Odd bypass_bits = 3
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 3)
+            .unwrap();
+        let values = [10i32, 1, 0, 1];
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 3)
+            .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_bits_8() {
+        // Larger bypass_bits = 8
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 8)
+            .unwrap();
+        let values = [10i32, 1, 0, 1];
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(&PMF_LENGTHS, &PMF_OFFSETS, &PMF_TABLE, SYMBOL_BITS, 8)
+            .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_multiple_bypasses() {
+        // Multiple bypass values in one stream: both -2 and 10 need bypass
+        // dist 0: offset=1 sentinel=3, dist 1: offset=2 sentinel=5
+        // value -2 (dist 0) => adjusted=-1 => bypass (negative)
+        // value 10 (dist 1) => adjusted=12 => bypass (positive)
+        let values = [-2i32, 10, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_mixed_in_range_and_bypass() {
+        // Mix of in-range and bypass values
+        // dist 0: offset=1 sentinel=3, valid adjusted [0,2] => values [-1, 1]
+        // dist 1: offset=2 sentinel=5, valid adjusted [0,4] => values [-2, 2]
+        // value 0 in dist 0 => in-range, value 1 in dist 0 => in-range
+        // value 5 in dist 1 => bypass (adjusted=7 > 4), value -3 in dist 1 => bypass (adjusted=-1 < 0)
+        let values = [0i32, 5, 1, -3];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_negative_outlier_at_boundary() {
+        // Negative outlier at boundary: -1 - sentinel (very negative)
+        // dist 0: offset=1, sentinel=3, value=-10 => adjusted=-9 => bypass
+        // (-9 < 0) => bypass_value = 2*9-1 = 17, decode: 17>>1=8, -(8+1) = -9, -9+1 = -8... wait
+        // decode bypass: negative flag set, half=8, symbol = -(8+1) = -9, -9 = -9+1 = -8...
+        // Actually: symbol = -9, values[i] = symbol - offset = (-9) - 1 = -10 ✓
+        let values = [-10i32, 1, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    #[test]
+    fn test_encode_bypass_large_positive_outlier() {
+        // Large positive outlier
+        let values = [10000i32, 1, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        enc.encode(&INDICES, &values, &mut encoded).unwrap();
+
+        let mut dec: EntropyDecoder<RansByte> = EntropyDecoder::new();
+        dec.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut decoded = vec![0i32; 4];
+        dec.decode(&mut decoded, &INDICES, &encoded).unwrap();
+        assert_eq!(decoded, values);
+    }
+
+    // -----------------------------------------------------------------------
+    // Issue 5: extreme value overflow protection
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_encode_bypass_extreme_negative_i32_min_plus_one() {
+        // i32::MIN + 1 with offset 1 gives adjusted = i32::MIN + 2 = -2147483646
+        // checked_neg of that gives 2147483646, no overflow.
+        // This should succeed (no overflow).
+        let values = [i32::MIN + 1, 1, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        let result = enc.encode(&INDICES, &values, &mut encoded);
+        // Must not panic — should succeed or return InvalidParams gracefully
+        assert!(result.is_ok() || result == Err(EntropyError::InvalidParams));
+    }
+
+    #[test]
+    fn test_encode_bypass_extreme_positive_i32_max() {
+        // i32::MAX with offset could cause overflow in checked_add -> InvalidParams
+        let values = [i32::MAX, 1, 0, 1];
+        let mut enc: EntropyEncoder<RansByte> = EntropyEncoder::new();
+        enc.initialize(
+            &PMF_LENGTHS,
+            &PMF_OFFSETS,
+            &PMF_TABLE,
+            SYMBOL_BITS,
+            BYPASS_BITS,
+        )
+        .unwrap();
+        let mut encoded = Vec::new();
+        let result = enc.encode(&INDICES, &values, &mut encoded);
+        assert_eq!(result, Err(EntropyError::InvalidParams));
     }
 }

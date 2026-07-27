@@ -16,6 +16,7 @@ fn main() {
         "decoder" => {
             Box::new(msrtc_rans_court::raw_decoder_differential::RawDecoderDifferentialCourt)
         }
+        "entropy" => Box::new(msrtc_rans_court::entropy_differential::EntropyDifferentialCourt),
         _ => Box::new(msrtc_rans_court::raw_encoder_differential::RawEncoderDifferentialCourt),
     };
 

@@ -1,0 +1,61 @@
+MSRTC Court Transcript
+=====================
+
+Court:       MSRTC.ENTROPY.DIFFERENTIAL
+Run ID:      20260727T082628_7b5fc52f91d1
+Timestamp:   20260727T082628
+Rust Commit: 7b5fc52f91d12efff3567333db63086e7e0fab68-dirty
+Oracle Cmt:  0500356a8d6146dd8dc8911022cbeca19675614f
+Environment: a690a3c318c6ef87f9e8e246cfaa4af9274d03694062b35062ce462ee214b03b
+
+Cases: 6 total, 6 pass, 0 residual, 0 skipped
+Result: PASS
+
+--- Case 1 ---
+ID:     encoder_diff:sha256:87cfdcdb642d4b3d977edf764e543bce79d2e216303ccb877fc7fc36c590a9de
+Status: PASS
+Oracle: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Native: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Seed:   0
+Variant: RansByte
+
+--- Case 2 ---
+ID:     roundtrip:sha256:87cfdcdb642d4b3d977edf764e543bce79d2e216303ccb877fc7fc36c590a9de
+Status: PASS
+Oracle:  (sha256: )
+Native: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Seed:   0
+Variant: RansByte
+
+--- Case 3 ---
+ID:     cpp_enc_rust_dec:sha256:87cfdcdb642d4b3d977edf764e543bce79d2e216303ccb877fc7fc36c590a9de
+Status: PASS
+Oracle: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Native: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Seed:   0
+Variant: RansByte
+
+--- Case 4 ---
+ID:     encoder_diff:sha256:0321134e9129375a0b91826e75410c5128946db4cac2d2f55e66468dc40cfeb2
+Status: PASS
+Oracle: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Native: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Seed:   1
+Variant: Rans64
+
+--- Case 5 ---
+ID:     roundtrip:sha256:0321134e9129375a0b91826e75410c5128946db4cac2d2f55e66468dc40cfeb2
+Status: PASS
+Oracle:  (sha256: )
+Native: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Seed:   1
+Variant: Rans64
+
+--- Case 6 ---
+ID:     cpp_enc_rust_dec:sha256:0321134e9129375a0b91826e75410c5128946db4cac2d2f55e66468dc40cfeb2
+Status: PASS
+Oracle: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Native: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Seed:   1
+Variant: Rans64
+
