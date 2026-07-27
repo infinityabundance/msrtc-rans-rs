@@ -9,6 +9,8 @@ description = "Deterministic no_std rANS primitives for msrtc_rans entropy coder
 default = []
 # Enable division-based reference path for verification
 division_reference = []
+# Enable std::error::Error impl
+std = []
 
 [lints]
 rust.missing_docs = "deny"
