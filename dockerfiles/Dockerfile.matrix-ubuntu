@@ -1,0 +1,24 @@
+# msrtc-rans-rs Docker matrix cell — Ubuntu 24.04
+# Runs the full Rust workspace test suite inside a dedicated container.
+# The oracle-dependent courts are #[ignore]d here (they run host-orchestrated
+# against the oracle cells); everything else must pass.
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+        build-essential git curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pinned toolchain from rust-toolchain.toml (stable + rustfmt + clippy)
+ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH=/usr/local/cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+
+RUN useradd -m -s /bin/bash builder && mkdir -p /workspace && chown -R builder /usr/local/cargo /usr/local/rustup /workspace
+USER builder
+WORKDIR /workspace/source
+
+COPY --chown=builder source /workspace/source
+
+RUN cargo fetch --locked
+
+CMD ["cargo", "test", "--workspace", "--exclude", "msrtc-rans-python"]

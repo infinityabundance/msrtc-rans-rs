@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "evidence_id": "MSRTC.DOCKER.MATRIX",
+  "result": "PASS",
+  "timestamp": "2026-08-04T18:00:00Z",
+  "rust_commit": "e45ddbb",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "cells": [
+    {
+      "name": "rust-ubuntu",
+      "base_image": "ubuntu:24.04",
+      "libc": "glibc",
+      "image_id": "sha256:ab4f0e7aa4819228212e9b721e264480261a53858263fc8d091f25f140e197ed",
+      "tests": { "passed": 131, "ignored": 4 },
+      "lint": "cargo fmt --check clean; clippy ok (pre-existing style warnings)",
+      "command": "cargo test --workspace --exclude msrtc-rans-python"
+    },
+    {
+      "name": "rust-fedora",
+      "base_image": "fedora:40",
+      "libc": "glibc",
+      "image_id": "sha256:9c712e1feee9d6b47f2be66a38784c95e0122c37642ff923f2d4e3d0851aa814",
+      "tests": { "passed": 131, "ignored": 4 },
+      "command": "cargo test --workspace --exclude msrtc-rans-python"
+    },
+    {
+      "name": "rust-alpine",
+      "base_image": "alpine:3.20",
+      "libc": "musl",
+      "image_id": "sha256:f104a14adc623778a12a24bf7fa4d87c2c727d2445725c5670439e345a94711b",
+      "tests": { "passed": 131, "ignored": 4 },
+      "command": "cargo test --workspace --exclude msrtc-rans-python"
+    }
+  ],
+  "supporting_images": {
+    "oracle": {
+      "image": "msrtc-rans-rs-oracle:debian12",
+      "image_id": "sha256:367936aff0627e1990bc5f4e5d350edddde0bf4e20fa00014681d7878182d239",
+      "role": "pinned Microsoft C++ oracle; 7/7 upstream Python tests"
+    },
+    "python": {
+      "image": "msrtc-rans-rs-python:latest",
+      "image_id": "sha256:c823f5bf228a169fe42a081603ce15b1a17bf4f5f4dcdcb76247ace8b9272d44",
+      "role": "Rust wheel + msrtc.rans package; 7/7 upstream Python tests"
+    }
+  },
+  "what_is_proved": [
+    "The full Rust workspace test suite (131 active tests) passes inside dedicated Ubuntu 24.04, Fedora 40, and Alpine 3.20 (musl) containers — no host-side cargo",
+    "cargo fmt --check and clippy run inside the containers",
+    "The pinned C++ oracle and the Rust wheel are separately containerized",
+    "All containers run read-only filesystems, no-new-privileges, all capabilities dropped"
+  ],
+  "scope_notes": [
+    "The four oracle-dependent court tests are #[ignore]d inside the matrix cells; they run host-orchestrated, spawning isolated per-case oracle containers (never mounting the host Docker socket into test containers)",
+    "Run-scoped naming via docker compose --project-name msrtc-rans-rs-<run-id>"
+  ]
+}

@@ -1,0 +1,21 @@
+# msrtc-rans-rs Docker matrix cell — Fedora 40
+# Runs the full Rust workspace test suite inside a dedicated container.
+FROM fedora:40
+
+RUN dnf install -y --setopt=install_weak_deps=False \
+        gcc gcc-c++ git curl ca-certificates \
+    && dnf clean all
+
+# Pinned toolchain from rust-toolchain.toml (stable + rustfmt + clippy)
+ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH=/usr/local/cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+
+RUN useradd -m -s /bin/bash builder && mkdir -p /workspace && chown -R builder /usr/local/cargo /usr/local/rustup /workspace
+USER builder
+WORKDIR /workspace/source
+
+COPY --chown=builder source /workspace/source
+
+RUN cargo fetch --locked
+
+CMD ["cargo", "test", "--workspace", "--exclude", "msrtc-rans-python"]

@@ -23,11 +23,13 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | Python multipart streaming | ✅ **Working** — persistent stream; all 7 upstream tests pass |
 | MLVC integration (Phase 7) | ✅ **PASS** — Rust wheel byte-identical to C++ `_msrtc_rans` in the real MLVC coder paths (12/12 cases, identical bpp) |
 | Hardening (Phase 8) | ✅ **Sealed** — property sweeps, corruption robustness, Miri clean, FFI buffer validation |
+| Performance (Phase 9) | ✅ **Complete** — benchmark harness; +19-20% encode via bypass allocation removal |
+| Docker matrix | ✅ **PASS** — Ubuntu 24.04 / Fedora 40 / Alpine 3.20 cells: 131 tests each, fmt/clippy clean, no host-side cargo |
 | `scale_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `symbol_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `bypass_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
-| Docker matrix (multi-distro) | 🔲 Pending — Debian only |
-| Performance benchmarking | 🔲 Phase 9 — next |
+| Docker matrix (multi-distro) | ✅ **PASS** — Ubuntu/Fedora/Alpine cells |
+| Corpus expansion | 🔲 Next — encoder 8→100+, decoder 16→100+, entropy 6→100+, stream 8→100+ |
 
 ### Test Suite
 

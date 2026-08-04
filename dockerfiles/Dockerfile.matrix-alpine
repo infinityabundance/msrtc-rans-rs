@@ -1,0 +1,21 @@
+# msrtc-rans-rs Docker matrix cell — Alpine 3.20 (musl libc)
+# Runs the full Rust workspace test suite inside a dedicated container.
+# This cell proves the workspace builds and tests pass against musl.
+FROM alpine:3.20
+
+RUN apk add --no-cache \
+        build-base git curl ca-certificates
+
+# Pinned toolchain from rust-toolchain.toml (stable + rustfmt + clippy)
+ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH=/usr/local/cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+
+RUN adduser -D -s /bin/sh builder && mkdir -p /workspace && chown -R builder /usr/local/cargo /usr/local/rustup /workspace
+USER builder
+WORKDIR /workspace/source
+
+COPY --chown=builder source /workspace/source
+
+RUN cargo fetch --locked
+
+CMD ["cargo", "test", "--workspace", "--exclude", "msrtc-rans-python"]

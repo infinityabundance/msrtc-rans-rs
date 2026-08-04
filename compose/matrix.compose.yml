@@ -1,0 +1,97 @@
+# Docker Compose matrix for msrtc-rans-rs forensic testing
+#
+# Run-scoped: docker compose --project-name msrtc-rans-rs-<run-id> \
+#   -f compose/matrix.compose.yml build && up --abort-on-container-exit
+#
+# Cells:
+#   rust-ubuntu / rust-fedora / rust-alpine — Rust workspace tests in
+#     dedicated containers (no host-side cargo). The four oracle-dependent
+#     courts are #[ignore]d here; they run host-orchestrated against the
+#     oracle cell (the court process spawns isolated oracle containers,
+#     never mounting the host Docker socket into test containers).
+#   oracle-debian — pinned Microsoft C++ oracle + upstream Python tests.
+#   no-cpp-verify — installs the Rust wheel and imports msrtc.rans with no
+#     C++ anywhere in the image.
+#
+# Project data lives under /run/media/one/toshiba4TB/docker/msrtc-rans-rs/.
+
+services:
+  rust-ubuntu:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.matrix-ubuntu
+    image: msrtc-rans-rs-matrix-ubuntu:latest
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    working_dir: /workspace/source
+    command: ["cargo", "test", "--workspace", "--exclude", "msrtc-rans-python"]
+
+  rust-fedora:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.matrix-fedora
+    image: msrtc-rans-rs-matrix-fedora:latest
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    working_dir: /workspace/source
+    command: ["cargo", "test", "--workspace", "--exclude", "msrtc-rans-python"]
+
+  rust-alpine:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.matrix-alpine
+    image: msrtc-rans-rs-matrix-alpine:latest
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    working_dir: /workspace/source
+    command: ["cargo", "test", "--workspace", "--exclude", "msrtc-rans-python"]
+
+  oracle-debian:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.oracle
+    image: msrtc-rans-rs-oracle:debian12
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    working_dir: /workspace/mlvc/python/test
+    command: ["python3", "-m", "pytest", "-v", "test_msrtc_rans.py"]
+
+  no-cpp-verify:
+    image: python:3.11-slim
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    volumes:
+      - type: bind
+        source: /wheels
+        target: /wheels
+        read_only: true
+    command: >
+      bash -c "
+        pip3 install --no-cache-dir /wheels/*.whl &&
+        python3 -c 'from msrtc.rans import RansVariant, EntropyEncoder, RansEncoderStream; print(\"OK: msrtc.rans imported (no C++)\")'
+      "

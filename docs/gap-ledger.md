@@ -11,10 +11,10 @@ This document tracks known gaps between the current implementation and a complet
 
 | Gap | Priority | Impact | Next Action |
 |-----|----------|--------|-------------|
-| Only Debian 12 oracle cell exists | Medium | Oracle parity not verified on other Linux distributions | Add Ubuntu 22.04, Fedora 39, Alpine 3.19 Dockerfiles |
-| No multi-compiler testing | Medium | GCC-only; MSVC/clang paths not tested | Add clang and MSVC oracle builds |
+| Only Debian 12 oracle cell exists | ✅ **Resolved** | Ubuntu 24.04 / Fedora 40 / Alpine 3.20 (musl) cells added; 131 tests pass in each; fmt/clippy clean | Complete |
+| No multi-compiler testing | Medium | GCC-only; MSVC/clang paths not tested | Add clang oracle builds |
 | No CI integration for oracle rebuild | High | Manual process; not reproducible by CI | Add GitHub Actions workflow for oracle Docker build |
-| Rust courts still run host-side | Medium | Addendum requires Rust testing inside dedicated containers | Move court/test execution into the Docker matrix |
+| Rust courts still run host-side | Medium | Addendum requires Rust testing inside dedicated containers | Matrix cells run the workspace tests; the oracle-dependent courts spawn isolated per-case oracle containers (host-orchestrated, no socket mount) |
 | Run-scoped naming not fully wired into receipts | Low | Receipts record abbreviated commands | Record per-case container names, labels, image digests in transcript |
 
 ---

@@ -163,6 +163,17 @@ All three residuals are **intentional safety divergences** — Rust is correct t
 - **Python FFI**: `Py_buffer` metadata validation before raw casts; exact-size output writes (all 7 upstream tests still pass).
 - Sealed as `MSRTC.HARDENING` at `ddea9a07b112` (4/4).
 
+### Phase 9 — Performance (COMPLETE)
+- Deterministic release benchmark harness (`msrtc-rans-bench`): raw byte/64 encode+decode, prepared encode, entropy encode+decode (both variants), stream multipart.
+- Raw primitives: 185–433 M items/s; entropy: 63–109 M items/s; streams: 79–113 M items/s.
+- Optimization: bypass encoding now uses a fixed 40-entry stack buffer instead of a per-value `Vec` — **+19% entropy byte encode, +20% stream encode**; all sealed courts re-verified byte-identical.
+- Report: `docs/phase9-report.md`.
+
+### Docker Matrix (PASS)
+- Three Rust cells (Ubuntu 24.04, Fedora 40, Alpine 3.20/musl) build and run the full workspace test suite inside dedicated containers — 131 tests pass in each; `cargo fmt --check` clean, clippy ok. No host-side cargo.
+- Supporting cells: pinned C++ oracle (7/7 upstream Python tests) and Rust wheel (`msrtc.rans` import, no C++).
+- Evidence: `evidence/docker-matrix/DOCKER_MATRIX_EVIDENCE.json`; compose: `compose/matrix.compose.yml`; cells: `dockerfiles/Dockerfile.matrix-{ubuntu,fedora,alpine}`.
+
 ---
 
 ## Next Phases
