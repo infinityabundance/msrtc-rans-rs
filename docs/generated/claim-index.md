@@ -33,7 +33,7 @@
 
 | Claim | Reason |
 |-------|--------|
-| "Byte-identical to Microsoft oracle for all inputs" | Differential courts cover 54 sealed cases, not exhaustive |
+| "Byte-identical to Microsoft oracle for all inputs" | Differential courts cover 420 sealed cases, not exhaustive |
 | "Full MLVC pipeline (trained weights + YUV) proven" | Phase 7 proves the real `msrtc.rans` call sites; full FrameLoop needs model checkpoints |
 | "Performance competitive" | Benchmarks not run (Phase 9 pending) |
 | "Memory-safe replacement" | Formal claim pending full memory safety audit (Phase 8 pending) |

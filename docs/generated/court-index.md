@@ -1,5 +1,5 @@
 # msrtc-rans-rs Court Index
-*Generated: 2026-08-04* — **Phases 4 + 7 + 8 — Five Courts Sealed**
+*Generated: 2026-08-04* — **All Phases — Five Courts Sealed, 420 Cases**
 
 ## Court Registry
 
@@ -7,10 +7,10 @@
 |----------|--------|-------|--------|-----------|---------|
 | `MSRTC.INVENTORY` | 🟡 `partial` | — | — | — | ❌ |
 | `MSRTC.ORACLE.BASELINE` | 🟡 `partial` | 7 | 7 | 0 | ❌ (observed, not receipted) |
-| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | ✅ `sealed` | 8 | 8 | 0 | ✅ Sealed |
-| `MSRTC.RAW.DECODER.DIFFERENTIAL` | ✅ `sealed` | 16 | 16 | 0 | ✅ Sealed |
-| `MSRTC.ENTROPY.DIFFERENTIAL` | ✅ `sealed` | 6 | 6 | 0 | ✅ Sealed |
-| `MSRTC.STREAM.DIFFERENTIAL` | ✅ `sealed` | 24 | 24 | 0 | ✅ Sealed |
+| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | ✅ `sealed` | 100 | 100 | 0 | ✅ Sealed |
+| `MSRTC.RAW.DECODER.DIFFERENTIAL` | ✅ `sealed` | 100 | 100 | 0 | ✅ Sealed |
+| `MSRTC.ENTROPY.DIFFERENTIAL` | ✅ `sealed` | 102 | 102 | 0 | ✅ Sealed |
+| `MSRTC.STREAM.DIFFERENTIAL` | ✅ `sealed` | 114 | 114 | 0 | ✅ Sealed |
 | `MSRTC.HARDENING` | ✅ `sealed` | 4 | 4 | 0 | ✅ Sealed |
 | `MSRTC.RAW.RANSBYTE` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.RAW.RANS64` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |

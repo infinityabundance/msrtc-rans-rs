@@ -13,10 +13,10 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | Upstream oracle source pin | ✅ **Sealed** — commit `0500356a` |
 | Oracle baseline observation | ✅ **Sealed** — 7/7 Python tests pass |
 | Docker Debian oracle cell | ✅ **Sealed** — Docker image with oracle CLIs |
-| `MSRTC.RAW.ENCODER.DIFFERENTIAL` court | ✅ **Sealed** — 8/8 cases pass |
-| `MSRTC.RAW.DECODER.DIFFERENTIAL` court | ✅ **Sealed** — 16/16 cases pass |
-| `MSRTC.ENTROPY.DIFFERENTIAL` court | ✅ **Sealed** — 6/6 cases pass |
-| `MSRTC.STREAM.DIFFERENTIAL` court | ✅ **Sealed** — 24/24 cases pass |
+| `MSRTC.RAW.ENCODER.DIFFERENTIAL` court | ✅ **Sealed** — 100/100 cases pass |
+| `MSRTC.RAW.DECODER.DIFFERENTIAL` court | ✅ **Sealed** — 100/100 cases pass |
+| `MSRTC.ENTROPY.DIFFERENTIAL` court | ✅ **Sealed** — 102/102 cases pass |
+| `MSRTC.STREAM.DIFFERENTIAL` court | ✅ **Sealed** — 114/114 cases pass |
 | `MSRTC.HARDENING` court | ✅ **Sealed** — 4/4 property battery |
 | `IResizableBuffer` / `HeapResizableBuffer` | ✅ **Implemented** — Microsoft growth formula, rollback |
 | Persistent `RansEncoderStream` / `RansDecoderStream` | ✅ **Sealed** — multipart wire-parity with Microsoft |
@@ -38,7 +38,7 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | Total test functions defined | 135 |
 | Active tests | 131 |
 | Ignored tests (Docker-gated) | 4 |
-| Differential court cases (sealed) | 54 |
+| Differential court cases (sealed) | 420 |
 | Receipts sealed | 5 |
 
 ---
@@ -150,10 +150,10 @@ The project uses a novel **forensic court system** to prove correctness:
 
 | Court ID | Cases | Result |
 |----------|-------|--------|
-| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | 8 | ✅ All pass |
-| `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | ✅ All pass |
-| `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | ✅ All pass |
-| `MSRTC.STREAM.DIFFERENTIAL` | 24 | ✅ All pass |
+| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | 100 | ✅ All pass |
+| `MSRTC.RAW.DECODER.DIFFERENTIAL` | 100 | ✅ All pass |
+| `MSRTC.ENTROPY.DIFFERENTIAL` | 102 | ✅ All pass |
+| `MSRTC.STREAM.DIFFERENTIAL` | 114 | ✅ All pass |
 | `MSRTC.HARDENING` | 4 | ✅ All pass |
 
 ---
