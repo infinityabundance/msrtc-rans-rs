@@ -1,0 +1,164 @@
+{
+  "court_id": "MSRTC.STREAM.DIFFERENTIAL",
+  "run_id": "20260804T152041_aad4dfce2757",
+  "timestamp": "20260804T152041",
+  "case_count": 24,
+  "pass_count": 24,
+  "residual_count": 0,
+  "skipped_count": 0,
+  "result": "PASS",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "rust_commit": "aad4dfce27578c5d47e68bd48312cbabb28995a6",
+  "docker_image_digest": "sha256:b250e98378f27d72c6328304d61e10b1d590ae48ab85f4477b89d7b161fead13",
+  "environment_sha256": "60cce9254bbf4825fa67b8efbeaeca1852ea87f2c4c8528a91486fbfd13a793b",
+  "commands": [
+    "cargo run -p msrtc-rans-court --bin seal -- stream",
+    "docker run -i --rm msrtc-rans-rs-oracle:debian12 /workspace/bin/stream_oracle_cli /dev/stdin"
+  ],
+  "cases": [
+    {
+      "case_id": "wire:sha256:7e266c2f4290c939de35bb50d742b50acd3d2d30b3cda74fbc48708f816fa5b4",
+      "status": "ok",
+      "oracle_sha256": "e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c",
+      "native_sha256": "e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:7e266c2f4290c939de35bb50d742b50acd3d2d30b3cda74fbc48708f816fa5b4",
+      "status": "ok",
+      "oracle_sha256": "e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c",
+      "native_sha256": "e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:7e266c2f4290c939de35bb50d742b50acd3d2d30b3cda74fbc48708f816fa5b4",
+      "status": "ok",
+      "oracle_sha256": "dd73327e81a1c33405aa18896c52eedd8450eafa8ed6e3f1c8e075359cceada9",
+      "native_sha256": "e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c"
+    },
+    {
+      "case_id": "wire:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3",
+      "status": "ok",
+      "oracle_sha256": "469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb",
+      "native_sha256": "469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3",
+      "status": "ok",
+      "oracle_sha256": "469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb",
+      "native_sha256": "469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3",
+      "status": "ok",
+      "oracle_sha256": "dd73327e81a1c33405aa18896c52eedd8450eafa8ed6e3f1c8e075359cceada9",
+      "native_sha256": "469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb"
+    },
+    {
+      "case_id": "wire:sha256:b8b20364e8a03c2f83551bec7c058d726467957917af4fafc3618728f6282caa",
+      "status": "ok",
+      "oracle_sha256": "141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888",
+      "native_sha256": "141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:b8b20364e8a03c2f83551bec7c058d726467957917af4fafc3618728f6282caa",
+      "status": "ok",
+      "oracle_sha256": "141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888",
+      "native_sha256": "141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:b8b20364e8a03c2f83551bec7c058d726467957917af4fafc3618728f6282caa",
+      "status": "ok",
+      "oracle_sha256": "5f2cf05693112748569973d8bdea1453f38b1de3343ffdbe515c035ef13ab947",
+      "native_sha256": "141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888"
+    },
+    {
+      "case_id": "wire:sha256:cc9e633966e92ebb1406acdf232bd37d90dc632c26af07e48d43769965189f0d",
+      "status": "ok",
+      "oracle_sha256": "b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6",
+      "native_sha256": "b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:cc9e633966e92ebb1406acdf232bd37d90dc632c26af07e48d43769965189f0d",
+      "status": "ok",
+      "oracle_sha256": "b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6",
+      "native_sha256": "b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:cc9e633966e92ebb1406acdf232bd37d90dc632c26af07e48d43769965189f0d",
+      "status": "ok",
+      "oracle_sha256": "5f2cf05693112748569973d8bdea1453f38b1de3343ffdbe515c035ef13ab947",
+      "native_sha256": "b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6"
+    },
+    {
+      "case_id": "wire:sha256:8d3531550e640e2c778592359a507198d2a5b066fb1e4d7cc12caae77ab0a4f9",
+      "status": "ok",
+      "oracle_sha256": "66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953",
+      "native_sha256": "66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:8d3531550e640e2c778592359a507198d2a5b066fb1e4d7cc12caae77ab0a4f9",
+      "status": "ok",
+      "oracle_sha256": "66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953",
+      "native_sha256": "66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:8d3531550e640e2c778592359a507198d2a5b066fb1e4d7cc12caae77ab0a4f9",
+      "status": "ok",
+      "oracle_sha256": "ef1be1a975858b6d01e82d952eb041121e96a6c4b37a95555eb1c8aff21dbc59",
+      "native_sha256": "66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953"
+    },
+    {
+      "case_id": "wire:sha256:24b961c9f89fee66323f75a7541e83a6f5be5a5ed3f15aab9ae7c27938cbbb91",
+      "status": "ok",
+      "oracle_sha256": "ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e",
+      "native_sha256": "ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:24b961c9f89fee66323f75a7541e83a6f5be5a5ed3f15aab9ae7c27938cbbb91",
+      "status": "ok",
+      "oracle_sha256": "ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e",
+      "native_sha256": "ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:24b961c9f89fee66323f75a7541e83a6f5be5a5ed3f15aab9ae7c27938cbbb91",
+      "status": "ok",
+      "oracle_sha256": "ef1be1a975858b6d01e82d952eb041121e96a6c4b37a95555eb1c8aff21dbc59",
+      "native_sha256": "ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e"
+    },
+    {
+      "case_id": "wire:sha256:91d272b2035b6a7dfaadd8782a43896937a2eaec16f76b75a5981d22f9651dd6",
+      "status": "ok",
+      "oracle_sha256": "f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28",
+      "native_sha256": "f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:91d272b2035b6a7dfaadd8782a43896937a2eaec16f76b75a5981d22f9651dd6",
+      "status": "ok",
+      "oracle_sha256": "f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28",
+      "native_sha256": "f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:91d272b2035b6a7dfaadd8782a43896937a2eaec16f76b75a5981d22f9651dd6",
+      "status": "ok",
+      "oracle_sha256": "dd73327e81a1c33405aa18896c52eedd8450eafa8ed6e3f1c8e075359cceada9",
+      "native_sha256": "f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28"
+    },
+    {
+      "case_id": "wire:sha256:2ffac1c4c2abbc39ad67180957ef50ff619702b7ec71a960fc44ed1620d9dfc3",
+      "status": "ok",
+      "oracle_sha256": "0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7",
+      "native_sha256": "0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7"
+    },
+    {
+      "case_id": "cpp_stream_rust_dec:sha256:2ffac1c4c2abbc39ad67180957ef50ff619702b7ec71a960fc44ed1620d9dfc3",
+      "status": "ok",
+      "oracle_sha256": "0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7",
+      "native_sha256": "0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7"
+    },
+    {
+      "case_id": "rust_stream_cpp_dec:sha256:2ffac1c4c2abbc39ad67180957ef50ff619702b7ec71a960fc44ed1620d9dfc3",
+      "status": "ok",
+      "oracle_sha256": "c0ad46f1ce993982e1e63d86b84354db8be0d629c205c23fd44cb0dc8c325690",
+      "native_sha256": "0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7"
+    }
+  ]
+}

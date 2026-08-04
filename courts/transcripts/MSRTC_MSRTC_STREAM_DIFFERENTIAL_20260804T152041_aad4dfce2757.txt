@@ -1,0 +1,205 @@
+MSRTC Court Transcript
+=====================
+
+Court:       MSRTC.STREAM.DIFFERENTIAL
+Run ID:      20260804T152041_aad4dfce2757
+Timestamp:   20260804T152041
+Rust Commit: aad4dfce27578c5d47e68bd48312cbabb28995a6
+Oracle Cmt:  0500356a8d6146dd8dc8911022cbeca19675614f
+Environment: 60cce9254bbf4825fa67b8efbeaeca1852ea87f2c4c8528a91486fbfd13a793b
+
+Cases: 24 total, 24 pass, 0 residual, 0 skipped
+Result: PASS
+
+--- Case 1 ---
+ID:     wire:sha256:7e266c2f4290c939de35bb50d742b50acd3d2d30b3cda74fbc48708f816fa5b4
+Status: PASS
+Oracle: ok (sha256: e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c)
+Native: ok (sha256: e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c)
+Seed:   10
+Variant: RansByte
+
+--- Case 2 ---
+ID:     cpp_stream_rust_dec:sha256:7e266c2f4290c939de35bb50d742b50acd3d2d30b3cda74fbc48708f816fa5b4
+Status: PASS
+Oracle: ok (sha256: e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c)
+Native: ok (sha256: e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c)
+Seed:   10
+Variant: RansByte
+
+--- Case 3 ---
+ID:     rust_stream_cpp_dec:sha256:7e266c2f4290c939de35bb50d742b50acd3d2d30b3cda74fbc48708f816fa5b4
+Status: PASS
+Oracle: ok (sha256: dd73327e81a1c33405aa18896c52eedd8450eafa8ed6e3f1c8e075359cceada9)
+Native: ok (sha256: e02f5be95b79043aab6856409468c0ee4aef737a715b9f3710ad747e97d20d3c)
+Seed:   10
+Variant: RansByte
+
+--- Case 4 ---
+ID:     wire:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3
+Status: PASS
+Oracle: ok (sha256: 469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb)
+Native: ok (sha256: 469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb)
+Seed:   11
+Variant: Rans64
+
+--- Case 5 ---
+ID:     cpp_stream_rust_dec:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3
+Status: PASS
+Oracle: ok (sha256: 469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb)
+Native: ok (sha256: 469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb)
+Seed:   11
+Variant: Rans64
+
+--- Case 6 ---
+ID:     rust_stream_cpp_dec:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3
+Status: PASS
+Oracle: ok (sha256: dd73327e81a1c33405aa18896c52eedd8450eafa8ed6e3f1c8e075359cceada9)
+Native: ok (sha256: 469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb)
+Seed:   11
+Variant: Rans64
+
+--- Case 7 ---
+ID:     wire:sha256:b8b20364e8a03c2f83551bec7c058d726467957917af4fafc3618728f6282caa
+Status: PASS
+Oracle: ok (sha256: 141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888)
+Native: ok (sha256: 141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888)
+Seed:   12
+Variant: RansByte
+
+--- Case 8 ---
+ID:     cpp_stream_rust_dec:sha256:b8b20364e8a03c2f83551bec7c058d726467957917af4fafc3618728f6282caa
+Status: PASS
+Oracle: ok (sha256: 141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888)
+Native: ok (sha256: 141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888)
+Seed:   12
+Variant: RansByte
+
+--- Case 9 ---
+ID:     rust_stream_cpp_dec:sha256:b8b20364e8a03c2f83551bec7c058d726467957917af4fafc3618728f6282caa
+Status: PASS
+Oracle: ok (sha256: 5f2cf05693112748569973d8bdea1453f38b1de3343ffdbe515c035ef13ab947)
+Native: ok (sha256: 141b85cd4375a66c90300cdd8293a44965d6abeadec47dd4c5214a478efc0888)
+Seed:   12
+Variant: RansByte
+
+--- Case 10 ---
+ID:     wire:sha256:cc9e633966e92ebb1406acdf232bd37d90dc632c26af07e48d43769965189f0d
+Status: PASS
+Oracle: ok (sha256: b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6)
+Native: ok (sha256: b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6)
+Seed:   13
+Variant: Rans64
+
+--- Case 11 ---
+ID:     cpp_stream_rust_dec:sha256:cc9e633966e92ebb1406acdf232bd37d90dc632c26af07e48d43769965189f0d
+Status: PASS
+Oracle: ok (sha256: b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6)
+Native: ok (sha256: b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6)
+Seed:   13
+Variant: Rans64
+
+--- Case 12 ---
+ID:     rust_stream_cpp_dec:sha256:cc9e633966e92ebb1406acdf232bd37d90dc632c26af07e48d43769965189f0d
+Status: PASS
+Oracle: ok (sha256: 5f2cf05693112748569973d8bdea1453f38b1de3343ffdbe515c035ef13ab947)
+Native: ok (sha256: b07cc90cf7dfcf0573e7cbd11586e83de1c0f5f39d7d22fac7b0b8adad27a4c6)
+Seed:   13
+Variant: Rans64
+
+--- Case 13 ---
+ID:     wire:sha256:8d3531550e640e2c778592359a507198d2a5b066fb1e4d7cc12caae77ab0a4f9
+Status: PASS
+Oracle: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Native: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Seed:   14
+Variant: RansByte
+
+--- Case 14 ---
+ID:     cpp_stream_rust_dec:sha256:8d3531550e640e2c778592359a507198d2a5b066fb1e4d7cc12caae77ab0a4f9
+Status: PASS
+Oracle: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Native: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Seed:   14
+Variant: RansByte
+
+--- Case 15 ---
+ID:     rust_stream_cpp_dec:sha256:8d3531550e640e2c778592359a507198d2a5b066fb1e4d7cc12caae77ab0a4f9
+Status: PASS
+Oracle: ok (sha256: ef1be1a975858b6d01e82d952eb041121e96a6c4b37a95555eb1c8aff21dbc59)
+Native: ok (sha256: 66b823a5cd366d6a12b4909fc5fdebacb75186abe2b877dce1ba5c4501512953)
+Seed:   14
+Variant: RansByte
+
+--- Case 16 ---
+ID:     wire:sha256:24b961c9f89fee66323f75a7541e83a6f5be5a5ed3f15aab9ae7c27938cbbb91
+Status: PASS
+Oracle: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Native: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Seed:   15
+Variant: Rans64
+
+--- Case 17 ---
+ID:     cpp_stream_rust_dec:sha256:24b961c9f89fee66323f75a7541e83a6f5be5a5ed3f15aab9ae7c27938cbbb91
+Status: PASS
+Oracle: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Native: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Seed:   15
+Variant: Rans64
+
+--- Case 18 ---
+ID:     rust_stream_cpp_dec:sha256:24b961c9f89fee66323f75a7541e83a6f5be5a5ed3f15aab9ae7c27938cbbb91
+Status: PASS
+Oracle: ok (sha256: ef1be1a975858b6d01e82d952eb041121e96a6c4b37a95555eb1c8aff21dbc59)
+Native: ok (sha256: ee5f05b75915153ac19ed4787ad12729e7a86b27ca4d4a19998787038e23607e)
+Seed:   15
+Variant: Rans64
+
+--- Case 19 ---
+ID:     wire:sha256:91d272b2035b6a7dfaadd8782a43896937a2eaec16f76b75a5981d22f9651dd6
+Status: PASS
+Oracle: ok (sha256: f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28)
+Native: ok (sha256: f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28)
+Seed:   16
+Variant: RansByte
+
+--- Case 20 ---
+ID:     cpp_stream_rust_dec:sha256:91d272b2035b6a7dfaadd8782a43896937a2eaec16f76b75a5981d22f9651dd6
+Status: PASS
+Oracle: ok (sha256: f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28)
+Native: ok (sha256: f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28)
+Seed:   16
+Variant: RansByte
+
+--- Case 21 ---
+ID:     rust_stream_cpp_dec:sha256:91d272b2035b6a7dfaadd8782a43896937a2eaec16f76b75a5981d22f9651dd6
+Status: PASS
+Oracle: ok (sha256: dd73327e81a1c33405aa18896c52eedd8450eafa8ed6e3f1c8e075359cceada9)
+Native: ok (sha256: f8fa06f61c3e8e203d41e3f4f09e16e2301e2af1b672f73a311a11d696f74f28)
+Seed:   16
+Variant: RansByte
+
+--- Case 22 ---
+ID:     wire:sha256:2ffac1c4c2abbc39ad67180957ef50ff619702b7ec71a960fc44ed1620d9dfc3
+Status: PASS
+Oracle: ok (sha256: 0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7)
+Native: ok (sha256: 0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7)
+Seed:   17
+Variant: RansByte
+
+--- Case 23 ---
+ID:     cpp_stream_rust_dec:sha256:2ffac1c4c2abbc39ad67180957ef50ff619702b7ec71a960fc44ed1620d9dfc3
+Status: PASS
+Oracle: ok (sha256: 0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7)
+Native: ok (sha256: 0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7)
+Seed:   17
+Variant: RansByte
+
+--- Case 24 ---
+ID:     rust_stream_cpp_dec:sha256:2ffac1c4c2abbc39ad67180957ef50ff619702b7ec71a960fc44ed1620d9dfc3
+Status: PASS
+Oracle: ok (sha256: c0ad46f1ce993982e1e63d86b84354db8be0d629c205c23fd44cb0dc8c325690)
+Native: ok (sha256: 0e383b45bb15e7aadcc299b0283faa22c31f5beb1c92734955230064e28b0fb7)
+Seed:   17
+Variant: RansByte
+
