@@ -1,0 +1,813 @@
+MSRTC Court Transcript
+=====================
+
+Court:       MSRTC.RAW.ENCODER.DIFFERENTIAL
+Run ID:      20260804T180451_135b0d564d86
+Timestamp:   20260804T180451
+Rust Commit: 135b0d564d86ef4115141fd8cd0df4627e36ea60
+Oracle Cmt:  0500356a8d6146dd8dc8911022cbeca19675614f
+Environment: f110ff6f4b3ad60c0c936f4bc2b32c6c8131d6f2f2d0a9ebad1e5a3c774c48d4
+
+Cases: 100 total, 100 pass, 0 residual, 0 skipped
+Result: PASS
+
+--- Case 1 ---
+ID:     sha256:557a58950aed0a1e782af48f4a6165a0536ae2514f279e8deefc78c0382eb162
+Status: PASS
+Oracle: ok (sha256: b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d)
+Native: ok (sha256: b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d)
+Seed:   0
+Variant: RansByte
+
+--- Case 2 ---
+ID:     sha256:632b8e41c8fcdf2df25706ec1993ab5b898f1cee1af293e8b386b0e828343703
+Status: PASS
+Oracle: ok (sha256: b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d)
+Native: ok (sha256: b40711a88c7039756fb8a73827eabe2c0fe5a0346ca7e0a104adc0fc764f528d)
+Seed:   1
+Variant: RansByte
+
+--- Case 3 ---
+ID:     sha256:c242d123c334a8c16335b42990fcb29d4e58330df8586efe80d3118b4d2ec4aa
+Status: PASS
+Oracle: ok (sha256: ada778ba29c330acaa70b8b095e66573480a260a8baa749ff47ab1dd632d7118)
+Native: ok (sha256: ada778ba29c330acaa70b8b095e66573480a260a8baa749ff47ab1dd632d7118)
+Seed:   2
+Variant: RansByte
+
+--- Case 4 ---
+ID:     sha256:5aa862ca4522173294149ed825a530e06735bb7ea1295865e2c93c881ab35148
+Status: PASS
+Oracle: ok (sha256: ada778ba29c330acaa70b8b095e66573480a260a8baa749ff47ab1dd632d7118)
+Native: ok (sha256: ada778ba29c330acaa70b8b095e66573480a260a8baa749ff47ab1dd632d7118)
+Seed:   3
+Variant: RansByte
+
+--- Case 5 ---
+ID:     sha256:955a8ce2112ac5d6b7aa8749d749b7839cce6b5aa59519e1fbd0be77feec9f4f
+Status: PASS
+Oracle: ok (sha256: 00ff0b6ecf87941e15539085f9a07063375e2da9846feb1d61712e5191f3fb7a)
+Native: ok (sha256: 00ff0b6ecf87941e15539085f9a07063375e2da9846feb1d61712e5191f3fb7a)
+Seed:   4
+Variant: RansByte
+
+--- Case 6 ---
+ID:     sha256:ad153039f869d97f2a6bb702d5f9dde40925ee73f29a064788f4611cf24bcfcc
+Status: PASS
+Oracle: ok (sha256: f3807d9bc9b0e42064d95a8560894351e8b9c8a4e0fa4eb34d2becd77a1010da)
+Native: ok (sha256: f3807d9bc9b0e42064d95a8560894351e8b9c8a4e0fa4eb34d2becd77a1010da)
+Seed:   5
+Variant: Rans64
+
+--- Case 7 ---
+ID:     sha256:66d8a8906419cbff13036aac18f0d63730d3c5d3ffffda224316787677035246
+Status: PASS
+Oracle: ok (sha256: f3807d9bc9b0e42064d95a8560894351e8b9c8a4e0fa4eb34d2becd77a1010da)
+Native: ok (sha256: f3807d9bc9b0e42064d95a8560894351e8b9c8a4e0fa4eb34d2becd77a1010da)
+Seed:   6
+Variant: Rans64
+
+--- Case 8 ---
+ID:     sha256:0f47252d1dbe54acad68b99fac8cbe8b9bc6723823b98a97a450ea36d79e94e1
+Status: PASS
+Oracle: ok (sha256: 763cb06a4315ce67ad6ee034881011a548eedb0305b72fa0196cc012b4b834e0)
+Native: ok (sha256: 763cb06a4315ce67ad6ee034881011a548eedb0305b72fa0196cc012b4b834e0)
+Seed:   7
+Variant: Rans64
+
+--- Case 9 ---
+ID:     sha256:7f2bf36e18d4860aa32c182b1ee17d6e60288c71ee68fa32b3a6ab0bb82a446c
+Status: PASS
+Oracle: ok (sha256: a7765ce3d742f13ec42fe973aae653301c026c11348c0583e49585d44083b4b5)
+Native: ok (sha256: a7765ce3d742f13ec42fe973aae653301c026c11348c0583e49585d44083b4b5)
+Seed:   1000
+Variant: RansByte
+
+--- Case 10 ---
+ID:     sha256:4420358fb961caa392ca6083bcf2b54e2652f2c99de6d923979b1a091d99a971
+Status: PASS
+Oracle: ok (sha256: d8c9e43fc22a50e501e3ccc973fa71486a0275787efa5302fa6537fd0a463fa4)
+Native: ok (sha256: d8c9e43fc22a50e501e3ccc973fa71486a0275787efa5302fa6537fd0a463fa4)
+Seed:   1001
+Variant: RansByte
+
+--- Case 11 ---
+ID:     sha256:3fbf96d74bf5b9af00c93b698a4c7e13c46d060f9d68e6a926cb03a3dd59b486
+Status: PASS
+Oracle: ok (sha256: 94904b90da19d48a622fe56913ed693e0382cb7ecb1c4ed9814aedd6d84bb0c3)
+Native: ok (sha256: 94904b90da19d48a622fe56913ed693e0382cb7ecb1c4ed9814aedd6d84bb0c3)
+Seed:   1002
+Variant: RansByte
+
+--- Case 12 ---
+ID:     sha256:bba248ff7aa7e8686f8a998438b0087c20161c8f415e34235fc6cf59d9a21dbf
+Status: PASS
+Oracle: ok (sha256: 73ea92154aafa88534c3682d6042c086eadacfcb71193dac596bbe3591868bc0)
+Native: ok (sha256: 73ea92154aafa88534c3682d6042c086eadacfcb71193dac596bbe3591868bc0)
+Seed:   1003
+Variant: RansByte
+
+--- Case 13 ---
+ID:     sha256:98343f7fbb4ea0eca8c53bee2566d846aeed26cf91074f1bcba2b535eff888be
+Status: PASS
+Oracle: ok (sha256: b7e13ff4de7636e93b864cfb41539c062f82b5cb448ee56edf8f6cfeb92043c1)
+Native: ok (sha256: b7e13ff4de7636e93b864cfb41539c062f82b5cb448ee56edf8f6cfeb92043c1)
+Seed:   1004
+Variant: RansByte
+
+--- Case 14 ---
+ID:     sha256:64329cb8540839cd8b3a30423c2bc876e12cd951408656a00f89f6560f76a94e
+Status: PASS
+Oracle: ok (sha256: 5302bfb5ce48da89f4ef5eb35e40319aeed2c475b71d1c820a2127222dc2a154)
+Native: ok (sha256: 5302bfb5ce48da89f4ef5eb35e40319aeed2c475b71d1c820a2127222dc2a154)
+Seed:   1005
+Variant: RansByte
+
+--- Case 15 ---
+ID:     sha256:65fd34b960d2ab65d706e5f284feecc47d6bac32622bd10266b869ede9b376ad
+Status: PASS
+Oracle: ok (sha256: 5bff2bc471db4571ee90b38996babbe7965c94415e834b7ca079af0880b30faf)
+Native: ok (sha256: 5bff2bc471db4571ee90b38996babbe7965c94415e834b7ca079af0880b30faf)
+Seed:   1006
+Variant: RansByte
+
+--- Case 16 ---
+ID:     sha256:90188bef293f7afde541b2a8eba34616ea0ea491952af713bc04f6f4172b578f
+Status: PASS
+Oracle: ok (sha256: 47412e3c54aa5344d6e05a5519623a673e210cc8c0665bc41bc6c8957db9eb74)
+Native: ok (sha256: 47412e3c54aa5344d6e05a5519623a673e210cc8c0665bc41bc6c8957db9eb74)
+Seed:   1007
+Variant: RansByte
+
+--- Case 17 ---
+ID:     sha256:c372ceff7ec795d40ac4d546beaa833462b36e08ef963a28c85cf207df996208
+Status: PASS
+Oracle: ok (sha256: 480227e0ba7c214cb3f2720a16c195132ed52c9b86ec043364c5f0dc3ed0ffdd)
+Native: ok (sha256: 480227e0ba7c214cb3f2720a16c195132ed52c9b86ec043364c5f0dc3ed0ffdd)
+Seed:   1008
+Variant: RansByte
+
+--- Case 18 ---
+ID:     sha256:d27f7d13a8afae17b780ba8239a1225d457a6ccc45fdc6db328c206c43a89fde
+Status: PASS
+Oracle: ok (sha256: 69462e8f15d02b121843c13a03ab866f0b05b390331e6c2cdd05c2738df0ccfb)
+Native: ok (sha256: 69462e8f15d02b121843c13a03ab866f0b05b390331e6c2cdd05c2738df0ccfb)
+Seed:   1009
+Variant: RansByte
+
+--- Case 19 ---
+ID:     sha256:498c59da707a5162752da60aeab57b68b0bbb1e90d73f9b25dee03d7f57ca706
+Status: PASS
+Oracle: ok (sha256: 49aa6af0edce593b9f8b1e1baeb262b251ed2ab4dd8d8827c7af8b2a5567d670)
+Native: ok (sha256: 49aa6af0edce593b9f8b1e1baeb262b251ed2ab4dd8d8827c7af8b2a5567d670)
+Seed:   1010
+Variant: RansByte
+
+--- Case 20 ---
+ID:     sha256:ef558620251029a0bafb9661f957838c37943f49bf3de33868d99567c19c359f
+Status: PASS
+Oracle: ok (sha256: 98fd158e5d5dc947a0dc7a2005561cb8c759f6742f0b2489f5485c04bbbcbba1)
+Native: ok (sha256: 98fd158e5d5dc947a0dc7a2005561cb8c759f6742f0b2489f5485c04bbbcbba1)
+Seed:   1011
+Variant: RansByte
+
+--- Case 21 ---
+ID:     sha256:d8718f396d979ab6a357836f20d602b0ac3e8f87fc54dd1e853687f6e151045d
+Status: PASS
+Oracle: ok (sha256: 1b60efdc8701671d25dddbc67d2c3ec56d0954cfeb818ac09090315a9e5cc12e)
+Native: ok (sha256: 1b60efdc8701671d25dddbc67d2c3ec56d0954cfeb818ac09090315a9e5cc12e)
+Seed:   1012
+Variant: RansByte
+
+--- Case 22 ---
+ID:     sha256:add56661d4e5014630875ce88a262569ecf7597a8fdb189167477033293c4994
+Status: PASS
+Oracle: ok (sha256: 0833a17bd59d79176b3b98bc96e712b61c90bb5599444730399aad8c7ed7ca0f)
+Native: ok (sha256: 0833a17bd59d79176b3b98bc96e712b61c90bb5599444730399aad8c7ed7ca0f)
+Seed:   1013
+Variant: RansByte
+
+--- Case 23 ---
+ID:     sha256:67393ed8f9cf1ac562e39d61a4b3268197de39d0a0aaa1bb0b209ddb98e8c507
+Status: PASS
+Oracle: ok (sha256: 063ffd8ec52de8827e88e1b81235fc435d41a8180e770a9a5f75ab10639b2530)
+Native: ok (sha256: 063ffd8ec52de8827e88e1b81235fc435d41a8180e770a9a5f75ab10639b2530)
+Seed:   1014
+Variant: RansByte
+
+--- Case 24 ---
+ID:     sha256:317662be86ba503837dcf229b32c674d1dfaf900aaf27ff9f19ae68fe1f205e5
+Status: PASS
+Oracle: ok (sha256: 8f83ad262c26d2342d25781a2e9bb4d0ae2a9a7e190d5bc23a71736a12ceeaf7)
+Native: ok (sha256: 8f83ad262c26d2342d25781a2e9bb4d0ae2a9a7e190d5bc23a71736a12ceeaf7)
+Seed:   1015
+Variant: RansByte
+
+--- Case 25 ---
+ID:     sha256:9bd0a6780b75219bf2b5be42a61a6a4f85d92bf1bf275105fa2a266b0e859834
+Status: PASS
+Oracle: ok (sha256: 218d8f41d11e4ccdcdc654b396d3ad8836b16d7953c946d99fdfeb3464b08363)
+Native: ok (sha256: 218d8f41d11e4ccdcdc654b396d3ad8836b16d7953c946d99fdfeb3464b08363)
+Seed:   1016
+Variant: RansByte
+
+--- Case 26 ---
+ID:     sha256:40e816a39cae63d868d05295370b3427c841979826cdfea1678a7ab59468277b
+Status: PASS
+Oracle: ok (sha256: 3f6abcad75208902fa9381fbd7b87af37dd479155a22f82e61e9b54ac7eee4a6)
+Native: ok (sha256: 3f6abcad75208902fa9381fbd7b87af37dd479155a22f82e61e9b54ac7eee4a6)
+Seed:   1017
+Variant: RansByte
+
+--- Case 27 ---
+ID:     sha256:74198f70af8505f912afdf846061e12bbf41423785a9783b7e0e4795880512b5
+Status: PASS
+Oracle: ok (sha256: fa1d34a3577fc24cdb1db28fed9c427eb13f93cfd276f44f75eb5bed99a5586f)
+Native: ok (sha256: fa1d34a3577fc24cdb1db28fed9c427eb13f93cfd276f44f75eb5bed99a5586f)
+Seed:   1018
+Variant: RansByte
+
+--- Case 28 ---
+ID:     sha256:3e9de9a3cc75b4074bc9f2c42fa2dba09b00f772d524aa24f38a0207fd556552
+Status: PASS
+Oracle: ok (sha256: b67764eafa4c771ad7f3a5bb619e3e39ee2472370ab7534aee33f2d769ca2dc9)
+Native: ok (sha256: b67764eafa4c771ad7f3a5bb619e3e39ee2472370ab7534aee33f2d769ca2dc9)
+Seed:   1019
+Variant: RansByte
+
+--- Case 29 ---
+ID:     sha256:3fe87b3bff383798eeb493d5e26232c4d2b3311741c19b9273e0762859ac0e09
+Status: PASS
+Oracle: ok (sha256: 8cc116c589f65b7cebadb4a7658b8a24cedcedbaf1beb30d567f1a7ca66585c2)
+Native: ok (sha256: 8cc116c589f65b7cebadb4a7658b8a24cedcedbaf1beb30d567f1a7ca66585c2)
+Seed:   1020
+Variant: RansByte
+
+--- Case 30 ---
+ID:     sha256:10158da9c1a6ed850e6e1d1f445e404c59822e9b47b61254871826551d428442
+Status: PASS
+Oracle: ok (sha256: a7765ce3d742f13ec42fe973aae653301c026c11348c0583e49585d44083b4b5)
+Native: ok (sha256: a7765ce3d742f13ec42fe973aae653301c026c11348c0583e49585d44083b4b5)
+Seed:   1021
+Variant: RansByte
+
+--- Case 31 ---
+ID:     sha256:26b263532786848f63ee16daed48f11f56ecb6eac8f642f6619be0d9084b3ea7
+Status: PASS
+Oracle: ok (sha256: 60a4b8746b2661a9316b4eb0b92204ec2800b34c8587af6690bc33994a16ba2f)
+Native: ok (sha256: 60a4b8746b2661a9316b4eb0b92204ec2800b34c8587af6690bc33994a16ba2f)
+Seed:   1022
+Variant: RansByte
+
+--- Case 32 ---
+ID:     sha256:9c81207e22af527263144e92bc5133e2a573d34ad91bb633ec9260894b0aa8c7
+Status: PASS
+Oracle: ok (sha256: 477963aa252f1a1f61781953bf5eb203811713a1147fe54aa7df830a84b80fcd)
+Native: ok (sha256: 477963aa252f1a1f61781953bf5eb203811713a1147fe54aa7df830a84b80fcd)
+Seed:   1023
+Variant: RansByte
+
+--- Case 33 ---
+ID:     sha256:93ace880e3e2ae8d79ed66c1e88da6647f65fe205809748f09e9ee829379d2f8
+Status: PASS
+Oracle: ok (sha256: 73ea92154aafa88534c3682d6042c086eadacfcb71193dac596bbe3591868bc0)
+Native: ok (sha256: 73ea92154aafa88534c3682d6042c086eadacfcb71193dac596bbe3591868bc0)
+Seed:   1024
+Variant: RansByte
+
+--- Case 34 ---
+ID:     sha256:660aace9e89e0d73a29edd72f279427be67668636d46679e047bdcc571755512
+Status: PASS
+Oracle: ok (sha256: bf5a70cb113552bd0353d21edb512bae207b0ed675224fba65413dca0d7827ab)
+Native: ok (sha256: bf5a70cb113552bd0353d21edb512bae207b0ed675224fba65413dca0d7827ab)
+Seed:   1025
+Variant: RansByte
+
+--- Case 35 ---
+ID:     sha256:1718872d54eaac056b50425731bc242a84ef6a1a2bc4630d82838effec237ede
+Status: PASS
+Oracle: ok (sha256: 9ba12b426f5129ab7e540135c9a062420c6bd41a9f32c1252c75e862429c8dd3)
+Native: ok (sha256: 9ba12b426f5129ab7e540135c9a062420c6bd41a9f32c1252c75e862429c8dd3)
+Seed:   1026
+Variant: RansByte
+
+--- Case 36 ---
+ID:     sha256:e335e632569ffcd015f440c3da3f0abe1b640d3da36b6ff0d880fc8ca5343595
+Status: PASS
+Oracle: ok (sha256: 5bff2bc471db4571ee90b38996babbe7965c94415e834b7ca079af0880b30faf)
+Native: ok (sha256: 5bff2bc471db4571ee90b38996babbe7965c94415e834b7ca079af0880b30faf)
+Seed:   1027
+Variant: RansByte
+
+--- Case 37 ---
+ID:     sha256:34e99ae12e81dd7efe4c225769d89fb2ff13a86e7efc384a70a6f7525f3cf605
+Status: PASS
+Oracle: ok (sha256: 19518c14c3f5ff357cb0a46583a79d679780674e43a6c2ab4287d8986af7c771)
+Native: ok (sha256: 19518c14c3f5ff357cb0a46583a79d679780674e43a6c2ab4287d8986af7c771)
+Seed:   1028
+Variant: RansByte
+
+--- Case 38 ---
+ID:     sha256:cec286fb437695e433b83be569083a03419967f39599cb88c75f7157f7a08d78
+Status: PASS
+Oracle: ok (sha256: a411cf9b7a9dfc85e8e536dc104a3bb4e647d041b7834013bf8c87bff4ca9f7d)
+Native: ok (sha256: a411cf9b7a9dfc85e8e536dc104a3bb4e647d041b7834013bf8c87bff4ca9f7d)
+Seed:   1029
+Variant: RansByte
+
+--- Case 39 ---
+ID:     sha256:d991dda58bdd007cc79b6f9f6b1b40d1630af328c6f86c857189069eca7ef341
+Status: PASS
+Oracle: ok (sha256: 69462e8f15d02b121843c13a03ab866f0b05b390331e6c2cdd05c2738df0ccfb)
+Native: ok (sha256: 69462e8f15d02b121843c13a03ab866f0b05b390331e6c2cdd05c2738df0ccfb)
+Seed:   1030
+Variant: RansByte
+
+--- Case 40 ---
+ID:     sha256:79214bb3f3c1f0bb119673776d6482e5561978e404983f0f2d56dada63ce96e1
+Status: PASS
+Oracle: ok (sha256: 13afee639ca68e3b3a2afe822cbe2dd7c67e04bd685f9d21a51bc1dd99509be6)
+Native: ok (sha256: 13afee639ca68e3b3a2afe822cbe2dd7c67e04bd685f9d21a51bc1dd99509be6)
+Seed:   1031
+Variant: RansByte
+
+--- Case 41 ---
+ID:     sha256:f15242dfa45f1e9592c1c5672f482c9e09e4ddd28756e3367b2d6f54dececb5b
+Status: PASS
+Oracle: ok (sha256: 38e5df95ac2e3c5313a3fbaf1ec2e59b89a417bccd15457e986cb6433ab0cee4)
+Native: ok (sha256: 38e5df95ac2e3c5313a3fbaf1ec2e59b89a417bccd15457e986cb6433ab0cee4)
+Seed:   1032
+Variant: RansByte
+
+--- Case 42 ---
+ID:     sha256:28a4985cdf772d91d9db10beae9db9ec92a6aab89ff25af77c480987cb60f9c2
+Status: PASS
+Oracle: ok (sha256: 1b60efdc8701671d25dddbc67d2c3ec56d0954cfeb818ac09090315a9e5cc12e)
+Native: ok (sha256: 1b60efdc8701671d25dddbc67d2c3ec56d0954cfeb818ac09090315a9e5cc12e)
+Seed:   1033
+Variant: RansByte
+
+--- Case 43 ---
+ID:     sha256:0c3a9148be40ff5320029965f6851d70490d44d5016b9f4927a1a4328896488a
+Status: PASS
+Oracle: ok (sha256: 7548203eb21143f1d6b74d06758579ba465cbbfff21778527b9b821bb1da0dca)
+Native: ok (sha256: 7548203eb21143f1d6b74d06758579ba465cbbfff21778527b9b821bb1da0dca)
+Seed:   1034
+Variant: RansByte
+
+--- Case 44 ---
+ID:     sha256:600615223574c874728e7302dc734afdaefc5b8f467d7110b80b595a0e3e6f0c
+Status: PASS
+Oracle: ok (sha256: d9c4493d5c3bbfe46e894fe5de88290c366d5a3bd2fd3ea4984f9a7343b2d19d)
+Native: ok (sha256: d9c4493d5c3bbfe46e894fe5de88290c366d5a3bd2fd3ea4984f9a7343b2d19d)
+Seed:   1035
+Variant: RansByte
+
+--- Case 45 ---
+ID:     sha256:94163d8216d4a9ec1c30d5a01812b20ffc847dfd0573b3e3bc0a7194238e33a7
+Status: PASS
+Oracle: ok (sha256: 8f83ad262c26d2342d25781a2e9bb4d0ae2a9a7e190d5bc23a71736a12ceeaf7)
+Native: ok (sha256: 8f83ad262c26d2342d25781a2e9bb4d0ae2a9a7e190d5bc23a71736a12ceeaf7)
+Seed:   1036
+Variant: RansByte
+
+--- Case 46 ---
+ID:     sha256:cdf6e1376871c78bda707ab2d40da7b06c78e438091bd516fd8f7b9f2599e556
+Status: PASS
+Oracle: ok (sha256: b9f9fdf647367eacaa02b70c4572877c1a74897b9cc2ad9e6c3be7aee0a6239a)
+Native: ok (sha256: b9f9fdf647367eacaa02b70c4572877c1a74897b9cc2ad9e6c3be7aee0a6239a)
+Seed:   1037
+Variant: RansByte
+
+--- Case 47 ---
+ID:     sha256:ad76f6f4a2f226e62e5e38b299db4bfb91884c9b02c67aae2bb99775f9219aeb
+Status: PASS
+Oracle: ok (sha256: e066afe4a1f1430e682e1c14ad73d0fa18c1d69262e61e3d89f894f39819e05a)
+Native: ok (sha256: e066afe4a1f1430e682e1c14ad73d0fa18c1d69262e61e3d89f894f39819e05a)
+Seed:   1038
+Variant: RansByte
+
+--- Case 48 ---
+ID:     sha256:2f1c6419c03d96d9d73b52b683ca89e33a5c4eaa0c0a5588148b405bd47f4dec
+Status: PASS
+Oracle: ok (sha256: fa1d34a3577fc24cdb1db28fed9c427eb13f93cfd276f44f75eb5bed99a5586f)
+Native: ok (sha256: fa1d34a3577fc24cdb1db28fed9c427eb13f93cfd276f44f75eb5bed99a5586f)
+Seed:   1039
+Variant: RansByte
+
+--- Case 49 ---
+ID:     sha256:f47f3ec8afb0b18e77d4b428cb3427d34d6126384131f2c41830837b3601b297
+Status: PASS
+Oracle: ok (sha256: b8afcc7704a875770aafcc882c4eb9f240c7003f3d57af7c96dafb1fe7d3ac8f)
+Native: ok (sha256: b8afcc7704a875770aafcc882c4eb9f240c7003f3d57af7c96dafb1fe7d3ac8f)
+Seed:   1040
+Variant: RansByte
+
+--- Case 50 ---
+ID:     sha256:f38493e55f548035f860506b4c97d63260bbadda330efbabf2359aa347e2f1b7
+Status: PASS
+Oracle: ok (sha256: aab2acdbd34529b6d16a69ba9aa2b628491530734380e8da71711007f7e8f2b5)
+Native: ok (sha256: aab2acdbd34529b6d16a69ba9aa2b628491530734380e8da71711007f7e8f2b5)
+Seed:   1041
+Variant: RansByte
+
+--- Case 51 ---
+ID:     sha256:2374223e1d5a321d4e181e97d23b624811f925add07585d24bb6d7e71345e1c9
+Status: PASS
+Oracle: ok (sha256: b73c45b78487f70ea5660abb17b61e7684431464d56d8634ed23d26f976ea928)
+Native: ok (sha256: b73c45b78487f70ea5660abb17b61e7684431464d56d8634ed23d26f976ea928)
+Seed:   1042
+Variant: Rans64
+
+--- Case 52 ---
+ID:     sha256:2e9696306beb559e40b415dc3b7179387f2d5adfe6ca9556587c2fad092200d1
+Status: PASS
+Oracle: ok (sha256: 563b29c2a9f76a26a50ee911bed8afa6c327811d68473c498286f497582b29d7)
+Native: ok (sha256: 563b29c2a9f76a26a50ee911bed8afa6c327811d68473c498286f497582b29d7)
+Seed:   1043
+Variant: Rans64
+
+--- Case 53 ---
+ID:     sha256:8675554ebc6ade240fd53e01143e0fe47781780372512d1550840e0f9ff7ccea
+Status: PASS
+Oracle: ok (sha256: e3588dd94e72944c12033930b164a9b1043e2b1f94aa5aaacc2c9405e2c52d57)
+Native: ok (sha256: e3588dd94e72944c12033930b164a9b1043e2b1f94aa5aaacc2c9405e2c52d57)
+Seed:   1044
+Variant: Rans64
+
+--- Case 54 ---
+ID:     sha256:eb674265cfc4ed26a1f10d0ac9a6ef490405a0df867fd6ca46a353b8376313c0
+Status: PASS
+Oracle: ok (sha256: 02563dfdfd6e7b12cb38e48f5e6e3d5074637026489000a1da258989473396dc)
+Native: ok (sha256: 02563dfdfd6e7b12cb38e48f5e6e3d5074637026489000a1da258989473396dc)
+Seed:   1045
+Variant: Rans64
+
+--- Case 55 ---
+ID:     sha256:11cb5cadd76b1972f1d216668fe87b7ee0756fd38f3f67fa31c59144b27dfb2e
+Status: PASS
+Oracle: ok (sha256: cbf0cccf455085d78e039f96be3af9ba5cb6cc7d1630ae8229cffd2ab0334115)
+Native: ok (sha256: cbf0cccf455085d78e039f96be3af9ba5cb6cc7d1630ae8229cffd2ab0334115)
+Seed:   1046
+Variant: Rans64
+
+--- Case 56 ---
+ID:     sha256:d28e2677a4691a2a23b968f6e78a2586af70b34fecdedcaf4b0725fef4152121
+Status: PASS
+Oracle: ok (sha256: d3bc2ef029e1e1eee59840a454773a2a6fba11f65274190768c7816fcc741d41)
+Native: ok (sha256: d3bc2ef029e1e1eee59840a454773a2a6fba11f65274190768c7816fcc741d41)
+Seed:   1047
+Variant: Rans64
+
+--- Case 57 ---
+ID:     sha256:ad0df93df27b65b9fd051192d3daf4dee52ca3f7417daefa095562038423b3eb
+Status: PASS
+Oracle: ok (sha256: b0c2caed6d42a2dc3145d935fe6f085c9a749f757ab629924f75e7f95dc184fc)
+Native: ok (sha256: b0c2caed6d42a2dc3145d935fe6f085c9a749f757ab629924f75e7f95dc184fc)
+Seed:   1048
+Variant: Rans64
+
+--- Case 58 ---
+ID:     sha256:0dc1e52721bb40fe94c63a1528629a9782eb7bc2c9b999081725acf1dc62d63c
+Status: PASS
+Oracle: ok (sha256: eca76bd9bd4b5ebf17253aba6c40fa27c66c91ccad5c36aef18805bc2af84419)
+Native: ok (sha256: eca76bd9bd4b5ebf17253aba6c40fa27c66c91ccad5c36aef18805bc2af84419)
+Seed:   1049
+Variant: Rans64
+
+--- Case 59 ---
+ID:     sha256:28f6a5a922ba52033c5489f582e1a1447b711a275ece1eb80bdf0e3c47effce1
+Status: PASS
+Oracle: ok (sha256: 12612f2d7543bdabe8db4d296c70ec9d2e0bdb5e813e1909d961b9e8e56cf4f0)
+Native: ok (sha256: 12612f2d7543bdabe8db4d296c70ec9d2e0bdb5e813e1909d961b9e8e56cf4f0)
+Seed:   1050
+Variant: Rans64
+
+--- Case 60 ---
+ID:     sha256:9e2548226e48d825ea79ce2c75d97886bed331c25a716aec087de07f2795bac8
+Status: PASS
+Oracle: ok (sha256: aefe5f15e7de5045e725aa57b17944f9c2420eb4cebbce3a480b93efafa3f80d)
+Native: ok (sha256: aefe5f15e7de5045e725aa57b17944f9c2420eb4cebbce3a480b93efafa3f80d)
+Seed:   1051
+Variant: Rans64
+
+--- Case 61 ---
+ID:     sha256:ef39cc26934dbb9ee408c6eefe09962cde9d4f70e62b0bf79e0622f91b6841d0
+Status: PASS
+Oracle: ok (sha256: 97f55022a179d0ab5350c341dada95188bf2dd17cc8c88e4b7363fb8294e8054)
+Native: ok (sha256: 97f55022a179d0ab5350c341dada95188bf2dd17cc8c88e4b7363fb8294e8054)
+Seed:   1052
+Variant: Rans64
+
+--- Case 62 ---
+ID:     sha256:7e9ae47482b268feba5547096519142451c9fe351a3ffdf2740e9a0fc6dbc28b
+Status: PASS
+Oracle: ok (sha256: 9729a6e3f6788f76942555c2cedcc55aee182ac8db61fdbf85a792a0e781ba70)
+Native: ok (sha256: 9729a6e3f6788f76942555c2cedcc55aee182ac8db61fdbf85a792a0e781ba70)
+Seed:   1053
+Variant: Rans64
+
+--- Case 63 ---
+ID:     sha256:286c00da0df0572c67589ee49b53172729d7b9e46426d2dfe3061cc46df1deba
+Status: PASS
+Oracle: ok (sha256: 86ebc176e65f59f4b0ad8d70e20738b60911119db63f836f0e0841c8bda046cf)
+Native: ok (sha256: 86ebc176e65f59f4b0ad8d70e20738b60911119db63f836f0e0841c8bda046cf)
+Seed:   1054
+Variant: Rans64
+
+--- Case 64 ---
+ID:     sha256:d9ffca0c41f99b9d128aa2213efc314acd26489ea3ed5e115c771f7862a04a49
+Status: PASS
+Oracle: ok (sha256: 6893f828e7c289f71f388086312ae2aaa4f1040b86f8ce914a79946314f17f2d)
+Native: ok (sha256: 6893f828e7c289f71f388086312ae2aaa4f1040b86f8ce914a79946314f17f2d)
+Seed:   1055
+Variant: Rans64
+
+--- Case 65 ---
+ID:     sha256:782c13a7fd601a5b312288ce23c97ab5d0661b50f370202ff83e9b3b70892475
+Status: PASS
+Oracle: ok (sha256: 15a25b32bb8c7ad2999ed005de716c38c3e697d37697051e7c122b03037813b2)
+Native: ok (sha256: 15a25b32bb8c7ad2999ed005de716c38c3e697d37697051e7c122b03037813b2)
+Seed:   1056
+Variant: Rans64
+
+--- Case 66 ---
+ID:     sha256:61664ff23cc54f3063f80fba62f2f55b98d9256199b3006c5ad054587f62aa3d
+Status: PASS
+Oracle: ok (sha256: 5d56d48655df9cb2f6a7b8191fec906a85de844edc05e99987ad6f9c4b46381d)
+Native: ok (sha256: 5d56d48655df9cb2f6a7b8191fec906a85de844edc05e99987ad6f9c4b46381d)
+Seed:   1057
+Variant: Rans64
+
+--- Case 67 ---
+ID:     sha256:2db317779d7db266822d8149f7592f69e67e85c4a9aface27cde5985fb1900eb
+Status: PASS
+Oracle: ok (sha256: 11e7392a1d511c59471d500ffa5269c97a8b6af46392257eaa7f0665ac802066)
+Native: ok (sha256: 11e7392a1d511c59471d500ffa5269c97a8b6af46392257eaa7f0665ac802066)
+Seed:   1058
+Variant: Rans64
+
+--- Case 68 ---
+ID:     sha256:c4ce5b65effff307f0bdf2d9e4132273c2c9f2e09f0b81c314fd4e1d91221e5d
+Status: PASS
+Oracle: ok (sha256: 6690680861556a0d3e5ea0aa4b88be086fc1eac5c2001e655881f90813af4720)
+Native: ok (sha256: 6690680861556a0d3e5ea0aa4b88be086fc1eac5c2001e655881f90813af4720)
+Seed:   1059
+Variant: Rans64
+
+--- Case 69 ---
+ID:     sha256:5155b7890c998ae25c8b2f5692af235aa8eafd9e872ba2bdb9736d9de31412de
+Status: PASS
+Oracle: ok (sha256: ae8fb9a949a204a40440617776d12eeab2dac1a19ea915895e3571d11bd5fe7a)
+Native: ok (sha256: ae8fb9a949a204a40440617776d12eeab2dac1a19ea915895e3571d11bd5fe7a)
+Seed:   1060
+Variant: Rans64
+
+--- Case 70 ---
+ID:     sha256:34342dcb28bf047d7fead16751890788a5246272dd9cf4f817bad8baf96695fd
+Status: PASS
+Oracle: ok (sha256: 0a5eba6f53967be2ddf9fd13b9914c80a225e25aa4e02827c91bba83bf0af3cd)
+Native: ok (sha256: 0a5eba6f53967be2ddf9fd13b9914c80a225e25aa4e02827c91bba83bf0af3cd)
+Seed:   1061
+Variant: Rans64
+
+--- Case 71 ---
+ID:     sha256:b2fb728da86fb130d5c589c6a7736d5e2e1714f30078661fe5932c8495575652
+Status: PASS
+Oracle: ok (sha256: c055fa1be64075d2cadf1dcf8eaaef156b608fd201c807fe11dc50176e998e77)
+Native: ok (sha256: c055fa1be64075d2cadf1dcf8eaaef156b608fd201c807fe11dc50176e998e77)
+Seed:   1062
+Variant: Rans64
+
+--- Case 72 ---
+ID:     sha256:7f6e0d48ed31fb60d0da2f01d2712b44bdddea138ac51c72cb686dc961272ce8
+Status: PASS
+Oracle: ok (sha256: b73c45b78487f70ea5660abb17b61e7684431464d56d8634ed23d26f976ea928)
+Native: ok (sha256: b73c45b78487f70ea5660abb17b61e7684431464d56d8634ed23d26f976ea928)
+Seed:   1063
+Variant: Rans64
+
+--- Case 73 ---
+ID:     sha256:76efdc654f9f059e4f3a3c021b3f35c66a76c26d6219d2b09751dbccf5176cf2
+Status: PASS
+Oracle: ok (sha256: 1fcf1c091d9ca588bbcad6e2f4426e84689c6f7e32f29274b5c172b039398cc0)
+Native: ok (sha256: 1fcf1c091d9ca588bbcad6e2f4426e84689c6f7e32f29274b5c172b039398cc0)
+Seed:   1064
+Variant: Rans64
+
+--- Case 74 ---
+ID:     sha256:8a53ce14c4326e9f88f067c55c8f055c4f96edeadaadcb42c804d5b3e469a9a7
+Status: PASS
+Oracle: ok (sha256: 5e8238d8b37a5b0a6bbd0cecd38f0fc86057dc7d52f87c7d0135c92fa6784fb2)
+Native: ok (sha256: 5e8238d8b37a5b0a6bbd0cecd38f0fc86057dc7d52f87c7d0135c92fa6784fb2)
+Seed:   1065
+Variant: Rans64
+
+--- Case 75 ---
+ID:     sha256:551f1a8ae26f2387db34d759ff0a13b06a330715bdd34adb7228bbad7dccdddf
+Status: PASS
+Oracle: ok (sha256: 02563dfdfd6e7b12cb38e48f5e6e3d5074637026489000a1da258989473396dc)
+Native: ok (sha256: 02563dfdfd6e7b12cb38e48f5e6e3d5074637026489000a1da258989473396dc)
+Seed:   1066
+Variant: Rans64
+
+--- Case 76 ---
+ID:     sha256:2a209c6e401e8c0f055de04cbb159af9f600beb0a0a7f94096e3dba2b79f18ea
+Status: PASS
+Oracle: ok (sha256: 58d2c635bf36665aa65dde4cd5e749823ee4dc686aad8c520d0f9f9349ddb43b)
+Native: ok (sha256: 58d2c635bf36665aa65dde4cd5e749823ee4dc686aad8c520d0f9f9349ddb43b)
+Seed:   1067
+Variant: Rans64
+
+--- Case 77 ---
+ID:     sha256:469c8e809b0d6378217a934472e4621d5fcb1bddd4efa81cf06f4be1e68d760a
+Status: PASS
+Oracle: ok (sha256: 1d713bec68541eee6d3dca2da9f82a455dbffa3a1494b32520c93c2c6125f804)
+Native: ok (sha256: 1d713bec68541eee6d3dca2da9f82a455dbffa3a1494b32520c93c2c6125f804)
+Seed:   1068
+Variant: Rans64
+
+--- Case 78 ---
+ID:     sha256:4e5277562e0c1fee25ac9856c60d86b14e2bb68eedc992913f483dd5ce1226d5
+Status: PASS
+Oracle: ok (sha256: b0c2caed6d42a2dc3145d935fe6f085c9a749f757ab629924f75e7f95dc184fc)
+Native: ok (sha256: b0c2caed6d42a2dc3145d935fe6f085c9a749f757ab629924f75e7f95dc184fc)
+Seed:   1069
+Variant: Rans64
+
+--- Case 79 ---
+ID:     sha256:72e22e0da257fd3bb1272f46d1009f13dd3bf9583c61ac46fafb1e20e039cb8e
+Status: PASS
+Oracle: ok (sha256: ba5a1212787f19f4282361634d826f6b3b8b7b2c79a7dd10fb114298b6df21c4)
+Native: ok (sha256: ba5a1212787f19f4282361634d826f6b3b8b7b2c79a7dd10fb114298b6df21c4)
+Seed:   1070
+Variant: Rans64
+
+--- Case 80 ---
+ID:     sha256:a58deaceecd659b16cace3429413dcfd3f4b0578a323751fa23312cb616ac614
+Status: PASS
+Oracle: ok (sha256: 4be2996dbc3e61837f5403f53662ba76cd10c0675c8fb93b3882e0ebfd9d324a)
+Native: ok (sha256: 4be2996dbc3e61837f5403f53662ba76cd10c0675c8fb93b3882e0ebfd9d324a)
+Seed:   1071
+Variant: Rans64
+
+--- Case 81 ---
+ID:     sha256:bee32a26fc14be8510cbabee1355c26884bc2e7b2d8fe06d4520882aaa9ff64b
+Status: PASS
+Oracle: ok (sha256: aefe5f15e7de5045e725aa57b17944f9c2420eb4cebbce3a480b93efafa3f80d)
+Native: ok (sha256: aefe5f15e7de5045e725aa57b17944f9c2420eb4cebbce3a480b93efafa3f80d)
+Seed:   1072
+Variant: Rans64
+
+--- Case 82 ---
+ID:     sha256:0ebde68205f064e3e161544e23499699da56e9a75346d45b3513aa948fc005c3
+Status: PASS
+Oracle: ok (sha256: aa043fce8055ed3613d35ae81b96b697c857c9f796aac06a473a8fb2e40271c3)
+Native: ok (sha256: aa043fce8055ed3613d35ae81b96b697c857c9f796aac06a473a8fb2e40271c3)
+Seed:   1073
+Variant: Rans64
+
+--- Case 83 ---
+ID:     sha256:f6ffe1b0b64f398806349e22941323936c1ce0f9328b02129e3c3ad1236b5537
+Status: PASS
+Oracle: ok (sha256: 9d1b1d21920c16e9498e629f23a91a995e80698f7cb6461f0277e7ee18769795)
+Native: ok (sha256: 9d1b1d21920c16e9498e629f23a91a995e80698f7cb6461f0277e7ee18769795)
+Seed:   1074
+Variant: Rans64
+
+--- Case 84 ---
+ID:     sha256:a16f902e8ea8da75b449022466bce9fc66176e875bf6b641802049ba87274fa7
+Status: PASS
+Oracle: ok (sha256: 86ebc176e65f59f4b0ad8d70e20738b60911119db63f836f0e0841c8bda046cf)
+Native: ok (sha256: 86ebc176e65f59f4b0ad8d70e20738b60911119db63f836f0e0841c8bda046cf)
+Seed:   1075
+Variant: Rans64
+
+--- Case 85 ---
+ID:     sha256:5daf452baa6dd407dd871884f8d2732c1fcd617dd0c2b83faa5b08a233ca3cb0
+Status: PASS
+Oracle: ok (sha256: 5c6033e4397033a9e475eaa2665205022c8567724f2b3ce3963b9bad4d6fb1e9)
+Native: ok (sha256: 5c6033e4397033a9e475eaa2665205022c8567724f2b3ce3963b9bad4d6fb1e9)
+Seed:   1076
+Variant: Rans64
+
+--- Case 86 ---
+ID:     sha256:56294bf7e0faefb8d977ae9557ca0f8c1c6339918424521741eb8ec2b37a72f9
+Status: PASS
+Oracle: ok (sha256: 412d71d603f022c9af9409b461c9452a9982285bbbef87565bd5b805a1982b91)
+Native: ok (sha256: 412d71d603f022c9af9409b461c9452a9982285bbbef87565bd5b805a1982b91)
+Seed:   1077
+Variant: Rans64
+
+--- Case 87 ---
+ID:     sha256:41ab41f883407099e92a18b8ccb568df4951a94738a8b4813a65f8b32992df09
+Status: PASS
+Oracle: ok (sha256: 5d56d48655df9cb2f6a7b8191fec906a85de844edc05e99987ad6f9c4b46381d)
+Native: ok (sha256: 5d56d48655df9cb2f6a7b8191fec906a85de844edc05e99987ad6f9c4b46381d)
+Seed:   1078
+Variant: Rans64
+
+--- Case 88 ---
+ID:     sha256:1bd039df72384f8964d5d3bc934584b4d66ea36064d2b87e46e065fef9fcd4a2
+Status: PASS
+Oracle: ok (sha256: 70cc8ad7b35ca2dbc5e80a4eaaca4b97bee4026c223567734bebd03302d04cdd)
+Native: ok (sha256: 70cc8ad7b35ca2dbc5e80a4eaaca4b97bee4026c223567734bebd03302d04cdd)
+Seed:   1079
+Variant: Rans64
+
+--- Case 89 ---
+ID:     sha256:d7ca461be94612e8dd775eed1e6a1b57e3b1e394044705f9190ce88a2ca273a9
+Status: PASS
+Oracle: ok (sha256: c0bb5793cc9bdd2ba609471ad4f2732aaa7718f31a3c79b95a86c0286a651798)
+Native: ok (sha256: c0bb5793cc9bdd2ba609471ad4f2732aaa7718f31a3c79b95a86c0286a651798)
+Seed:   1080
+Variant: Rans64
+
+--- Case 90 ---
+ID:     sha256:2291c9a0edc90fa4fe5eddcc4f984ce0d5a6ad310a50175ba74a4f5b433c8d0f
+Status: PASS
+Oracle: ok (sha256: ae8fb9a949a204a40440617776d12eeab2dac1a19ea915895e3571d11bd5fe7a)
+Native: ok (sha256: ae8fb9a949a204a40440617776d12eeab2dac1a19ea915895e3571d11bd5fe7a)
+Seed:   1081
+Variant: Rans64
+
+--- Case 91 ---
+ID:     sha256:b558c41d12fb030fe27c51f5e2a49b539dc524575dae3f97ccc13d99e8aeded2
+Status: PASS
+Oracle: ok (sha256: d58e1f6d5f48ee1f73bcb028e96e0cfed161a1e68206dd8902f885b20c1706cb)
+Native: ok (sha256: d58e1f6d5f48ee1f73bcb028e96e0cfed161a1e68206dd8902f885b20c1706cb)
+Seed:   1082
+Variant: Rans64
+
+--- Case 92 ---
+ID:     sha256:e73c6d6e9e763efeb3a2d98d5140e7c68f4d44f47cc41dd64be472975ca9f3c6
+Status: PASS
+Oracle: ok (sha256: 7a93fb13c52a34b2f4df02f90563f020075be1d7273bc4bb5d943b84d92e96bd)
+Native: ok (sha256: 7a93fb13c52a34b2f4df02f90563f020075be1d7273bc4bb5d943b84d92e96bd)
+Seed:   1083
+Variant: Rans64
+
+--- Case 93 ---
+ID:     sha256:7d1e06b1f3252b9ad64b01ec69516774439c50f1c44ec2f319922a227a1aa09b
+Status: PASS
+Oracle: ok (sha256: 9126cc43e40fdd9f0ac1aaca87dfa559cdd3a8f8fab39884356593890e2ef662)
+Native: ok (sha256: 9126cc43e40fdd9f0ac1aaca87dfa559cdd3a8f8fab39884356593890e2ef662)
+Seed:   2084
+Variant: Rans64
+
+--- Case 94 ---
+ID:     sha256:4903cb2f038371415e8423451178162f8ad195bb870e7f8e25346829251d0565
+Status: PASS
+Oracle: ok (sha256: 2468cc73b88ffe730cea531f7a644d177da97a893ad94560099bd40df930ec3d)
+Native: ok (sha256: 2468cc73b88ffe730cea531f7a644d177da97a893ad94560099bd40df930ec3d)
+Seed:   2085
+Variant: Rans64
+
+--- Case 95 ---
+ID:     sha256:9a2711d990b1c611256f2b61fafa39d1158ead65b3457eb494ae93f75db6af93
+Status: PASS
+Oracle: ok (sha256: 7de954ea488207155cf9e9a4c46376b144ac09c444c66319334c3cf6f1a69bb7)
+Native: ok (sha256: 7de954ea488207155cf9e9a4c46376b144ac09c444c66319334c3cf6f1a69bb7)
+Seed:   2086
+Variant: Rans64
+
+--- Case 96 ---
+ID:     sha256:8969c5672f04c104a987ebd482d015269e57c61501ec1120f5259d87786d0d2c
+Status: PASS
+Oracle: ok (sha256: 3e34dab34d59d55ae3cd21595cdb2169afdb5bcb0f22a570f5fdbb5185cacdbd)
+Native: ok (sha256: 3e34dab34d59d55ae3cd21595cdb2169afdb5bcb0f22a570f5fdbb5185cacdbd)
+Seed:   2087
+Variant: Rans64
+
+--- Case 97 ---
+ID:     sha256:3b73fcd3b15872c4b56801313404d6dbd4fa90d777bec4caee11dc95110bfc2b
+Status: PASS
+Oracle: ok (sha256: 9126cc43e40fdd9f0ac1aaca87dfa559cdd3a8f8fab39884356593890e2ef662)
+Native: ok (sha256: 9126cc43e40fdd9f0ac1aaca87dfa559cdd3a8f8fab39884356593890e2ef662)
+Seed:   2088
+Variant: Rans64
+
+--- Case 98 ---
+ID:     sha256:9d67d44e7eb393e299d8fe33436293d0d80483e7a0f697a5796bf3e9cc064855
+Status: PASS
+Oracle: ok (sha256: 2468cc73b88ffe730cea531f7a644d177da97a893ad94560099bd40df930ec3d)
+Native: ok (sha256: 2468cc73b88ffe730cea531f7a644d177da97a893ad94560099bd40df930ec3d)
+Seed:   2089
+Variant: Rans64
+
+--- Case 99 ---
+ID:     sha256:5fedfc0e9303f88d9a5ba8033e5e642138ae317f0184e46cdaee8caabd28c522
+Status: PASS
+Oracle: ok (sha256: 7de954ea488207155cf9e9a4c46376b144ac09c444c66319334c3cf6f1a69bb7)
+Native: ok (sha256: 7de954ea488207155cf9e9a4c46376b144ac09c444c66319334c3cf6f1a69bb7)
+Seed:   2090
+Variant: Rans64
+
+--- Case 100 ---
+ID:     sha256:f75adb18eb069d01cca4d5d856e8a4c3b41e7dfcfc1587ab5bb3159f08d40fea
+Status: PASS
+Oracle: ok (sha256: a9cca10114d45178d48294b2843f40381f4edbf73e7962bb050454ed9838fa3b)
+Native: ok (sha256: a9cca10114d45178d48294b2843f40381f4edbf73e7962bb050454ed9838fa3b)
+Seed:   2091
+Variant: Rans64
+
