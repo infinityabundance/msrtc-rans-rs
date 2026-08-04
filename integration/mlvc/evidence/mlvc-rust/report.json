@@ -1,0 +1,101 @@
+{
+  "backend": "rust",
+  "seed": 12648430,
+  "total_cases": 12,
+  "total_bits": 5626520,
+  "sections": {
+    "conversion_coder": [
+      {
+        "case": "coder_scales_f0",
+        "bitstream_sha256": "16d2309d266bc360936098da5b88b998bddfbd1534c8276151ea4650247af30a",
+        "length": 85787,
+        "bpp": 167.552734375,
+        "y_recon_ok": true,
+        "z_recon_ok": true
+      },
+      {
+        "case": "coder_index_space_f0",
+        "bitstream_sha256": "2f3553c215f3806d8226bb544ff645e576f50497f0be886ad2fa9f7436751e3c",
+        "length": 82257,
+        "bpp": 160.658203125,
+        "y_recon_ok": true
+      },
+      {
+        "case": "coder_scales_f1",
+        "bitstream_sha256": "93e820cfb415d453018bfc65f114ab99e4784870c8aeee27ac5e031f80ef5745",
+        "length": 85949,
+        "bpp": 167.869140625,
+        "y_recon_ok": true,
+        "z_recon_ok": true
+      },
+      {
+        "case": "coder_index_space_f1",
+        "bitstream_sha256": "44c9fe21973566b6cc072f226aef22bbc04bd23bc797b915b21f56767c9ca812",
+        "length": 82571,
+        "bpp": 161.271484375,
+        "y_recon_ok": true
+      },
+      {
+        "case": "coder_scales_f2",
+        "bitstream_sha256": "a21a3518710758aebe4ffdd04350c403ac8c9e653c21c57c13e18d636474d8f7",
+        "length": 85909,
+        "bpp": 167.791015625,
+        "y_recon_ok": true,
+        "z_recon_ok": true
+      },
+      {
+        "case": "coder_index_space_f2",
+        "bitstream_sha256": "d4caaa6ace6c6426b9cd5affe9b7821712ca9888b801c5740a86d46a53db2590",
+        "length": 82338,
+        "bpp": 160.81640625,
+        "y_recon_ok": true
+      },
+      {
+        "case": "coder_scales_f3",
+        "bitstream_sha256": "911143610bc81cbf04a719b9472c431ca1527bf2df691ecb6212208f9c0008ca",
+        "length": 85736,
+        "bpp": 167.453125,
+        "y_recon_ok": true,
+        "z_recon_ok": true
+      },
+      {
+        "case": "coder_index_space_f3",
+        "bitstream_sha256": "45b89e28a07c4aa50e3d6bd846b0301e46e94f3ddbeb6511d6cef6dbccce0e0f",
+        "length": 82453,
+        "bpp": 161.041015625,
+        "y_recon_ok": true
+      }
+    ],
+    "entropy_models": [
+      {
+        "case": "torch_aehelper_f0",
+        "bitstream_sha256": "04bfcd291f12226d671fe3fd4626f541603d456e73301a894b2db251ae9b76e6",
+        "length": 7582,
+        "bpp": 59.234375,
+        "y_recon_ok": true
+      },
+      {
+        "case": "torch_aehelper_f1",
+        "bitstream_sha256": "f6bf1fbebe9c6fd63140475ba234f3296a62b7e9d85cafc937f0896dbdbd1bc6",
+        "length": 7536,
+        "bpp": 58.875,
+        "y_recon_ok": true
+      },
+      {
+        "case": "torch_multistream_b0",
+        "bitstream_sha256": "91ed5a40f47b59f813a632e5dc10a769f60e06cb5a7a2ece5c941fb1e709e05b",
+        "length": 7597,
+        "bpp": 59.3515625,
+        "y_recon_ok": true
+      },
+      {
+        "case": "torch_multistream_b1",
+        "bitstream_sha256": "e0e9fd650fb5de5f62bf6364b7462271825a787e745c3fb523fd3613bec43e33",
+        "length": 7600,
+        "bpp": 59.375,
+        "y_recon_ok": true
+      }
+    ]
+  },
+  "all_passed": true
+}

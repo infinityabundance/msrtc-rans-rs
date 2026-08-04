@@ -48,9 +48,10 @@ This document tracks known gaps between the current implementation and a complet
 
 | Gap | Priority | Impact | Next Action |
 |-----|----------|--------|-------------|
-| No MLVC integration test | High | Cannot claim drop-in replacement | **Phase 7** — install the Rust wheel into a real MLVC environment; verify bitstreams, bpp, frames |
+| No MLVC integration test | ✅ **Resolved** | **Phase 7 PASS** — Rust wheel byte-identical to C++ `_msrtc_rans` in real MLVC coder paths (12/12 cases, identical bpp) | Complete |
+| Full FrameLoop with trained weights + YUV | Medium | Exercises the same primitives; needs model checkpoints | Run when checkpoints are available |
+| `.mlvc` decode-only mode | Medium | Bitstream container format | Differential test with real `.mlvc` files |
 | No MLVC-compatible C API | Medium | MLVC needs C calling convention | Add `extern "C"` API to msrtc-rans if MLVC requires it |
-| No MLVC bitstream compatibility check | Medium | Bitstream format differences unknown | Differential test with MLVC bitstreams |
 
 ---
 

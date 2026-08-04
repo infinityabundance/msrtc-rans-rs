@@ -1,0 +1,36 @@
+# Phase 7 — MLVC integration: C++ backend (upstream _msrtc_rans)
+# Builds the pinned Microsoft MLVC C++ msrtc_rans Python module and runs the
+# MLVC integration harness against it. The harness exercises the real MLVC
+# code paths (conversion/_coder.py, src/models/entropy_models.py,
+# src/utils/stream_helper.py) with numpy + CPU torch, no trained weights.
+FROM python:3.11-slim AS base
+
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+        build-essential cmake ninja-build python3-dev libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir numpy --index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install --no-cache-dir dataclasses_json scipy
+
+WORKDIR /workspace
+COPY mlvc-upstream /workspace/mlvc-upstream
+COPY harness /workspace/harness
+
+# ---- Build the upstream C++ msrtc_rans Python module (pinned commit) ----
+RUN mkdir -p /workspace/build/msrtc_rans && \
+    cmake -S /workspace/mlvc-upstream/packages/msrtc_rans \
+          -B /workspace/build/msrtc_rans \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_PYTHON_MODULE=ON \
+          -DINSTALL_ONLY_PYTHON_MODULE=ON && \
+    cmake --build /workspace/build/msrtc_rans --config Release && \
+    cp /workspace/build/msrtc_rans/Release/msrtc/rans/_msrtc_rans.cpython-311-*.so \
+       /workspace/mlvc-upstream/packages/msrtc_rans/python/src/msrtc/rans/
+
+ENV PYTHONPATH=/workspace/mlvc-upstream/packages/msrtc_rans/python/src:/workspace/mlvc-upstream/video
+ENV MLVC_ROOT=/workspace/mlvc-upstream/video
+
+WORKDIR /workspace
+CMD ["python", "/workspace/harness/mlvc_harness.py", "--out", "/out", "--backend", "cpp"]

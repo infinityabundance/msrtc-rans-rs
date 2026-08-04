@@ -146,11 +146,17 @@ All three residuals are **intentional safety divergences** — Rust is correct t
 
 ---
 
+### Phase 7 — MLVC Integration (PASS)
+- Installed the Rust wheel in a dedicated container and ran the **real MLVC code paths** (`conversion/_coder.py` GaussianEncoder/BitEstimator, `src/models/entropy_models.py` AEHelper, `src/utils/stream_helper.py`) against both the C++ `_msrtc_rans` and the Rust wheel.
+- **12/12 bitstreams byte-identical** (SHA-256 verified), per-case bpp identical, reconstruction identical, aggregate bits identical (5,626,520).
+- Evidence: `integration/mlvc/evidence/`; harness: `integration/mlvc/`.
+
+---
+
 ## Next Phases
 
 | Phase | Scope |
 |-------|-------|
-| 7 | **MLVC integration** — install the Rust wheel into a real MLVC environment; prove bitstreams, bpp, and reconstructed frames match |
 | 8 | Hardening — property tests, generation sweeps, fuzzing, Miri, allocation-failure injection, corruption testing |
 | 9 | Performance — profiling, monomorphization, bounds-check elimination, intrinsics |
 | — | Docker matrix — Ubuntu/Fedora/Alpine cells; run-scoped names/labels/digests |

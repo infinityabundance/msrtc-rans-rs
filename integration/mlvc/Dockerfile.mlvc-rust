@@ -1,0 +1,45 @@
+# Phase 7 — MLVC integration: Rust backend (msrtc-rans-rs wheel)
+# Builds the msrtc-rans-rs PyO3 wheel and layers the msrtc.rans package,
+# then runs the SAME MLVC integration harness as the C++ backend.
+# The two runs must produce byte-identical bitstreams and identical bpp.
+FROM python:3.11-slim AS py-builder
+
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+        python3-dev build-essential curl pkg-config libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH=/root/.cargo/bin:$PATH
+RUN pip3 install maturin numpy --no-cache-dir
+
+WORKDIR /workspace
+COPY source /workspace/source
+
+RUN cd /workspace/source/crates/msrtc-rans-python && \
+    maturin build --release 2>&1 | tail -5
+
+FROM python:3.11-slim AS base
+
+RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
+        libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir numpy --index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install --no-cache-dir dataclasses_json scipy
+
+WORKDIR /workspace
+COPY --from=py-builder /workspace/source/target/wheels /wheels
+COPY --from=py-builder /workspace/source/crates/msrtc-rans-python/python /python_source
+COPY mlvc-upstream /workspace/mlvc-upstream
+COPY harness /workspace/harness
+
+# Install the Rust wheel + layer the msrtc.rans package
+RUN pip3 install /wheels/*.whl --no-cache-dir && \
+    cp -r /python_source/msrtc /usr/local/lib/python3.11/site-packages/msrtc
+
+ENV PYTHONPATH=/workspace/mlvc-upstream/video
+ENV MLVC_ROOT=/workspace/mlvc-upstream/video
+
+WORKDIR /workspace
+CMD ["python", "/workspace/harness/mlvc_harness.py", "--out", "/out", "--backend", "rust"]

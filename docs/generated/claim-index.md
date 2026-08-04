@@ -18,6 +18,7 @@
 | Rust stream → Microsoft persistent decoder recovers all values + EOF | `MSRTC.STREAM.DIFFERENTIAL` — 8/8 | ✅ **Proved** |
 | Multipart Python API matches upstream test (push 2 → flush → decode 1,2 → decodeEOF) | Upstream `test_encode_decode_multi_part_0` + `MSRTC.STREAM.DIFFERENTIAL` | ✅ **Proved** |
 | `IResizableBuffer` / `HeapResizableBuffer` growth policy matches Microsoft | `new = old + min(old, max_step)`, max_step floored at 512; unit tests | ✅ **Implemented** |
+| **Rust wheel is a drop-in for C++ `_msrtc_rans` in real MLVC code paths** | **Phase 7 integration** — 12/12 bitstreams byte-identical, identical bpp, identical reconstruction (conversion/_coder.py, entropy_models.py, stream_helper.py) | ✅ **Proved** |
 | VecSink growth no longer corrupts output | Growth boundary tests at 64, 65, 320, 321, 1000 | ✅ **Fixed** |
 | Decoder advance is now transactional | Truncated-stream path preserved | ✅ **Fixed** |
 | `Source::Outcome` abstraction removed | Simplified to `bool` | ✅ **Cleaned** |
@@ -30,7 +31,7 @@
 | Claim | Reason |
 |-------|--------|
 | "Byte-identical to Microsoft oracle for all inputs" | Differential courts cover 54 sealed cases, not exhaustive |
-| "Works with MLVC" | MLVC integration not yet tested (Phase 7 pending) |
+| "Full MLVC pipeline (trained weights + YUV) proven" | Phase 7 proves the real `msrtc.rans` call sites; full FrameLoop needs model checkpoints |
 | "Performance competitive" | Benchmarks not run (Phase 9 pending) |
 | "Memory-safe replacement" | Formal claim pending full memory safety audit (Phase 8 pending) |
 | "No correctness bugs remain" | Residual `MSRTC.RAW.SCALE32` open; further inputs may reveal issues |

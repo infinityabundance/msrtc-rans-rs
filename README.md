@@ -6,7 +6,7 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 
 ---
 
-## Current Status — Phase 4 Complete ✅
+## Current Status — Phases 4 + 7 Complete ✅
 
 | Component | Status |
 |-----------|--------|
@@ -20,11 +20,12 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | `IResizableBuffer` / `HeapResizableBuffer` | ✅ **Implemented** — Microsoft growth formula, rollback |
 | Persistent `RansEncoderStream` / `RansDecoderStream` | ✅ **Sealed** — multipart wire-parity with Microsoft |
 | Python multipart streaming | ✅ **Working** — persistent stream; all 7 upstream tests pass |
+| **MLVC integration (Phase 7)** | ✅ **PASS** — Rust wheel byte-identical to C++ `_msrtc_rans` in the real MLVC coder paths (12/12 cases, identical bpp) |
 | `scale_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `symbol_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `bypass_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | Docker matrix (multi-distro) | 🔲 Pending — Debian only |
-| MLVC integration | 🔲 Phase 7 — next |
+| Hardening (fuzz/Miri/property tests) | 🔲 Phase 8 |
 | Performance benchmarking | 🔲 Phase 9 |
 
 ### Test Suite
