@@ -1,0 +1,45 @@
+MSRTC Court Transcript
+=====================
+
+Court:       MSRTC.HARDENING
+Run ID:      20260804T172603_ddea9a07b112
+Timestamp:   20260804T172603
+Rust Commit: ddea9a07b112c327ac633d8e97a853e6eb34fc15
+Oracle Cmt:  n/a (internal property court)
+Environment: f6437fc045d7181327c6690fac35d7417eef6e4191f07409654724a38653fecb
+
+Cases: 4 total, 4 pass, 0 residual, 0 skipped
+Result: PASS
+
+--- Case 1 ---
+ID:     raw_sweeps:sub_checks=218
+Status: PASS
+Oracle: n/a (sha256: )
+Native: ok (sha256: dd9c9cdf7bca15258a7e728f4283eb896bd18044292045049445612f3d5c25a9)
+Seed:   0
+Variant: n/a
+
+--- Case 2 ---
+ID:     corruption_robustness:sub_checks=2
+Status: PASS
+Oracle: n/a (sha256: )
+Native: ok (sha256: 97b87a58dd76e94f4562e951cd194ac772fe02d36c5ce3528143153b051e3e40)
+Seed:   0
+Variant: n/a
+
+--- Case 3 ---
+ID:     entropy_sweeps:sub_checks=32
+Status: PASS
+Oracle: n/a (sha256: )
+Native: ok (sha256: 2e50e99d049f721ac32a1c51dc2e11bc58b175f6f9499b4b7ac6c44035bf84bb)
+Seed:   0
+Variant: n/a
+
+--- Case 4 ---
+ID:     allocation_checks:sub_checks=3
+Status: PASS
+Oracle: n/a (sha256: )
+Native: ok (sha256: 8bc7f873b6b72991025542ff924a88f7a6dec722dc17965b362c2022c03f7bdb)
+Seed:   0
+Variant: n/a
+

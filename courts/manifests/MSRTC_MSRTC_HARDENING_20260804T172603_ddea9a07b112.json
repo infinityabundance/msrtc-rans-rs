@@ -1,0 +1,17 @@
+{
+  "case_count": 4,
+  "court_id": "MSRTC.HARDENING",
+  "environment_sha256": "f6437fc045d7181327c6690fac35d7417eef6e4191f07409654724a38653fecb",
+  "oracle_commit": "n/a (internal property court)",
+  "oracle_image_digest": "n/a (no oracle container)",
+  "pass_count": 4,
+  "receipt_sha256": "44081461981faf99a2ab5dce37dfccd1f403b4a0a74f33c5525ef3ed064e1c44",
+  "residual_count": 0,
+  "result": "PASS",
+  "run_id": "20260804T172603_ddea9a07b112",
+  "rust_commit": "ddea9a07b112c327ac633d8e97a853e6eb34fc15",
+  "schema_version": 1,
+  "skipped_count": 0,
+  "timestamp": "20260804T172603",
+  "transcript_sha256": "a1caf825fde642e50cd8253cc4f906d17602282e78441613d2d592a021631611"
+}
