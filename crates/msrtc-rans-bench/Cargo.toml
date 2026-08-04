@@ -9,6 +9,11 @@ documentation = "https://docs.rs/msrtc-rans-bench"
 
 [dependencies]
 msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.3" }
+msrtc-rans = { path = "../msrtc-rans", version = "0.3" }
+
+[[bin]]
+name = "msrtc-rans-bench"
+path = "src/main.rs"
 
 [lints]
 rust.unsafe_code = "forbid"

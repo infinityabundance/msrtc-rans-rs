@@ -3,7 +3,7 @@
   "court_id": "MSRTC.RAW.DECODER.DIFFERENTIAL",
   "case_id": "rust_enc_cpp_dec_22a6a1016a3b10c3b9d38693a46bc9823dba7c02e0b0f34125bc26992a9c08e8",
   "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
-  "rust_commit": "a9b5049efcc167e39870eb3d7fd1be42ddaacb72-dirty",
+  "rust_commit": "6b48219aac4d864c55e0c851360a08cdebabb592-dirty",
   "seed": 1,
   "variant": "RansByte",
   "input_hashes": {
@@ -28,5 +28,5 @@
   },
   "classification": "environmental",
   "resolution": "open",
-  "environment_sha256": "a9a512f440a680d3f85ecb62e7057bbcb06f4bceb20108e2182b51a2ad2a5136"
+  "environment_sha256": "936e3ba1c341103112c223e5ef9930171da9c9a0fcc8bec54110e63ec5dd9a6a"
 }

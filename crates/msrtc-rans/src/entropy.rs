@@ -315,6 +315,7 @@ impl<S: EncSymbol> EncoderState<S> {
 
         // Encode in reverse order (matching C++: iterate from last to first)
         let data_size = indices.len();
+        let dist_len = self.distribution_descs.len();
         let mut idx = data_size as isize - 1;
         while idx >= 0 {
             let index = indices[idx as usize];
@@ -327,7 +328,6 @@ impl<S: EncSymbol> EncoderState<S> {
             }
 
             // Clamp distribution index to a valid range
-            let dist_len = self.distribution_descs.len();
             let ui = if (index as usize) < dist_len {
                 index as usize
             } else {
@@ -376,22 +376,30 @@ impl<S: EncSymbol> EncoderState<S> {
 
     #[inline]
     fn encode_bypass_value<E: RawEncoder>(&self, encoder: &mut E, bypass_value: Freq) {
-        // Split bypassValue into bypassBits-sized digits (LSB first)
-        let max_parts = (FREQ_BITS as usize / self.bypass_bits as usize).max(2);
-        let mut bypass_buffer = Vec::with_capacity(max_parts);
+        // Split bypassValue into bypassBits-sized digits (LSB first) into a
+        // FIXED stack buffer — no heap allocation per bypassed value.
+        //
+        // Max bypass_value needs 33 bits (i32 value range + offset), i.e. at
+        // most 17 digits at bypass_bits=2; 40 entries is a safe upper bound.
+        // (The C++ uses a 16-part std::array which overflows for wide bypass
+        // values — latent UB that Rust does not replicate.)
+        let mut bypass_buffer = [0u32; 40];
+        let mut parts = 0usize;
 
         let mut bv = bypass_value;
         while bv != 0 {
-            bypass_buffer.push(bv & self.bypass_max_value);
+            bypass_buffer[parts] = bv & self.bypass_max_value;
             bv >>= self.bypass_bits;
+            parts += 1;
         }
 
-        let mut bypass_count = bypass_buffer.len() as Freq;
+        let mut bypass_count = parts as Freq;
 
         // Put digits in reverse order (MSB first in the bitstream)
         // since the rANS encoder writes from end to start
-        for &digit in bypass_buffer.iter().rev() {
-            encoder.put_raw(digit, 1, self.bypass_bits);
+        while parts > 0 {
+            parts -= 1;
+            encoder.put_raw(bypass_buffer[parts], 1, self.bypass_bits);
         }
 
         // Encode bypass count as remainder-coded prefix

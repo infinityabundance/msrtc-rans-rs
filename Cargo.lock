@@ -126,6 +126,7 @@ dependencies = [
 name = "msrtc-rans-bench"
 version = "0.3.0"
 dependencies = [
+ "msrtc-rans",
  "msrtc-rans-core",
 ]
 
