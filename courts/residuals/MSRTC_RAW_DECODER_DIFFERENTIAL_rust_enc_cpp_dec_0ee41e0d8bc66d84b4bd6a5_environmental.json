@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "court_id": "MSRTC.RAW.DECODER.DIFFERENTIAL",
+  "case_id": "rust_enc_cpp_dec_0ee41e0d8bc66d84b4bd6a5c3fbc41c1a7ce089505bb8e0c40837257119e80de",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "rust_commit": "a9b5049efcc167e39870eb3d7fd1be42ddaacb72-dirty",
+  "seed": 7,
+  "variant": "Rans64",
+  "input_hashes": {
+    "pmf_lengths_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+    "pmf_offsets_sha256": "447e12701a0d03cf90a4ad7f02f1a045b35d284e26fe520440edb116d76bf700",
+    "pmf_table_sha256": "f7382ef1188df8fe8a168d035c39685d007d4c1448d1e466c8b54f6e0353b5b2",
+    "indices_sha256": "",
+    "values_sha256": "0ee41e0d8bc66d84b4bd6a5c3fbc41c1a7ce089505bb8e0c40837257119e80de"
+  },
+  "oracle": {
+    "status": "oracle_error",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "native": {
+    "status": "error: run_decoder_oracle: decoder_oracle_exit_125: Unable to find image 'msrtc-rans-rs-oracle:debian12' locally\ndocker: Error response from daemon: pull access denied for msrtc-rans-rs-oracle, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "comparison": {
+    "exact": false
+  },
+  "classification": "environmental",
+  "resolution": "open",
+  "environment_sha256": "a9a512f440a680d3f85ecb62e7057bbcb06f4bceb20108e2182b51a2ad2a5136"
+}

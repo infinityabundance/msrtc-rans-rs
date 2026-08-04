@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "court_id": "MSRTC.STREAM.DIFFERENTIAL",
+  "case_id": "wire:sha256:9ad70b8be36572361638ad6f54aaf83ed8eea388f2bd81a583e541f3c2cf3bc3",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "rust_commit": "a9b5049efcc167e39870eb3d7fd1be42ddaacb72-dirty",
+  "seed": 11,
+  "variant": "Rans64",
+  "input_hashes": {
+    "pmf_lengths_sha256": "7da5043f7aa4ea0b8ab28886dbbab6b6160809656566bf9e91368701c2d22d60",
+    "pmf_offsets_sha256": "f6163685634824034cbb1450836111e3fc38c54fc623e60878ec7f9352f32b72",
+    "pmf_table_sha256": "46d21a5567dba505fcfa8a11ae744b857cdc15d2c0c92d8761bef3e5a14d402b",
+    "indices_sha256": "00168b90b9678fbc4a126622e0ce033bd8aa70138848aa7cc4114af97285113a",
+    "values_sha256": "463bdf26d021e04a9a0319099f7f827b56554aae8dd8333f5b8507aabfc37e5f"
+  },
+  "oracle": {
+    "status": "oracle_error: stream_oracle_exit_125: Unable to find image 'msrtc-rans-rs-oracle:debian12' locally\ndocker: Error response from daemon: pull access denied for msrtc-rans-rs-oracle, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information",
+    "output_sha256": "",
+    "length": 0
+  },
+  "native": {
+    "status": "ok",
+    "output_sha256": "469d800a467ec1c5d36137b9f0bf9ec0d6642d67433bb8f8ec883f7cbcf793eb",
+    "length": 20
+  },
+  "comparison": {
+    "exact": false,
+    "first_differing_offset": 0,
+    "differing_bytes": 20
+  },
+  "classification": "environmental",
+  "resolution": "open",
+  "environment_sha256": "a9a512f440a680d3f85ecb62e7057bbcb06f4bceb20108e2182b51a2ad2a5136"
+}

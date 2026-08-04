@@ -111,6 +111,7 @@ pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
         "MSRTC.RAW.ENCODER.DIFFERENTIAL" => "/workspace/bin/raw_oracle_cli",
         "MSRTC.RAW.DECODER.DIFFERENTIAL" => "/workspace/bin/decoder_oracle_cli",
         "MSRTC.STREAM.DIFFERENTIAL" => "/workspace/bin/stream_oracle_cli",
+        "MSRTC.HARDENING" => "n/a (internal property court)",
         _ => "/workspace/bin/oracle_cli",
     };
 
@@ -118,9 +119,13 @@ pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
         "-- decoder"
     } else if result.court_id.contains("STREAM") {
         "-- stream"
+    } else if result.court_id.contains("HARDENING") {
+        "-- hardening"
     } else {
         ""
     };
+
+    let is_hardening = result.court_id == "MSRTC.HARDENING";
 
     let receipt = Receipt {
         court_id: result.court_id.clone(),
@@ -131,23 +136,40 @@ pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
         residual_count: result.residual_count,
         skipped_count: result.skipped_count,
         result: aggregate,
-        oracle_commit: oracle::ORACLE_COMMIT.to_string(),
+        oracle_commit: if is_hardening {
+            "n/a (internal property court)".to_string()
+        } else {
+            oracle::ORACLE_COMMIT.to_string()
+        },
         rust_commit: rust_commit.clone(),
-        docker_image_digest: docker_digest,
+        docker_image_digest: if is_hardening {
+            "n/a (no oracle container)".to_string()
+        } else {
+            docker_digest
+        },
         environment_sha256: environment_sha256(),
-        commands: vec![
-            format!(
-                "cargo run -p msrtc-rans-court --bin seal {}",
-                cargo_arg.trim()
-            ),
-            format!(
-                "docker run -i --rm {} {} /dev/stdin",
-                oracle::ORACLE_IMAGE,
-                oracle_cli
-            ),
-        ],
+        commands: if is_hardening {
+            vec![format!(
+                "cargo run -p msrtc-rans-court --bin seal -- hardening"
+            )]
+        } else {
+            vec![
+                format!(
+                    "cargo run -p msrtc-rans-court --bin seal {}",
+                    cargo_arg.trim()
+                ),
+                format!(
+                    "docker run -i --rm {} {} /dev/stdin",
+                    oracle::ORACLE_IMAGE,
+                    oracle_cli
+                ),
+            ]
+        },
         cases,
     };
+
+    let _ = oracle_cli;
+    let _ = cargo_arg;
 
     // Build absolute paths from CARGO_MANIFEST_DIR
     let base = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

@@ -464,7 +464,16 @@ macro_rules! generate_rans_impl {
                 let x = self.state;
                 let mask = (scale - 1) as $state_ty;
                 let value = x & mask;
-                debug_assert!(value >= start as $state_ty);
+                // Corrupt-stream hardening: if the low `scale_bits` fall outside
+                // the symbol's range, fail transactionally (state unchanged).
+                // This is an intentional safety divergence: the C++ oracle uses
+                // `assert(value >= start)` (panic in debug, unsigned wrap in
+                // release); Rust deterministically reports decode failure.
+                // Valid streams never hit this path (the encoder only emits
+                // low bits within the symbol range).
+                if value < start as $state_ty {
+                    return false;
+                }
 
                 // Compute new state into a LOCAL — do not mutate self.state yet
                 let shift = scale_bits as u32;

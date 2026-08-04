@@ -28,5 +28,9 @@ pub mod buffer;
 /// rANS stream types — `RansEncoderStream` / `RansDecoderStream`.
 pub mod stream;
 
+/// Deterministic hardening/property tests (Phase 8) — compiled for tests only.
+#[cfg(test)]
+pub mod hardening;
+
 /// Re-export the stream types at the crate root.
 pub use stream::{RansDecoderStream, RansEncoderStream, RansVariant};

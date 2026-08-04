@@ -30,6 +30,10 @@ pub mod sink;
 pub mod source;
 pub mod variant;
 
+/// Deterministic hardening/property tests (Phase 8) — compiled for tests only.
+#[cfg(test)]
+pub mod hardening;
+
 /// Frequency type used throughout the rANS implementation - corresponds to `rans_freq_t` (uint32_t)
 pub type Freq = u32;
 

@@ -596,6 +596,12 @@ impl DecoderState {
         // Issue 2c: use u64 for intermediate value to avoid overflow on shift
         let mut encoded_value: u64 = 0;
         let total_bits = bypass_count as u64 * self.bypass_bits as u64;
+        // Corrupt-stream hardening: a bounded bypass count can still imply
+        // shift >= 64 for wide bypass_bits; reject instead of panicking.
+        // (C++ computes `freq_t << shift` — undefined at shift >= 32.)
+        if total_bits >= 64 {
+            return Err(EntropyError::InvalidStream);
+        }
         let mut shift: u64 = 0;
         while shift < total_bits {
             let v = decoder.get(self.bypass_bits);
@@ -618,6 +624,10 @@ impl DecoderState {
         // Issue 2c: use u64 for intermediate value to avoid overflow on shift
         let mut encoded_value: u64 = 0;
         let total_bits = bypass_count as u64 * self.bypass_bits as u64;
+        // Corrupt-stream hardening (same as byte path).
+        if total_bits >= 64 {
+            return Err(EntropyError::InvalidStream);
+        }
         let mut shift: u64 = 0;
         while shift < total_bits {
             let v = decoder.get(self.bypass_bits);

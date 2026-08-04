@@ -45,6 +45,41 @@ use msrtc_rans::variant::RansByte;
 const BUF_READ: i32 = 12; // PyBUF_ND | PyBUF_FORMAT = PyBUF_CONTIG
 const BUF_WRITE: i32 = 13; // PyBUF_CONTIG | PyBUF_WRITABLE
 
+/// Validate a `Py_buffer` for use as a contiguous 1-D int32 array.
+///
+/// Mirrors Microsoft's `isInt32Array`: one-dimensional, int32-compatible
+/// format ("i" or "l"), 4-byte itemsize. Also requires 4-byte pointer
+/// alignment so the raw `*const i32` reinterpretation is sound.
+fn validate_i32_buffer(buf: &ffi::Py_buffer) -> Result<(), String> {
+    if buf.ndim != 1 {
+        return Err(format!("expected 1-d array, got ndim={}", buf.ndim));
+    }
+    if buf.itemsize != 4 {
+        return Err(format!("expected int32 (itemsize 4), got {}", buf.itemsize));
+    }
+    if buf.format.is_null() {
+        return Err("buffer has no format string".into());
+    }
+    let fmt = unsafe { std::ffi::CStr::from_ptr(buf.format) }.to_string_lossy();
+    let fmt = fmt.trim_end_matches(|c: char| c.is_ascii_digit()); // strip byte-count suffix
+    if fmt != "i" && fmt != "l" {
+        return Err(format!("expected int32 format, got '{}'", fmt));
+    }
+    if buf.len as usize % 4 != 0 {
+        return Err(format!(
+            "int32 array length must be multiple of 4, got {}",
+            buf.len
+        ));
+    }
+    if (buf.buf as usize) % 4 != 0 {
+        return Err("int32 buffer is not 4-byte aligned".into());
+    }
+    if buf.shape.is_null() || unsafe { *buf.shape } != buf.len / buf.itemsize {
+        return Err("buffer shape does not match length".into());
+    }
+    Ok(())
+}
+
 unsafe fn buffer_to_i32_slice(buf: &ffi::Py_buffer) -> &[i32] {
     let n = (buf.len as usize) / 4;
     std::slice::from_raw_parts(buf.buf as *const i32, n)
@@ -59,11 +94,15 @@ fn get_i32_buffer(obj: &Bound<'_, PyAny>) -> PyResult<Vec<i32>> {
     let mut buf: ffi::Py_buffer = unsafe { std::mem::zeroed() };
     let ret = unsafe { ffi::PyObject_GetBuffer(obj.as_ptr(), &mut buf, BUF_READ) };
     if ret != 0 {
-        return Err(PyValueError::new_err("cannot get i32 buffer from object"));
+        return Err(PyValueError::new_err(
+            "indices/values/pmf must be an int32 1-d array (buffer protocol)",
+        ));
     }
-    let vec = unsafe { buffer_to_i32_slice(&buf).to_vec() };
+    let result = validate_i32_buffer(&buf)
+        .map_err(PyValueError::new_err)
+        .and_then(|_| Ok(unsafe { buffer_to_i32_slice(&buf).to_vec() }));
     unsafe { ffi::PyBuffer_Release(&mut buf) };
-    Ok(vec)
+    result
 }
 
 fn get_u8_buffer(obj: &Bound<'_, PyAny>) -> PyResult<Vec<u8>> {
@@ -79,9 +118,24 @@ fn get_u8_buffer(obj: &Bound<'_, PyAny>) -> PyResult<Vec<u8>> {
     if ret != 0 {
         return Err(PyValueError::new_err("cannot get buffer from object"));
     }
-    let vec = unsafe { buffer_to_u8_slice(&buf).to_vec() };
+    let result = (|| -> Result<Vec<u8>, String> {
+        if buf.ndim != 1 {
+            return Err(format!("expected 1-d buffer, got ndim={}", buf.ndim));
+        }
+        if buf.itemsize != 1 {
+            return Err(format!(
+                "expected byte buffer (itemsize 1), got {}",
+                buf.itemsize
+            ));
+        }
+        if buf.shape.is_null() || unsafe { *buf.shape } != buf.len {
+            return Err("buffer shape does not match length".into());
+        }
+        Ok(unsafe { buffer_to_u8_slice(&buf).to_vec() })
+    })()
+    .map_err(PyValueError::new_err);
     unsafe { ffi::PyBuffer_Release(&mut buf) };
-    Ok(vec)
+    result
 }
 
 fn write_i32_buffer(obj: &Bound<'_, PyAny>, data: &[i32]) -> PyResult<()> {
@@ -89,18 +143,31 @@ fn write_i32_buffer(obj: &Bound<'_, PyAny>, data: &[i32]) -> PyResult<()> {
     let ret = unsafe { ffi::PyObject_GetBuffer(obj.as_ptr(), &mut buf, BUF_WRITE) };
     if ret != 0 {
         return Err(PyValueError::new_err(
-            "cannot get writable i32 buffer from object",
+            "values must be a writable int32 1-d array",
         ));
     }
-    let n = data.len() * 4;
-    let copy_len = n.min(buf.len as usize);
-    unsafe {
-        let dst = buf.buf as *mut u8;
-        let src = data.as_ptr() as *const u8;
-        std::ptr::copy_nonoverlapping(src, dst, copy_len);
-        ffi::PyBuffer_Release(&mut buf);
-    }
-    Ok(())
+    let result = (|| -> Result<(), String> {
+        validate_i32_buffer(&buf)?;
+        let n = data.len() * 4;
+        // No silent short writes: the output array must be exactly sized.
+        if buf.len as usize != n {
+            return Err(format!(
+                "output int32 array has {} bytes, expected exactly {} for {} values",
+                buf.len,
+                n,
+                data.len()
+            ));
+        }
+        unsafe {
+            let dst = buf.buf as *mut u8;
+            let src = data.as_ptr() as *const u8;
+            std::ptr::copy_nonoverlapping(src, dst, n);
+        }
+        Ok(())
+    })()
+    .map_err(PyValueError::new_err);
+    unsafe { ffi::PyBuffer_Release(&mut buf) };
+    result
 }
 
 // ---------------------------------------------------------------------------

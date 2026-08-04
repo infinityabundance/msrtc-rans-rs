@@ -18,6 +18,7 @@ fn main() {
         }
         "entropy" => Box::new(msrtc_rans_court::entropy_differential::EntropyDifferentialCourt),
         "stream" => Box::new(msrtc_rans_court::stream_differential::StreamDifferentialCourt),
+        "hardening" => Box::new(msrtc_rans_court::hardening::HardeningCourt),
         _ => Box::new(msrtc_rans_court::raw_encoder_differential::RawEncoderDifferentialCourt),
     };
 
