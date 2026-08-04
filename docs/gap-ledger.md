@@ -63,7 +63,7 @@ This document tracks known gaps between the current implementation and a complet
 | No Python type stubs | ✅ **Resolved** | `_msrtc_rans.pyi` present | Complete |
 | No wheel builds | ✅ **Resolved** | maturin wheel builds; tested in Docker | Complete |
 | No Python tests | ✅ **Resolved** | All 7 upstream tests pass | Complete |
-| `Py_buffer` metadata validation (ndim/format/itemsize/alignment/exact capacity) | Medium | FFI buffer helpers use raw byte copies; need hardening | Phase 8 hardening pass |
+| `Py_buffer` metadata validation (ndim/format/itemsize/alignment/exact capacity) | ✅ **Resolved** | Phase 8: FFI helpers now validate all buffer metadata; exact-size output writes | Complete |
 | Wheel not a standalone `msrtc.rans` distribution | Medium | Package files layered into site-packages post-install | maturin mixed-project layout packaging |
 
 ---
@@ -74,9 +74,9 @@ This document tracks known gaps between the current implementation and a complet
 |-----|----------|--------|-------------|
 | `xtask gen` not implemented | Medium | Docs not regenerable | Implement `xtask gen` command |
 | No API reference docs | Low | Developer experience | Add rustdoc examples |
-| No fuzz testing | Medium | Random inputs untested | Add `cargo fuzz` harness (Phase 8) |
+| No fuzz testing | ✅ **Resolved** | Deterministic LCG sweeps + corruption battery sealed in `MSRTC.HARDENING`; Miri clean on core/entropy paths | Complete |
 | No benchmark results | Low | Performance unknown | Run benchmark harness (Phase 9) |
-| No formal verification | Low | Mathematical proof of correctness | Explore using Kani or Proptest (Phase 8) |
+| No formal verification | Low | Mathematical proof of correctness | Explore using Kani or Proptest (follow-up) |
 
 ---
 

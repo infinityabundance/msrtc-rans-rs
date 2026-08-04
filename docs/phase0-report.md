@@ -153,11 +153,22 @@ All three residuals are **intentional safety divergences** — Rust is correct t
 
 ---
 
+### Phase 8 — Hardening (SEALED)
+- **Property sweeps**: RansByte scale-bits 2..=23 and Rans64 2..=31 roundtrips (218 checks), boundary freq patterns, prepared-vs-raw byte equivalence.
+- **Corruption robustness**: truncated + bit-flipped streams never panic; failed advances are transactional (state preserved).
+- **Entropy sweeps**: roundtrip + stream multipart sweeps (32 checks, both variants, bypass outliers).
+- **Allocation-failure injection**: growth overflow is a typed `CapacityOverflow` error, never a panic.
+- **Fixes found**: `advance_unchecked` fails transactionally on `value < start` (C++ asserts/wraps); bypass payload decoding rejects `total_bits >= 64` shift overflow (C++ UB).
+- **Miri**: clean on core prepared/raw + transactional paths and the entropy corrupt-stream path (no UB in the forbid(unsafe_code) crates).
+- **Python FFI**: `Py_buffer` metadata validation before raw casts; exact-size output writes (all 7 upstream tests still pass).
+- Sealed as `MSRTC.HARDENING` at `ddea9a07b112` (4/4).
+
+---
+
 ## Next Phases
 
 | Phase | Scope |
 |-------|-------|
-| 8 | Hardening — property tests, generation sweeps, fuzzing, Miri, allocation-failure injection, corruption testing |
 | 9 | Performance — profiling, monomorphization, bounds-check elimination, intrinsics |
 | — | Docker matrix — Ubuntu/Fedora/Alpine cells; run-scoped names/labels/digests |
 | — | Corpus expansion — encoder 8→100+, decoder 16→100+, entropy 6→100+, stream 8→100+ |

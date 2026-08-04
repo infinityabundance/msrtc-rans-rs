@@ -1,5 +1,5 @@
 # msrtc-rans-rs Claim Index
-*Generated: 2026-08-04* — **Phase 4 — Four Courts Sealed — All Verified**
+*Generated: 2026-08-04* — **Phases 4 + 7 + 8 — Five Courts Sealed — All Verified**
 
 ## Verified Claims (backed by differential court receipts)
 
@@ -19,6 +19,9 @@
 | Multipart Python API matches upstream test (push 2 → flush → decode 1,2 → decodeEOF) | Upstream `test_encode_decode_multi_part_0` + `MSRTC.STREAM.DIFFERENTIAL` | ✅ **Proved** |
 | `IResizableBuffer` / `HeapResizableBuffer` growth policy matches Microsoft | `new = old + min(old, max_step)`, max_step floored at 512; unit tests | ✅ **Implemented** |
 | **Rust wheel is a drop-in for C++ `_msrtc_rans` in real MLVC code paths** | **Phase 7 integration** — 12/12 bitstreams byte-identical, identical bpp, identical reconstruction (conversion/_coder.py, entropy_models.py, stream_helper.py) | ✅ **Proved** |
+| **Raw engine survives property sweeps + corruption** | **MSRTC.HARDENING** — 218 raw sweep checks, transactional truncation/flip robustness | ✅ **Proved** |
+| **Entropy coder survives roundtrip + corrupt-stream sweeps** | **MSRTC.HARDENING** — 32 entropy/stream checks, no panics on corrupt input | ✅ **Proved** |
+| **Python FFI validates buffer metadata** | ndim/format/itemsize/alignment/shape checks; exact-size output writes | ✅ **Implemented** |
 | VecSink growth no longer corrupts output | Growth boundary tests at 64, 65, 320, 321, 1000 | ✅ **Fixed** |
 | Decoder advance is now transactional | Truncated-stream path preserved | ✅ **Fixed** |
 | `Source::Outcome` abstraction removed | Simplified to `bool` | ✅ **Cleaned** |
@@ -43,6 +46,9 @@
 | `MSRTC.RAW.SCALE32` | `intentional_safety_divergence` | `scale_bits=32` causes undefined shift in C++; Rust rejects deterministically with RawRansError | `open` |
 | `MSRTC.RAW.SYMBOLBITS32` | `intentional_safety_divergence` | `symbol_bits=32` rejected in Rust; C++ has undefined behavior | `open` |
 | `MSRTC.RAW.BYPASSBITS32` | `intentional_safety_divergence` | `bypass_bits=32` rejected in Rust; C++ has undefined behavior | `open` |
+| `MSRTC.RAW.BYPASSSHIFT` | `intentional_safety_divergence` | Corrupt streams with a huge decoded bypass count → Rust rejects (`total_bits >= 64`); C++ shifts ≥ 32 (UB) | `open` |
+| `MSRTC.RAW.LOWSTATE` | `intentional_safety_divergence` | RansByte `scale_bits > 23` with small freq drains state below LowerBound (C++ identical; Rust documents the operational domain) | `open` |
+| `MSRTC.RAW.CORRUPTADVANCE` | `intentional_safety_divergence` | `value < start` on corrupt streams → Rust fails transactionally; C++ asserts (debug) / wraps (release) | `open` |
 
 ## Resolved Residuals
 

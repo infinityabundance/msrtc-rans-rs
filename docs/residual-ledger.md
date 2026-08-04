@@ -33,6 +33,30 @@ Three active residuals remain, all classified as **intentional safety divergence
 - **Classification:** `intentional_safety_divergence`
 - **Resolution:** `open`
 
+### MSRTC.RAW.BYPASSSHIFT — Intentional Safety Divergence (Phase 8)
+
+- **Case:** corrupt stream decodes a huge bypass count → payload shift overflow
+- **C++ behavior:** `freq_t << shift` — undefined at shift ≥ 32
+- **Rust behavior:** rejects with `EntropyError::InvalidStream` when `total_bits >= 64` (no panic)
+- **Classification:** `intentional_safety_divergence`
+- **Resolution:** `open`
+
+### MSRTC.RAW.LOWSTATE — Operational Domain (Phase 8)
+
+- **Case:** RansByte `scale_bits > 23` with small freq drains the encoder state below `LowerBound` (2^23), producing a stream the decoder rejects
+- **C++ behavior:** identical math (`StateBits = 31`) — same degenerate output
+- **Rust behavior:** documents the operational domain (`scale_bits <= 23` for RansByte); deterministic
+- **Classification:** `intentional_safety_divergence` (documented domain)
+- **Resolution:** `open`
+
+### MSRTC.RAW.CORRUPTADVANCE — Intentional Safety Divergence (Phase 8)
+
+- **Case:** corrupt stream yields low bits `value < start` in `advance`
+- **C++ behavior:** `assert(value >= start)` — panic in debug, unsigned wrap in release
+- **Rust behavior:** fails transactionally (returns false, state unchanged) — no panic in any build
+- **Classification:** `intentional_safety_divergence`
+- **Resolution:** `open`
+
 ## Resolved Residuals
 
 ### Entropy Differential — RansByte native mismatch (seed 0)

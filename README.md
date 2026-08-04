@@ -6,7 +6,7 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 
 ---
 
-## Current Status — Phases 4 + 7 Complete ✅
+## Current Status — Phases 4 + 7 + 8 Complete ✅
 
 | Component | Status |
 |-----------|--------|
@@ -17,26 +17,27 @@ A fully differential-tested, `#![forbid(unsafe_code)]`, `#![no_std]`-compatible 
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` court | ✅ **Sealed** — 16/16 cases pass |
 | `MSRTC.ENTROPY.DIFFERENTIAL` court | ✅ **Sealed** — 6/6 cases pass |
 | `MSRTC.STREAM.DIFFERENTIAL` court | ✅ **Sealed** — 24/24 cases pass |
+| `MSRTC.HARDENING` court | ✅ **Sealed** — 4/4 property battery |
 | `IResizableBuffer` / `HeapResizableBuffer` | ✅ **Implemented** — Microsoft growth formula, rollback |
 | Persistent `RansEncoderStream` / `RansDecoderStream` | ✅ **Sealed** — multipart wire-parity with Microsoft |
 | Python multipart streaming | ✅ **Working** — persistent stream; all 7 upstream tests pass |
-| **MLVC integration (Phase 7)** | ✅ **PASS** — Rust wheel byte-identical to C++ `_msrtc_rans` in the real MLVC coder paths (12/12 cases, identical bpp) |
+| MLVC integration (Phase 7) | ✅ **PASS** — Rust wheel byte-identical to C++ `_msrtc_rans` in the real MLVC coder paths (12/12 cases, identical bpp) |
+| Hardening (Phase 8) | ✅ **Sealed** — property sweeps, corruption robustness, Miri clean, FFI buffer validation |
 | `scale_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `symbol_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | `bypass_bits == 32` safety rejection | ✅ **Residual** — intentional safety divergence |
 | Docker matrix (multi-distro) | 🔲 Pending — Debian only |
-| Hardening (fuzz/Miri/property tests) | 🔲 Phase 8 |
-| Performance benchmarking | 🔲 Phase 9 |
+| Performance benchmarking | 🔲 Phase 9 — next |
 
 ### Test Suite
 
 | Metric | Count |
 |--------|-------|
-| Total test functions defined | 123 |
-| Active tests | 119 |
+| Total test functions defined | 135 |
+| Active tests | 131 |
 | Ignored tests (Docker-gated) | 4 |
 | Differential court cases (sealed) | 54 |
-| Receipts sealed | 4 |
+| Receipts sealed | 5 |
 
 ---
 
@@ -151,6 +152,7 @@ The project uses a novel **forensic court system** to prove correctness:
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | ✅ All pass |
 | `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | ✅ All pass |
 | `MSRTC.STREAM.DIFFERENTIAL` | 24 | ✅ All pass |
+| `MSRTC.HARDENING` | 4 | ✅ All pass |
 
 ---
 

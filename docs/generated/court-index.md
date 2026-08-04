@@ -1,5 +1,5 @@
 # msrtc-rans-rs Court Index
-*Generated: 2026-08-04* — **Phase 4 — Four Courts Sealed**
+*Generated: 2026-08-04* — **Phases 4 + 7 + 8 — Five Courts Sealed**
 
 ## Court Registry
 
@@ -11,6 +11,7 @@
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` | ✅ `sealed` | 16 | 16 | 0 | ✅ Sealed |
 | `MSRTC.ENTROPY.DIFFERENTIAL` | ✅ `sealed` | 6 | 6 | 0 | ✅ Sealed |
 | `MSRTC.STREAM.DIFFERENTIAL` | ✅ `sealed` | 24 | 24 | 0 | ✅ Sealed |
+| `MSRTC.HARDENING` | ✅ `sealed` | 4 | 4 | 0 | ✅ Sealed |
 | `MSRTC.RAW.RANSBYTE` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.RAW.RANS64` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.RECIPROCAL` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
@@ -58,12 +59,20 @@
 - **Sealed at commit:** `aad4dfce2757`
 - **Receipt:** `courts/receipts/MSRTC_MSRTC_STREAM_DIFFERENTIAL_20260804T152041_aad4dfce2757.json`
 
+### MSRTC.HARDENING
+- **Cases:** 4 (raw sweeps: 218 checks; corruption robustness: 2; entropy sweeps: 32; allocation checks: 3)
+- **Oracle:** none — internal property court
+- **Run ID:** `20260804T172603_ddea9a07b112`
+- **Sealed at commit:** `ddea9a07b112`
+- **Receipt:** `courts/receipts/MSRTC_MSRTC_HARDENING_20260804T172603_ddea9a07b112.json`
+
 ## Receipt Files
 
 - `courts/receipts/MSRTC_MSRTC_RAW_ENCODER_DIFFERENTIAL_20260727T082625_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_RAW_DECODER_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_ENTROPY_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_STREAM_DIFFERENTIAL_20260804T152041_aad4dfce2757.json`
+- `courts/receipts/MSRTC_MSRTC_HARDENING_20260804T172603_ddea9a07b112.json`
 
 ## Evidence Chain
 
