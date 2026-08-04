@@ -74,16 +74,20 @@ The C++ oracle builds and runs correctly in the Docker environment:
 ### Steps
 
 ```bash
-# 1. Build the Docker oracle image
+# 1. Build the Docker oracle image (4 CLIs: oracle_cli, raw_oracle_cli,
+#    decoder_oracle_cli, stream_oracle_cli)
 docker build --tag msrtc-rans-rs-oracle:debian12 \
-  --file /path/to/Dockerfile.oracle \
+  --file dockerfiles/Dockerfile.oracle \
   /path/to/build-context
 
 # 2. Verify the upstream Python tests
 docker run --rm msrtc-rans-rs-oracle:debian12
 
-# 3. Run all differential courts (seals receipts)
-cargo run -p msrtc-rans-court --bin seal -- --all
+# 3. Run the differential courts (seals receipts) — one per court
+cargo run -p msrtc-rans-court --bin seal -- encoder
+cargo run -p msrtc-rans-court --bin seal -- decoder
+cargo run -p msrtc-rans-court --bin seal -- entropy
+cargo run -p msrtc-rans-court --bin seal -- stream
 
 # 4. Verify new receipts
 ls courts/receipts/

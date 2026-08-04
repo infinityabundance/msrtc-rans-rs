@@ -102,11 +102,12 @@ All mismatches are preserved as structured residuals in `courts/residuals/`. See
 | `environmental` | Divergence due to environment |
 | `unclassified` | Not yet investigated |
 
-## Current Phase 3 Sealed State
+## Current Phase 4 Sealed State
 
-Three differential courts sealed at commit `dcfd39e80852`:
-- **Encoder differential:** 8/8 cases passing
-- **Decoder differential:** 16/16 cases passing
-- **Entropy differential:** 6/6 cases passing
+Four differential courts sealed:
+- **Encoder differential:** 8/8 cases passing (at `dcfd39e80852`)
+- **Decoder differential:** 16/16 cases passing (at `dcfd39e80852`)
+- **Entropy differential:** 6/6 cases passing (at `dcfd39e80852`)
+- **Stream differential:** 24/24 cases passing (at `aad4dfce2757`) — multipart persistent streams
 
-Test suite: 102 defined, 99 active, 3 ignored. All published crates at version 0.2.1.
+Test suite: 123 defined, 119 active, 4 ignored (Docker-gated). All published crates at version 0.3.0.

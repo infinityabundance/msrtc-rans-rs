@@ -1,5 +1,5 @@
 # msrtc-rans-rs Parity Matrix
-*Generated: 2026-07-27* — **Phase 3 — Three Courts Sealed**
+*Generated: 2026-08-04* — **Phase 4 — Four Courts Sealed**
 
 ## Raw rANS Primitives
 
@@ -53,6 +53,23 @@
 | Large positive outlier bypass | 🔒 `sealed` | i32 max value tested |
 | Extreme negative outlier bypass | 🔒 `sealed` | i32 min + 1 tested |
 
+## Streams & Allocation (Phase 4)
+
+| Feature | RansByte | Rans64 | Current Status |
+|---------|----------|--------|----------------|
+| `IResizableBuffer` pattern | 🔒 | 🔒 | `sealed` — `ResizableBuffer` trait + `HeapResizableBuffer` |
+| Buffer growth policy | 🔒 | 🔒 | `sealed` — `new = old + min(old, max_step)`; max_step floored at 512; unit-tested |
+| Growth relocation (content to END) | 🔒 | 🔒 | `sealed` — matches Microsoft `newBuffer.last(content.size())` |
+| Rollback semantics | 🔒 | 🔒 | `sealed` — `rollback()` discards pending grow |
+| `RansEncoderStream` persistent push | 🔒 | 🔒 | `sealed` — STREAM.DIFFERENTIAL wire parity (8/8) |
+| `RansEncoderStream::Flush` once | 🔒 | 🔒 | `sealed` — flush returns full stream; reset for reuse |
+| `RansEncoderStream::Reset` (abort) | 🔒 | 🔒 | `sealed` — discards session (C++ `Flush(abort=true)`) |
+| `RansDecoderStream` persistent cursor | 🔒 | 🔒 | `sealed` — STREAM.DIFFERENTIAL (16/16 decode results) |
+| `RansDecoderStream::CheckEOF` | 🔒 | 🔒 | `sealed` — source EOF + state == LowerBound |
+| `RansDecoderStream::DecodeEOF` | 🔒 | 🔒 | `sealed` — STREAM.DIFFERENTIAL decode sub-cases |
+| Multipart wire layout (LIFO decode) | 🔒 | 🔒 | `sealed` — push 2,1 → flush → decode 1,2 matches Microsoft |
+| Python multipart API | 🔒 | 🔒 | `sealed` — upstream `test_encode_decode_multi_part_0` passes |
+
 ## Known Issues
 
 | Issue | Severity | Status |
@@ -64,7 +81,7 @@
 | `bypass_bits == 32` rejection | 🟡 **Residual** | Intentional safety divergence — Rust rejects |
 | No Docker matrix (multi-distro) | 🟡 **Gap** | Debian only; Ubuntu, Fedora, Alpine pending |
 | No receipt regeneration infrastructure | 🟡 **Gap** | `xtask gen` not implemented |
-| No MLVC integration test | 🟡 **Gap** | Not started |
+| No MLVC integration test | 🟡 **Gap** | Phase 7 pending |
 
 ## Legend
 

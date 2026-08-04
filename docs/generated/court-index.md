@@ -1,5 +1,5 @@
 # msrtc-rans-rs Court Index
-*Generated: 2026-07-27* — **Phase 3 — Three Courts Sealed**
+*Generated: 2026-08-04* — **Phase 4 — Four Courts Sealed**
 
 ## Court Registry
 
@@ -10,12 +10,12 @@
 | `MSRTC.RAW.ENCODER.DIFFERENTIAL` | ✅ `sealed` | 8 | 8 | 0 | ✅ Sealed |
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` | ✅ `sealed` | 16 | 16 | 0 | ✅ Sealed |
 | `MSRTC.ENTROPY.DIFFERENTIAL` | ✅ `sealed` | 6 | 6 | 0 | ✅ Sealed |
+| `MSRTC.STREAM.DIFFERENTIAL` | ✅ `sealed` | 24 | 24 | 0 | ✅ Sealed |
 | `MSRTC.RAW.RANSBYTE` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.RAW.RANS64` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.RECIPROCAL` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.PMF` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.BYPASS` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
-| `MSRTC.STREAM` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.BUFFER` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.CROSS` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
 | `MSRTC.INVALID` | 🔲 `scaffold` | 0 | 0 | 0 | ❌ |
@@ -51,11 +51,19 @@
 - **Sealed at commit:** `dcfd39e80852`
 - **Receipt:** `courts/receipts/MSRTC_MSRTC_ENTROPY_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 
+### MSRTC.STREAM.DIFFERENTIAL
+- **Cases:** 24 (8 multipart stream cases × 3 sub-cases: wire parity, Microsoft stream → Rust decoder, Rust stream → Microsoft decoder; both RansByte and Rans64; 1–3 batches; bypass-bits 2 and 4; 256-symbol batches)
+- **Oracle CLI:** `stream_oracle_cli`
+- **Run ID:** `20260804T152041_aad4dfce2757`
+- **Sealed at commit:** `aad4dfce2757`
+- **Receipt:** `courts/receipts/MSRTC_MSRTC_STREAM_DIFFERENTIAL_20260804T152041_aad4dfce2757.json`
+
 ## Receipt Files
 
 - `courts/receipts/MSRTC_MSRTC_RAW_ENCODER_DIFFERENTIAL_20260727T082625_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_RAW_DECODER_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
 - `courts/receipts/MSRTC_MSRTC_ENTROPY_DIFFERENTIAL_20260727T082628_7b5fc52f91d1.json`
+- `courts/receipts/MSRTC_MSRTC_STREAM_DIFFERENTIAL_20260804T152041_aad4dfce2757.json`
 
 ## Evidence Chain
 
@@ -63,7 +71,7 @@
 upstream.lock (pinned commit + fixture hashes)
     │
     ▼
-Docker image (build environment + oracle CLI)
+Docker image (build environment + oracle CLIs)
     │
     ▼
 Casefiles (deterministic test inputs, content-addressed by SHA-256)

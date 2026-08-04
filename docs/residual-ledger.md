@@ -1,5 +1,5 @@
 # msrtc-rans-rs Residual Ledger
-*Updated: 2026-07-27* — **Phase 3 — Three Courts Sealed**
+*Updated: 2026-08-04* — **Phase 4 — Four Courts Sealed**
 
 ## Overview
 

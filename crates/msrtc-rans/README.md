@@ -2,9 +2,9 @@
 
 **Safe public Rust entropy-coder API for msrtc_rans.**
 
-This crate provides the high-level entropy coder API, wrapping the raw rANS primitives from `msrtc-rans-core` with PMF validation, CDF table construction, bypass coding, and distribution descriptors.
+This crate provides the high-level entropy coder API, wrapping the raw rANS primitives from `msrtc-rans-core` with PMF validation, CDF table construction, bypass coding, distribution descriptors, **persistent streams**, and the **resizable buffer** allocation layer.
 
-## Status — Phase 3 Sealed ✅
+## Status — Phases 3 + 4 Sealed ✅
 
 | Feature | Status |
 |---------|--------|
@@ -13,9 +13,13 @@ This crate provides the high-level entropy coder API, wrapping the raw rANS prim
 | PMF validation | ✅ Implemented and courted |
 | CDF table construction | ✅ Implemented and courted |
 | Bypass coding (variable-width) | ✅ Implemented and courted |
+| `RansEncoderStream` (persistent push) | ✅ Sealed — `MSRTC.STREAM.DIFFERENTIAL` 24/24 |
+| `RansDecoderStream` (persistent cursor) | ✅ Sealed — `MSRTC.STREAM.DIFFERENTIAL` 24/24 |
+| `ResizableBuffer` / `HeapResizableBuffer` | ✅ Implemented — Microsoft growth formula |
 | Entropy differential court | ✅ Sealed (6/6 cases) |
+| Stream differential court | ✅ Sealed (24/24 cases) |
 
-The full entropy encode/decode pipeline (PMF → CDF → bypass) has been verified byte-for-byte against the pinned Microsoft C++ oracle. All 30 entropy tests plus 1 doc-test pass.
+The full entropy encode/decode pipeline (PMF → CDF → bypass) and the persistent stream layer have been verified byte-for-byte against the pinned Microsoft C++ oracle. All 46 tests in this crate pass.
 
 ## Features
 
@@ -24,6 +28,8 @@ The full entropy encode/decode pipeline (PMF → CDF → bypass) has been verifi
 - PMF validation: rejects empty tables, invalid dimensions, zero frequencies
 - Bypass coding for out-of-range values with configurable bypass bits
 - Mixed in-range and bypass value streams
+- **Persistent streams** — one raw rANS state across `push()` calls (Microsoft `RawRansEncoderStream`); LIFO multipart layout
+- **Resizable buffer** — `new = old + min(old, max_size_step)` growth, rollback, backward-writing sink
 - Comprehensive error handling via `EntropyError` enum
 - Re-exports all `msrtc-rans-core` types and traits
 
@@ -33,39 +39,58 @@ The full entropy encode/decode pipeline (PMF → CDF → bypass) has been verifi
 
 ```rust
 use msrtc_rans::entropy::EntropyEncoder;
-use msrtc_rans_core::RansByte;
+use msrtc_rans::variant::RansByte;
 
 let mut encoder = EntropyEncoder::<RansByte>::new();
 
-let pmf_lengths = vec![2u32];
-let pmf_offsets = vec![0u32];
-let pmf_table = vec![1u32, 3u32];  // frequencies
+let pmf_lengths = vec![2i32];
+let pmf_offsets = vec![0i32];
+let pmf_table = vec![1i32, 3i32];  // frequencies
 let symbol_bits = 16;
 let bypass_bits = 4;
 
 encoder.initialize(&pmf_lengths, &pmf_offsets, &pmf_table, symbol_bits, bypass_bits)
     .expect("valid PMF");
 
+let indices = vec![0i32, 0i32, 0i32, 0i32];
 let values = vec![-2i32, 1i32, 0i32, 1i32];
-let encoded = encoder.encode(&values).expect("encode");
+let mut buffer = Vec::new();
+encoder.encode(&indices, &values, &mut buffer).expect("encode");
+```
 
-// Decode
-use msrtc_rans::entropy::EntropyDecoder;
-use msrtc_rans_core::RansByte;
+### Multipart stream (persistent encoder)
 
-let mut decoder = EntropyDecoder::<RansByte>::new();
-decoder.initialize(&pmf_lengths, &pmf_offsets, &pmf_table, symbol_bits, bypass_bits)
-    .expect("valid PMF");
+```rust
+use msrtc_rans::entropy::EntropyEncoder;
+use msrtc_rans::stream::{RansEncoderStream, RansDecoderStream};
+use msrtc_rans::variant::RansByte;
 
-let decoded = decoder.decode(&encoded).expect("decode");
-assert_eq!(decoded, values);
+// Batch A pushed first, batch B second → decode B first, then A (LIFO).
+let mut stream = RansEncoderStream::<RansByte>::new();
+stream.push(&encoder_a, &indices_a, &values_a).expect("push a");
+stream.push(&encoder_b, &indices_b, &values_b).expect("push b");
+let data = stream.flush().expect("flush");
+
+let mut dstream = RansDecoderStream::<RansByte>::open_on(&data);
+// decode batch B, then batch A, then decode_eof().
+```
+
+### Resizable buffer
+
+```rust
+use msrtc_rans::buffer::{HeapResizableBuffer, ResizableBufferSink};
+
+let mut buffer = HeapResizableBuffer::new(4096, 1024 * 1024);
+let mut sink = ResizableBufferSink::<u8>::new(&mut buffer);
+sink.write_u8(0xAB);
+sink.write_u8(0xCD);
+assert_eq!(sink.encoded_bytes(), &[0xCD, 0xAB]); // backward-written
 ```
 
 ### Raw rANS (re-exported from msrtc-rans-core)
 
 ```rust
-use msrtc_rans::{RansByteEncoder, RansByteDecoder};
-use msrtc_rans::{VecSink, SliceSource};
+use msrtc_rans::{RansByteEncoder, RansByteDecoder, VecSink, SliceSource};
 
 let sink = VecSink::<u8>::new(64);
 let mut encoder = RansByteEncoder::new(sink);

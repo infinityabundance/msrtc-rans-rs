@@ -1,67 +1,73 @@
-# msrtc-rans-rs — Phase 3 Final Report
+# msrtc-rans-rs — Phase 0–4 Status Report
 
-**Date:** 2026-07-27
-**Phase:** 3 — Full Entropy Coder with Differential Verification
+**Date:** 2026-08-04
+**Phase:** 4 — Streams & Allocation Complete
 **Upstream oracle commit:** `0500356a8d6146dd8dc8911022cbeca19675614f`
-**Workspace version:** 0.2.0 (→ 0.2.1)
-**Sealed at:** `dcfd39e80852`
+**Workspace version:** 0.3.0
+**Sealed at:** `aad4dfce2757` (stream court), `dcfd39e80852` (raw + entropy courts)
 
 ---
 
 ## Executive Summary
 
-Phase 3 delivers the **complete entropy coder** — PMF validation, CDF table construction, bypass coding, and full encode/decode pipeline — with **three sealed differential courts** proving byte-identical output to the Microsoft C++ oracle. The project has transitioned from a raw rANS primitive implementation to a fully differential-tested entropy coding library with 102 test functions (99 active, 3 ignored).
+The project delivers a **differential-tested native Rust replacement** for Microsoft MLVC's `msrtc_rans` entropy coder. Four forensic courts are sealed against the pinned C++ oracle:
+
+| Court | Cases | Result | Sealed at |
+|-------|------:|--------|-----------|
+| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | 8 | ✅ 8/8 | `dcfd39e80852` |
+| `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | ✅ 16/16 | `dcfd39e80852` |
+| `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | ✅ 6/6 | `dcfd39e80852` |
+| `MSRTC.STREAM.DIFFERENTIAL` | 24 | ✅ 24/24 | `aad4dfce2757` |
+
+Phase 4 adds the **streams & allocation layer**: persistent `RansEncoderStream` / `RansDecoderStream` (a single raw rANS state across `push()` calls, matching Microsoft's `RawRansEncoderStream`), the `IResizableBuffer` / `HeapResizableBuffer` pattern with Microsoft's growth formula, and a new `MSRTC.STREAM.DIFFERENTIAL` court proving **multipart wire parity** — the Rust multipart stream is byte-identical to Microsoft's, and both sides cross-decode each other's streams.
 
 ---
 
-## What Was Implemented in Phase 3
+## What Was Implemented in Phase 4
 
-### Entropy Coder (`msrtc-rans/src/entropy.rs`)
+### Streams (`msrtc-rans/src/stream.rs`)
 
-- **`EntropyEncoder`** — Public struct wrapping encoder state; supports `new()`, `initialize(pmf, symbol_bits, bypass_bits)`, and `encode(values) -> Vec<u8>`
-- **`EntropyDecoder`** — Public struct wrapping decoder state; supports `new()`, `initialize(pmf, symbol_bits, bypass_bits)`, and `decode(bytes) -> Vec<i32>`
-- **PMF Validation** — Rejects empty lengths lists, mismatched dimensions, invalid scale_bits, zero frequencies, scale_bits > 31, bypass_bits > 31
-- **Distribution Descriptors** — Per-distribution metadata for value offset, bypass sentinel, and symbol offset
-- **CDF Table Construction** — Cumulative distribution function derived from PMF frequencies
-- **Bypass Coding** — Variable-width bypass encoding for out-of-range values; supports both u8 (RansByte) and u32 (Rans64) bypass payloads with configurable bypass bits
-- **Encode Path** — Value→distribution→symbol→raw rANS encode, with bypass sentinel for out-of-range values
-- **Decode Path** — Raw rANS decode→CDF symbol recovery→bypass decode→value reconstruction
-- **Cross-Variant Support** — Both RansByte and Rans64 via `EncoderVariantForS` and `RawEncoder` traits
-- **Error Handling** — `EntropyError` enum with `InvalidPmf`, `InvalidParams`, `InvalidState`, `InvalidStream`, `RawRansError` variants
+- **`RansEncoderStream<S>`** — Generic persistent encoder stream; `push()` continues one raw rANS encoder state (exactly Microsoft's `RansEncoderStreamImpl`), `flush()` finalizes once and resets for reuse, `reset()` aborts the session.
+- **`RansDecoderStream<S>`** — Generic persistent decoder stream; owns the message and keeps a persistent decode cursor `(unit position, state)` across sequential `decode()` calls (Microsoft's `RansDecoderStreamImpl`). First decode initializes the raw decoder; `check_eof()` requires source exhaustion AND `state == LowerBound`.
+- **`RansVariant`** — Runtime variant enum (RansByte=1, Rans64=0) for the Python-facing API.
+- **Core additions** — `RansDecoder::from_state(source, state)` and `SliceSource::seek(pos)` enable continuation decoding.
 
-### Entropy Tests
+### Allocation (`msrtc-rans/src/buffer.rs`)
 
-- **30 test functions** covering:
-  - Encoder/decoder initialization (both variants)
-  - PMF validation (rejects invalid inputs)
-  - Reference bitstream match (encode matches oracle hex)
-  - In-range value encoding/decoding (round-trip)
-  - Bypass encoding/decoding (various bypass bits: 2, 3, 8)
-  - Mixed in-range + bypass values
-  - Large positive and extreme negative outlier bypass
-  - Multiple bypasses per stream
-  - `symbol_bits=32` rejection safety check
-  - `bypass_bits=32` rejection safety check
-  - Misaligned stream rejection (1, 2, 3 extra bytes resistance)
+- **`ResizableBuffer` trait** — `get_buffer`, `begin_to_grow`, `commit`, `rollback` (Microsoft's `IResizableBuffer`).
+- **`HeapResizableBuffer`** — Growth formula `new = old + min(old, max_size_step)` with `max_size_step` floored at `MIN_BUFFER_SIZE = 512`; initial size aligned to a multiple of 16; rollback cancels a pending grow.
+- **`ResizableBufferSink`** — Safe backward-writing byte sink (`write_u8` / `write_u32`); growth relocates existing content to the END of the enlarged buffer (Microsoft's `newBuffer.last(content.size())`).
 
-### Differential Courts
+### Python Bindings (`msrtc-rans-python`)
 
-Three differential courts were built and sealed:
+- `RansEncoderStream` now wraps the **persistent** Rust encoder stream (no more independent segments — the previous multipart layout was wrong).
+- `RansDecoderStream` keeps a persistent cursor; `decodeEOF` enforces full consumption + EOF state.
+- All **7 upstream Python tests** pass inside Docker, including `test_encode_decode_multi_part_0` (push two batches → flush → decode in reverse order → decodeEOF) and `test_rans_encoder_stream_0` (256-symbol stream).
 
-| Court ID | Cases | Passes | Result | What It Proves |
-|----------|-------|--------|--------|----------------|
-| `MSRTC.RAW.ENCODER.DIFFERENTIAL` | 8 | 8 | ✅ Sealed | Raw RansByte/Rans64 encoder matches C++ oracle |
-| `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | 16 | ✅ Sealed | Raw decoder matches C++ (both directions) |
-| `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | 6 | ✅ Sealed | Full entropy coder matches C++ (encode, decode, cross-validate) |
-| **Total** | **30** | **30** | **✅ All pass** | |
+### Stream Differential Court (`MSRTC.STREAM.DIFFERENTIAL`)
 
-### Oracle Infrastructure
+- New C++ oracle CLI `stream_oracle_cli` exercising Microsoft's persistent `RansEncoderStream` / `RansDecoderStream` over multipart casefiles (encode + decode modes).
+- **8 multipart cases** (RansByte + Rans64; 1, 2, and 3 batches; 256-symbol batches; bypass bits 2 and 4) × **3 sub-cases**:
+  1. Wire parity — Rust flush bytes vs Microsoft stream bytes
+  2. Microsoft stream → Rust persistent decoder (values + EOF)
+  3. Rust stream → Microsoft persistent decoder (values + EOF)
+- **24/24 sealed** at clean commit `aad4dfce2757`.
 
-- **`oracle_cli`** — Entropy coder oracle binary (reads casefiles from stdin, writes hex output)
-- **`raw_oracle_cli`** — Raw encoder oracle binary
-- **`decoder_oracle_cli`** — Decoder oracle binary
-- **Receipt system** — JSON receipts, human-readable transcripts, manifests with hash linking
-- **Residual persistence** — Structured mismatch records written to `courts/residuals/`
+---
+
+## What Was Implemented in Phases 0–3 (Summary)
+
+### Phase 0 — Oracle Baseline
+- Microsoft MLVC pinned at `0500356a8d6146dd8dc8911022cbeca19675614f`; Docker Debian 12 oracle cell; reference fixtures captured; workspace scaffolded.
+
+### Phase 1 — Raw rANS Engine
+- Raw `RansByte` / `Rans64` encoders and decoders, reciprocal preparation, transactional decoder advance, Microsoft-compatible buffer growth. Sealed via `MSRTC.RAW.ENCODER.DIFFERENTIAL` (8/8) and `MSRTC.RAW.DECODER.DIFFERENTIAL` (16/16).
+
+### Phase 3 — Entropy Coder
+- `EntropyEncoder` / `EntropyDecoder` with PMF validation, distribution descriptors, CDF construction, `upper_bound` symbol lookup, variable-width bypass coding, value reconstruction. Sealed via `MSRTC.ENTROPY.DIFFERENTIAL` (6/6).
+
+### Phase 6 — Python Drop-in
+- PyO3 extension `_msrtc_rans` implementing the `msrtc.rans` Python API; all 7 upstream tests pass; single-message bitstreams byte-match the reference fixtures.
 
 ---
 
@@ -74,12 +80,12 @@ Three differential courts were built and sealed:
 | `MSRTC.RAW.ENCODER.DIFFERENTIAL` | 8 | 8 | 0 | ✅ Sealed |
 | `MSRTC.RAW.DECODER.DIFFERENTIAL` | 16 | 16 | 0 | ✅ Sealed |
 | `MSRTC.ENTROPY.DIFFERENTIAL` | 6 | 6 | 0 | ✅ Sealed |
+| `MSRTC.STREAM.DIFFERENTIAL` | 24 | 24 | 0 | ✅ Sealed |
 | `MSRTC.RAW.RANSBYTE` | — | — | — | 📋 Scaffold |
 | `MSRTC.RAW.RANS64` | — | — | — | 📋 Scaffold |
 | `MSRTC.RECIPROCAL` | — | — | — | 📋 Scaffold |
 | `MSRTC.PMF` | — | — | — | 📋 Scaffold |
 | `MSRTC.BYPASS` | — | — | — | 📋 Scaffold |
-| `MSRTC.STREAM` | — | — | — | 📋 Scaffold |
 | `MSRTC.BUFFER` | — | — | — | 📋 Scaffold |
 | `MSRTC.CROSS` | — | — | — | 📋 Scaffold |
 | `MSRTC.INVALID` | — | — | — | 📋 Scaffold |
@@ -96,15 +102,18 @@ Three differential courts were built and sealed:
 - **Rans64 raw decoder:** ✅ Byte-identical (Rust↔C++ both directions, 16/16 cases)
 - **EntropyEncoder (PMF + bypass):** ✅ Byte-identical to C++ oracle (6/6 cases)
 - **EntropyDecoder (CDF + bypass):** ✅ Byte-identical to C++ oracle (6/6 cases)
+- **Multipart stream (persistent encoder):** ✅ Byte-identical to Microsoft `RansEncoderStream` (8/8 wire cases)
+- **Multipart stream decoding:** ✅ Both directions, values + EOF (16/16 decode cases)
 - **Cross-validation (C++ encode → Rust decode):** ✅ Matches
 
 ---
 
 ## Python Compatibility
 
-- **Upstream Python tests:** 7/7 passing against C++ oracle in Docker
-- **Rust extension:** Scaffold only (PyO3 module with no API yet)
-- **Wheels:** Not yet built
+- **Upstream Python tests:** 7/7 passing against the Rust extension in Docker
+- **Bitstream fixtures:** RansByte `0500bd040001a10003000b00` and Rans64 `0500a1bd04000000110a002f03000300` match byte-for-byte
+- **Multipart:** persistent stream semantics; wire-parity proven against Microsoft oracle
+- **Wheels:** built with maturin; `msrtc.rans` package layered into site-packages
 
 ---
 
@@ -123,68 +132,26 @@ All three residuals are **intentional safety divergences** — Rust is correct t
 ## Evidence
 
 - `oracle/upstream.lock` — Upstream pin and fixture hashes
-- `courts/receipts/` — 3 sealed receipt JSON files
+- `courts/receipts/` — 4 sealed receipt JSON files
 - `courts/transcripts/` — Human-readable court transcripts
 - `courts/manifests/` — Receipt + transcript hash-linked manifests
-- `courts/residuals/` — 3 active residuals (safety divergences) + 2 stale resolved residuals
+- `courts/residuals/` — 3 active residuals (safety divergences) + 2 resolved residual records
 - `docs/generated/surface-inventory.md` — Complete surface enumeration
 - `docs/generated/parity-matrix.md` — Current parity status
 - `docs/generated/claim-index.md` — Verified and unverified claims
 - `docs/generated/court-index.md` — Court registry with statuses
+- `dockerfiles/` — `Dockerfile.oracle` (4 oracle CLIs), `Dockerfile.rust`, `Dockerfile.python`
+- `oracle/harness/` — `oracle_cli`, `raw_oracle_cli`, `decoder_oracle_cli`, `stream_oracle_cli`
 - Docker image `msrtc-rans-rs-oracle:debian12` — Green baseline
 
 ---
 
-## Exact Commands Run (Phase 3 Sealing)
+## Next Phases
 
-```bash
-# Seal raw encoder differential court
-cargo run -p msrtc-rans-court --bin seal -- --encoder
-
-# Seal raw decoder differential court
-cargo run -p msrtc-rans-court --bin seal -- --decoder
-
-# Seal entropy differential court  
-cargo run -p msrtc-rans-court --bin seal -- --entropy
-
-# Verify all tests pass
-cargo test --workspace --exclude msrtc-rans-python
-# 99 tests passed (30 core + 30 entropy + 39 court), 3 ignored
-
-# Lint check
-cargo clippy --workspace --exclude msrtc-rans-python --all-targets -- -D warnings
-cargo fmt --check
-```
-
----
-
-## All Workspace Tests
-
-| Crate | Test Count | Status |
-|-------|-----------|--------|
-| `msrtc-rans-core` | 30 | ✅ All pass |
-| `msrtc-rans` (entropy) | 30 + 1 doc (ignored) | ✅ All pass |
-| `msrtc-rans-court` | 42 (39 pass, 3 ignored) | ✅ 39 pass, 3 ignored |
-| **Total** | **102 defined (99 active, 3 ignored)** | **✅ All active pass** |
-
----
-
-## Claims Intentionally Not Made
-
-- "Byte-identical to Microsoft oracle for all inputs" — Differential court covers 30 specific cases, not exhaustive
-- "Drop-in replacement" — Python API not implemented; MLVC integration not tested
-- "Works with MLVC" — MLVC integration not tested
-- "Performance competitive" — Benchmarks not run
-- "Memory-safe replacement" — Formal claim pending full memory safety audit
-
----
-
-## Next Actions
-
-1. **Phase 4** — Streaming buffer management and multi-buffer support
-2. **Phase 5** — Python extension implementation via PyO3
-3. **Phase 6** — Docker matrix (Ubuntu, Fedora, Alpine oracle cells)
-4. **Phase 7** — MLVC integration harness and bitstream compatibility
-5. **Phase 8** — Differential fuzzing for random-input coverage
-6. **Phase 9** — Performance benchmarking and optimization
-7. **Tooling** — Implement `xtask gen` for reproducible docs; add CI workflow
+| Phase | Scope |
+|-------|-------|
+| 7 | **MLVC integration** — install the Rust wheel into a real MLVC environment; prove bitstreams, bpp, and reconstructed frames match |
+| 8 | Hardening — property tests, generation sweeps, fuzzing, Miri, allocation-failure injection, corruption testing |
+| 9 | Performance — profiling, monomorphization, bounds-check elimination, intrinsics |
+| — | Docker matrix — Ubuntu/Fedora/Alpine cells; run-scoped names/labels/digests |
+| — | Corpus expansion — encoder 8→100+, decoder 16→100+, entropy 6→100+, stream 8→100+ |

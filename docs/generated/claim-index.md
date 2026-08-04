@@ -1,5 +1,5 @@
 # msrtc-rans-rs Claim Index
-*Generated: 2026-07-27* — **Phase 3 — Three Courts Sealed — All Verified**
+*Generated: 2026-08-04* — **Phase 4 — Four Courts Sealed — All Verified**
 
 ## Verified Claims (backed by differential court receipts)
 
@@ -13,6 +13,11 @@
 | Full entropy encode (PMF + bypass) matches C++ oracle | `MSRTC.ENTROPY.DIFFERENTIAL` — 6/6 sealed receipt | ✅ **Proved** |
 | Full entropy decode matches C++ oracle | `MSRTC.ENTROPY.DIFFERENTIAL` — 6/6 sealed receipt | ✅ **Proved** |
 | C++ encode → Rust decode cross-validation matches | `MSRTC.ENTROPY.DIFFERENTIAL` roundtrip cases | ✅ **Proved** |
+| Multipart stream flush bytes match Microsoft byte-for-byte | `MSRTC.STREAM.DIFFERENTIAL` wire sub-cases — 8/8 | ✅ **Proved** |
+| Microsoft stream → Rust persistent decoder recovers all values + EOF | `MSRTC.STREAM.DIFFERENTIAL` — 8/8 | ✅ **Proved** |
+| Rust stream → Microsoft persistent decoder recovers all values + EOF | `MSRTC.STREAM.DIFFERENTIAL` — 8/8 | ✅ **Proved** |
+| Multipart Python API matches upstream test (push 2 → flush → decode 1,2 → decodeEOF) | Upstream `test_encode_decode_multi_part_0` + `MSRTC.STREAM.DIFFERENTIAL` | ✅ **Proved** |
+| `IResizableBuffer` / `HeapResizableBuffer` growth policy matches Microsoft | `new = old + min(old, max_step)`, max_step floored at 512; unit tests | ✅ **Implemented** |
 | VecSink growth no longer corrupts output | Growth boundary tests at 64, 65, 320, 321, 1000 | ✅ **Fixed** |
 | Decoder advance is now transactional | Truncated-stream path preserved | ✅ **Fixed** |
 | `Source::Outcome` abstraction removed | Simplified to `bool` | ✅ **Cleaned** |
@@ -24,12 +29,11 @@
 
 | Claim | Reason |
 |-------|--------|
-| "Byte-identical to Microsoft oracle for all inputs" | Differential court covers 30 cases, not exhaustive |
-| "Drop-in replacement" | Python API not implemented; API types differ slightly |
-| "Works with MLVC" | MLVC integration not tested |
-| "Performance competitive" | Benchmarks not run |
-| "Memory-safe replacement" | Formal claim pending full memory safety audit |
-| "No correctness bugs remain" | Residual MSRTC.RAW.SCALE32 open; further inputs may reveal issues |
+| "Byte-identical to Microsoft oracle for all inputs" | Differential courts cover 54 sealed cases, not exhaustive |
+| "Works with MLVC" | MLVC integration not yet tested (Phase 7 pending) |
+| "Performance competitive" | Benchmarks not run (Phase 9 pending) |
+| "Memory-safe replacement" | Formal claim pending full memory safety audit (Phase 8 pending) |
+| "No correctness bugs remain" | Residual `MSRTC.RAW.SCALE32` open; further inputs may reveal issues |
 
 ## Open Residuals
 
@@ -52,5 +56,5 @@
 |-----|--------|-------------|
 | `xtask gen` is a TODO | Docs not regenerable | Implement document generation |
 | Docker matrix incomplete | Only Debian oracle cell exists | Add Ubuntu, Fedora, Alpine |
-| No fuzz testing | Random inputs not explored | Add differential fuzzing |
-| No cross-platform testing | Only x86_64 Linux tested | Add ARM, macOS verification |
+| No fuzz testing | Random inputs not explored | Add differential fuzzing (Phase 8) |
+| No cross-platform testing | Only x86_64 Linux tested | Add ARM, macOS verification (Phase 8) |
