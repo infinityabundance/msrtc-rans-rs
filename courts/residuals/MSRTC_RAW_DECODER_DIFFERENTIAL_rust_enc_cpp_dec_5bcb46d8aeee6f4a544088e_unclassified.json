@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "court_id": "MSRTC.RAW.DECODER.DIFFERENTIAL",
+  "case_id": "rust_enc_cpp_dec_5bcb46d8aeee6f4a544088e78e289dc77cfaf39bbb8e21c25f9587098f59dc35",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "rust_commit": "bf639b44c99be86af38c98690246e7b7dfd93069-dirty",
+  "seed": 1024,
+  "variant": "Rans64",
+  "input_hashes": {
+    "pmf_lengths_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+    "pmf_offsets_sha256": "42f4aeb81c1ef81f771f3de8abca9dcf66901c575530e7672e4b1146474ae650",
+    "pmf_table_sha256": "c6bfdc08e9eea6f7d6b9c5f7f61916f379dd9edcb35d539e2e2fc75ca77e3e84",
+    "indices_sha256": "",
+    "values_sha256": "5bcb46d8aeee6f4a544088e78e289dc77cfaf39bbb8e21c25f9587098f59dc35"
+  },
+  "oracle": {
+    "status": "oracle_error",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "native": {
+    "status": "error: rust_decode: Rust decoder advance failed (Rans64)",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  "comparison": {
+    "exact": false
+  },
+  "classification": "unclassified",
+  "resolution": "open",
+  "environment_sha256": "7b6be9e7be02f269af0dd4bc8ac068ea1eb489916e92319c44658260d35ea3d6"
+}

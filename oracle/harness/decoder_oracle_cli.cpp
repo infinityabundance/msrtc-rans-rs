@@ -116,10 +116,10 @@ static bool decode_stream(
         return false;
     }
 
-    // Decode each symbol
-    for (auto& sym : symbols) {
-        uint32_t start = sym.first;
-        uint32_t freq  = sym.second;
+    // Decode each symbol — rANS decodes in REVERSE of the encode order.
+    for (auto it = symbols.rbegin(); it != symbols.rend(); ++it) {
+        uint32_t start = it->first;
+        uint32_t freq  = it->second;
 
         // Get cumulative frequency
         uint32_t cum_freq = decoder.Get(static_cast<msrtc_rans::rans_freq_t>(scale_bits));

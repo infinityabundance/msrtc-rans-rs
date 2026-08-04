@@ -107,7 +107,8 @@ impl DecoderCase {
         }
 
         let mut get_values = Vec::with_capacity(self.symbols.len());
-        for &(start, freq) in &self.symbols {
+        // rANS decodes in REVERSE of the encode order.
+        for &(start, freq) in self.symbols.iter().rev() {
             let cum_freq = decoder.get(self.scale_bits);
             get_values.push(cum_freq);
             if !decoder.advance(start, freq, self.scale_bits) {
@@ -139,7 +140,8 @@ impl DecoderCase {
         }
 
         let mut get_values = Vec::with_capacity(self.symbols.len());
-        for &(start, freq) in &self.symbols {
+        // rANS decodes in REVERSE of the encode order.
+        for &(start, freq) in self.symbols.iter().rev() {
             let cum_freq = decoder.get(self.scale_bits);
             get_values.push(cum_freq);
             if !decoder.advance(start, freq, self.scale_bits) {
@@ -634,6 +636,43 @@ fn generate_decoder_cases() -> Vec<DecoderCase> {
         scale_bits: 20,
         symbols: vec![(0, 524288), (524288, 262144), (786432, 131072)],
     });
+
+    // ---- seeded LCG sweep (adds ~48 base cases; 2 results each = ~96) ----
+    let mut rng = crate::corpus::Lcg::new(0xD3C0DE);
+    let byte_bits = [8u32, 10, 12, 16, 20, 22, 23];
+    let s64_bits = [8u32, 12, 16, 20, 24, 28, 31];
+    let mut seq = 0u64;
+
+    for &variant in &[1u32, 0u32] {
+        let bits = if variant == 1 { byte_bits } else { s64_bits };
+        for &sb in &bits {
+            let scale = 1u32 << sb;
+            for run in 0..3 {
+                let count = 1 + (rng.below(20) as usize);
+                let symbols = if run == 0 {
+                    vec![
+                        (0, 1),
+                        (0, scale - 1),
+                        (scale - 1, 1),
+                        (scale / 2, scale / 2),
+                    ]
+                } else if run == 1 {
+                    let mut s = vec![(0, scale.max(2) - 1), (scale / 3, scale / 3)];
+                    s.extend(crate::corpus::gen_symbols(&mut rng, scale, 4));
+                    s
+                } else {
+                    crate::corpus::gen_symbols(&mut rng, scale, count)
+                };
+                cases.push(DecoderCase {
+                    seed: 1000 + seq,
+                    variant,
+                    scale_bits: sb,
+                    symbols,
+                });
+                seq += 1;
+            }
+        }
+    }
 
     cases
 }

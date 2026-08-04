@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "court_id": "MSRTC.RAW.DECODER.DIFFERENTIAL",
+  "case_id": "cpp_enc_rust_dec:sha256:c8fc3ddc29f2e57a089e2175f688cad7bcba19cea48baa2afb1f5ebf5bac4b11",
+  "oracle_commit": "0500356a8d6146dd8dc8911022cbeca19675614f",
+  "rust_commit": "bf639b44c99be86af38c98690246e7b7dfd93069-dirty",
+  "seed": 1034,
+  "variant": "Rans64",
+  "input_hashes": {
+    "pmf_lengths_sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+    "pmf_offsets_sha256": "17fa9c7f5e9039a2d46e73e17d8e094a796ee4c313199bad42db4ee1dc30d865",
+    "pmf_table_sha256": "2af2ffaa80c23e8cf7c4c8125f761020f26d19d1d20cbdfdfcb1ef03bd9bc32c",
+    "indices_sha256": "6be71c380f01056fb72cb6537e40db5778bce002127b1484755d1915f20efb6f",
+    "values_sha256": "c8fc3ddc29f2e57a089e2175f688cad7bcba19cea48baa2afb1f5ebf5bac4b11"
+  },
+  "oracle": {
+    "status": "ok",
+    "output_sha256": "99df584fff01c576541e23f1f339960fb6690eb6693767464d552509cf225a56",
+    "length": 28
+  },
+  "native": {
+    "status": "ok",
+    "output_sha256": "22f1097d9e8e92820945dbe4f1c19c4fe351aa5c8991052536f818afa7d5e17c",
+    "length": 28
+  },
+  "comparison": {
+    "exact": false,
+    "first_differing_offset": 4,
+    "differing_bytes": 5
+  },
+  "classification": "unclassified",
+  "resolution": "open",
+  "environment_sha256": "7b6be9e7be02f269af0dd4bc8ac068ea1eb489916e92319c44658260d35ea3d6"
+}

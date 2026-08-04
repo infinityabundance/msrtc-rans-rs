@@ -285,6 +285,9 @@ impl Court for RawEncoderDifferentialCourt {
 }
 
 /// Generate deterministic raw primitive test cases.
+///
+/// 8 hand-picked boundary cases + a seeded LCG sweep over variants, modes,
+/// and scale widths → ~112 cases.
 fn generate_raw_cases() -> Vec<RawCase> {
     let mut cases = Vec::new();
 
@@ -360,6 +363,73 @@ fn generate_raw_cases() -> Vec<RawCase> {
         symbols: vec![(0, 1)],
     });
 
+    // ---- seeded LCG sweep (adds ~104 cases) ----
+    let mut rng = crate::corpus::Lcg::new(0xE7_1C0DE);
+    let mut extra = 0usize;
+    let byte_bits = [8u32, 10, 12, 16, 20, 22, 23];
+    let s64_bits = [8u32, 12, 16, 20, 24, 28, 31];
+    let mut seq = 0u64;
+
+    for &variant in &[1u32, 0u32] {
+        for &mode in &[0u32, 1u32] {
+            let bits = if variant == 1 { byte_bits } else { s64_bits };
+            for &sb in &bits {
+                let scale = 1u32 << sb;
+                for run in 0..3 {
+                    let count = 1 + (rng.below(24) as usize);
+                    let symbols = crate::corpus::gen_symbols(&mut rng, scale, count);
+                    // Boundary-flavored sequences: freq=1 / near-full / half
+                    let symbols = if run == 0 {
+                        vec![
+                            (0, 1),
+                            (0, scale - 1),
+                            (scale - 1, 1),
+                            (scale / 2, scale / 2),
+                        ]
+                    } else if run == 1 {
+                        let mut s = vec![(0, scale.max(2) - 1), (scale / 3, scale / 3)];
+                        s.extend(symbols.iter().take(4).copied());
+                        s
+                    } else {
+                        symbols
+                    };
+                    cases.push(RawCase {
+                        seed: 1000 + seq,
+                        variant,
+                        mode,
+                        scale_bits: sb,
+                        symbols,
+                    });
+                    extra += 1;
+                    seq += 1;
+                }
+            }
+        }
+    }
+
+    // Boundary-focused Rans64 cases at the operational top (scale_bits=31)
+    for &mode in &[0u32, 1u32] {
+        for i in 0..4 {
+            let scale = 1u32 << 31;
+            let symbols = match i {
+                0 => vec![(0, 1), (scale - 1, 1), (scale / 2, scale / 2)],
+                1 => vec![(0, scale - 1), (1, scale - 2), (2, scale - 3)],
+                2 => vec![(scale - 2, 2), (scale / 3, scale / 3)],
+                _ => crate::corpus::gen_symbols(&mut rng, scale, 8),
+            };
+            cases.push(RawCase {
+                seed: 2000 + seq,
+                variant: 0,
+                mode,
+                scale_bits: 31,
+                symbols,
+            });
+            extra += 1;
+            seq += 1;
+        }
+    }
+
+    let _ = extra;
     cases
 }
 

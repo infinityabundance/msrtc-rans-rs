@@ -774,6 +774,60 @@ fn generate_stream_cases() -> Vec<StreamCase> {
             batches: vec![batch_pmf1(), batch_pmf1(), batch_pmf1()],
         },
     ]
+    .into_iter()
+    .chain(generate_lcg_stream_cases())
+    .collect()
+}
+
+/// Seeded LCG multipart stream cases (~26 more; 3 results each = ~78).
+fn generate_lcg_stream_cases() -> Vec<StreamCase> {
+    let mut rng = crate::corpus::Lcg::new(0x57E7_2026);
+    let mut out = Vec::new();
+    let mut seq = 0u64;
+    for &(variant, symbol_bits, bypass_bits) in &[
+        (1u32, 16u32, 2u32),
+        (0, 16, 2),
+        (1, 16, 4),
+        (0, 16, 4),
+        (1, 12, 2),
+        (0, 12, 4),
+    ] {
+        for batch_count in 1..=5usize {
+            if seq >= 30 {
+                break;
+            }
+            let scale = 1u32 << symbol_bits;
+            let mut batches = Vec::with_capacity(batch_count);
+            for _ in 0..batch_count {
+                let center = 4 + (rng.below(5) as i32);
+                let dist_count = 1 + (rng.below(3) as usize);
+                let (lengths, offsets, table) =
+                    crate::corpus::gen_pmf(&mut rng, scale, center, dist_count);
+                let count = 32 + (rng.below(96) as usize);
+                let (values, indices) =
+                    crate::corpus::gen_values(&mut rng, dist_count, center, count);
+                batches.push(StreamBatch {
+                    pmf_lengths: lengths,
+                    pmf_offsets: offsets,
+                    pmf_table: table,
+                    indices,
+                    values,
+                });
+            }
+            out.push(StreamCase {
+                seed: 1000 + seq,
+                variant,
+                symbol_bits,
+                bypass_bits,
+                batches,
+            });
+            seq += 1;
+        }
+        if seq >= 30 {
+            break;
+        }
+    }
+    out
 }
 
 #[cfg(test)]

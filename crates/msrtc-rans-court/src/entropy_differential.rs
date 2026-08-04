@@ -622,7 +622,7 @@ fn run_cpp_encode_rust_decode(
 // ---------------------------------------------------------------------------
 
 fn generate_entropy_cases() -> Vec<EntropyCase> {
-    vec![
+    let mut cases = vec![
         // Reference case from test_msrtc_rans.py (RansByte)
         EntropyCase {
             seed: 0,
@@ -651,7 +651,55 @@ fn generate_entropy_cases() -> Vec<EntropyCase> {
                 values: vec![-2, 1, 0, 1],
             }
         },
-    ]
+    ];
+
+    // ---- seeded LCG sweep (adds 32 base cases; 3 results each = 96) ----
+    let mut rng = crate::corpus::Lcg::new(0xE7E7_2026);
+    let mut seq = 0u64;
+    for &(variant, symbol_bits, bypass_bits) in &[
+        (1u32, 8u32, 2u32),
+        (0, 8, 2),
+        (1, 12, 2),
+        (0, 12, 2),
+        (1, 16, 2),
+        (0, 16, 2),
+        (1, 16, 4),
+        (0, 16, 4),
+        (1, 16, 8),
+        (0, 16, 8),
+        (1, 12, 4),
+        (0, 12, 8),
+    ] {
+        for dist_count in [2usize, 4, 8] {
+            // 3 runs per (variant, bits, dist_count) = 12*3*3 = 108... cap at 32
+            if seq >= 32 {
+                break;
+            }
+            let scale = 1u32 << symbol_bits;
+            let center = 4 + (rng.below(5) as i32);
+            let (lengths, offsets, table) =
+                crate::corpus::gen_pmf(&mut rng, scale, center, dist_count);
+            let count = 64 + (rng.below(128) as usize);
+            let (values, indices) = crate::corpus::gen_values(&mut rng, dist_count, center, count);
+            cases.push(EntropyCase {
+                seed: 1000 + seq,
+                variant,
+                symbol_bits,
+                bypass_bits,
+                pmf_lengths: lengths,
+                pmf_offsets: offsets,
+                pmf_table: table,
+                indices,
+                values,
+            });
+            seq += 1;
+        }
+        if seq >= 32 {
+            break;
+        }
+    }
+
+    cases
 }
 
 #[cfg(test)]

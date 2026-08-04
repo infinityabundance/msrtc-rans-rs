@@ -96,6 +96,8 @@ impl CourtResult {
 
 /// Bypass court — MSRTC.BYPASS
 pub mod bypass;
+/// Deterministic corpus generators for the differential courts
+pub mod corpus;
 /// Entropy differential court — MSRTC.ENTROPY.DIFFERENTIAL
 pub mod entropy_differential;
 /// Hardening property court — MSRTC.HARDENING
