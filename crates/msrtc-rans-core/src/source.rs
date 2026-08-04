@@ -44,6 +44,13 @@ impl<'a, Unit: Copy> SliceSource<'a, Unit> {
     pub fn remaining(&self) -> usize {
         self.data.len().saturating_sub(self.pos)
     }
+
+    /// Seek to an absolute unit position.
+    ///
+    /// Used by persistent stream decoding to continue from a saved cursor.
+    pub fn seek(&mut self, pos: usize) {
+        self.pos = pos.min(self.data.len());
+    }
 }
 
 impl<'a, Unit: Copy> Source<Unit> for SliceSource<'a, Unit> {

@@ -287,6 +287,155 @@ pub fn run_decoder_oracle(binary: &[u8]) -> Result<DecoderOracleResponse, String
     })
 }
 
+// ---------------------------------------------------------------------------
+// Stream oracle (multipart persistent RansEncoderStream / RansDecoderStream)
+// ---------------------------------------------------------------------------
+
+/// Run the stream oracle CLI (encode mode) inside Docker with the given
+/// multipart casefile. Returns the flushed stream bytes.
+pub fn run_stream_oracle_encode(binary: &[u8]) -> Result<OracleResponse, String> {
+    let container_name = generate_run_id();
+    let mut child = Command::new("docker")
+        .args(["run"])
+        .args(docker_run_args())
+        .args([
+            "--name",
+            &container_name,
+            ORACLE_IMAGE,
+            "/workspace/bin/stream_oracle_cli",
+            "encode",
+            "/dev/stdin",
+        ])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("docker_spawn: {}", e))?;
+
+    if let Some(ref mut stdin) = child.stdin {
+        stdin
+            .write_all(binary)
+            .map_err(|e| format!("stdin_write: {}", e))?;
+    }
+    drop(child.stdin.take());
+
+    let output = child
+        .wait_with_output()
+        .map_err(|e| format!("docker_wait: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!(
+            "stream_oracle_exit_{}: {}",
+            output.status.code().unwrap_or(-1),
+            stderr.trim()
+        ));
+    }
+
+    let bitstream = output.stdout;
+    let stderr_str = String::from_utf8_lossy(&output.stderr);
+    let last_line = stderr_str.lines().last().unwrap_or("");
+
+    validate_oracle_response(last_line, &bitstream)
+}
+
+/// Result of running the stream oracle CLI in decode mode.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct StreamDecodeResponse {
+    pub status: String,
+    /// Decoded values per batch, in DECODE order (reverse push order).
+    pub values: Vec<Vec<i32>>,
+    pub values_sha256: String,
+    pub eof: bool,
+}
+
+/// Run the stream oracle CLI (decode mode) inside Docker.
+///
+/// The input is `[casefile bytes][stream bytes]` concatenated on stdin;
+/// the CLI parses the self-delimiting casefile and treats the remainder as
+/// the encoded stream.
+///
+/// Returns the decoded values reported by Microsoft's RansDecoderStream.
+pub fn run_stream_oracle_decode(
+    casefile: &[u8],
+    stream: &[u8],
+) -> Result<StreamDecodeResponse, String> {
+    let mut stdin_data = Vec::with_capacity(casefile.len() + stream.len());
+    stdin_data.extend_from_slice(casefile);
+    stdin_data.extend_from_slice(stream);
+
+    let container_name = generate_run_id();
+    let mut child = Command::new("docker")
+        .args(["run"])
+        .args(docker_run_args())
+        .args([
+            "--name",
+            &container_name,
+            ORACLE_IMAGE,
+            "/workspace/bin/stream_oracle_cli",
+            "decode",
+        ])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("docker_spawn: {}", e))?;
+
+    if let Some(ref mut stdin) = child.stdin {
+        stdin
+            .write_all(&stdin_data)
+            .map_err(|e| format!("stdin_write: {}", e))?;
+    }
+    drop(child.stdin.take());
+
+    let output = child
+        .wait_with_output()
+        .map_err(|e| format!("docker_wait: {}", e))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!(
+            "stream_decode_oracle_exit_{}: {}",
+            output.status.code().unwrap_or(-1),
+            stderr.trim()
+        ));
+    }
+
+    let stderr_str = String::from_utf8_lossy(&output.stderr);
+    let last_line = stderr_str.lines().last().unwrap_or("");
+
+    let parsed: serde_json::Value = serde_json::from_str(last_line)
+        .map_err(|e| format!("stream_decode_json_parse: {} — line: {}", e, last_line))?;
+
+    let status = parsed["status"].as_str().unwrap_or("unknown").to_string();
+    if status != "ok" {
+        let msg = parsed["message"].as_str().unwrap_or("unknown error");
+        return Err(format!("stream_decode_oracle_error: {}", msg));
+    }
+
+    let values: Vec<Vec<i32>> = parsed["values"]
+        .as_array()
+        .ok_or_else(|| "missing values array".to_string())?
+        .iter()
+        .map(|batch| {
+            batch
+                .as_array()
+                .map(|v| v.iter().map(|x| x.as_i64().unwrap_or(0) as i32).collect())
+                .unwrap_or_default()
+        })
+        .collect();
+
+    let values_sha256 = parsed["values_sha256"].as_str().unwrap_or("").to_string();
+    let eof = parsed["eof"].as_bool().unwrap_or(false);
+
+    Ok(StreamDecodeResponse {
+        status,
+        values,
+        values_sha256,
+        eof,
+    })
+}
+
 fn hex_decode(hex: &str) -> Result<Vec<u8>, String> {
     let hex = hex.trim();
     if hex.len() % 2 != 0 {

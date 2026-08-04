@@ -12,8 +12,8 @@ name = "_msrtc_rans"
 crate-type = ["cdylib"]
 
 [dependencies]
-msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.2" }
-msrtc-rans = { path = "../msrtc-rans", version = "0.2" }
+msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.3" }
+msrtc-rans = { path = "../msrtc-rans", version = "0.3" }
 pyo3 = { version = "0.22", features = ["extension-module", "abi3-py311"] }
 
 [features]

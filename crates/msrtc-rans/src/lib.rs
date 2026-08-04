@@ -21,3 +21,12 @@ pub use msrtc_rans_core::*;
 
 /// Entropy encoder/decoder (high-level PMF/bypass/CDF pipeline).
 pub mod entropy;
+
+/// Resizable buffer layer — `IResizableBuffer` / `HeapResizableBuffer`.
+pub mod buffer;
+
+/// rANS stream types — `RansEncoderStream` / `RansDecoderStream`.
+pub mod stream;
+
+/// Re-export the stream types at the crate root.
+pub use stream::{RansDecoderStream, RansEncoderStream, RansVariant};

@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "msrtc-rans"
-version = "0.2.3"
+version = "0.3.0"
 description = "rANS entropy coder implementation — Rust native replacement for Microsoft MLVC msrtc_rans"
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.22"]

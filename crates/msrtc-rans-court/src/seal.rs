@@ -110,11 +110,14 @@ pub fn write_run_artifacts(result: &CourtResult) -> std::io::Result<Receipt> {
     let oracle_cli = match result.court_id.as_str() {
         "MSRTC.RAW.ENCODER.DIFFERENTIAL" => "/workspace/bin/raw_oracle_cli",
         "MSRTC.RAW.DECODER.DIFFERENTIAL" => "/workspace/bin/decoder_oracle_cli",
+        "MSRTC.STREAM.DIFFERENTIAL" => "/workspace/bin/stream_oracle_cli",
         _ => "/workspace/bin/oracle_cli",
     };
 
     let cargo_arg = if result.court_id.contains("DECODER") {
         "-- decoder"
+    } else if result.court_id.contains("STREAM") {
+        "-- stream"
     } else {
         ""
     };

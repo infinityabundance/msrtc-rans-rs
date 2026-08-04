@@ -24,7 +24,7 @@ use msrtc_rans_core::{
     Freq, Rans64Decoder, Rans64Encoder, RansByteDecoder, RansByteEncoder, error::RawRansError,
 };
 
-use crate::oracle::{self, environment_sha256, git_commit, try_write_residual};
+use crate::oracle::{self, environment_sha256, git_commit};
 use crate::{Court, CourtResult, CourtStatus};
 
 /// A single decoder differential test case.

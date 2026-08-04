@@ -344,6 +344,13 @@ macro_rules! generate_rans_impl {
                 }
             }
 
+            /// Construct a decoder with a given state (used for persistent
+            /// stream decoding where the state continues across calls).
+            #[inline]
+            pub fn from_state(source: Sr, state: $state_ty) -> Self {
+                Self { source, state }
+            }
+
             #[inline]
             pub fn source(&self) -> &Sr {
                 &self.source

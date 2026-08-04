@@ -1165,6 +1165,29 @@ impl<S: RansParams> EntropyDecoder<S> {
     ) -> Result<usize, EntropyError> {
         self.decode_batch(values, indices, data)
     }
+
+    /// Continue decoding from a persistent RansByte decoder (stream mode).
+    ///
+    /// The decoder must already be initialized (via `init()` on the first
+    /// call). The caller owns the decoder and its source cursor.
+    pub fn decode_byte_continue(
+        &self,
+        raw: &mut msrtc_rans_core::RansByteDecoder<SliceSource<'_, u8>>,
+        values: &mut [i32],
+        indices: &[i32],
+    ) -> Result<(), EntropyError> {
+        self.state.decode_inner_byte(raw, values, indices)
+    }
+
+    /// Continue decoding from a persistent Rans64 decoder (stream mode).
+    pub fn decode_64_continue(
+        &self,
+        raw: &mut msrtc_rans_core::Rans64Decoder<SliceSource<'_, u32>>,
+        values: &mut [i32],
+        indices: &[i32],
+    ) -> Result<(), EntropyError> {
+        self.state.decode_inner_64(raw, values, indices)
+    }
 }
 
 impl<S: RansParams> Default for EntropyDecoder<S> {

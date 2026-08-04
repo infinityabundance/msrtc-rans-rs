@@ -12,7 +12,7 @@ default = []
 std = []
 
 [dependencies]
-msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.2" }
+msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.3" }
 
 [lints]
 rust.unsafe_code = "forbid"

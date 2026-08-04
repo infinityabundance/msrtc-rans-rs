@@ -114,6 +114,8 @@ pub mod raw_ransbyte;
 pub mod reciprocal;
 /// Seal and receipt generation
 pub mod seal;
+/// Stream differential court — MSRTC.STREAM.DIFFERENTIAL
+pub mod stream_differential;
 
 #[cfg(test)]
 mod tests {

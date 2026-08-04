@@ -7,6 +7,17 @@
 //!
 //! This crate uses PyO3 to create a CPython extension module that is
 //! import-path-compatible with the existing `msrtc.rans` package.
+//!
+//! Stream classes wrap the persistent Rust stream types from
+//! `msrtc_rans::stream`, matching Microsoft's `RansEncoderStream` /
+//! `RansDecoderStream` semantics:
+//!
+//! - `RansEncoderStream` keeps a single persistent raw rANS encoder state
+//!   across `push()` calls and flushes it once (`Flush(abort=false)`),
+//!   exactly like Microsoft's `RansEncoderStreamImpl`.
+//! - `RansDecoderStream` owns the encoded message and keeps a persistent
+//!   decode cursor (unit position + rANS state) across `decode()` calls,
+//!   matching Microsoft's `RansDecoderStreamImpl`.
 
 #![allow(missing_docs)]
 #![allow(unsafe_op_in_unsafe_fn)]
@@ -18,6 +29,8 @@ use pyo3::types::PyByteArray;
 use pyo3::types::PyBytes;
 
 use msrtc_rans::entropy::{EntropyDecoder, EntropyEncoder};
+use msrtc_rans::stream::RansDecoderStream as CoreDecoderStream;
+use msrtc_rans::stream::RansEncoderStream as CoreEncoderStream;
 use msrtc_rans::variant::Rans64;
 use msrtc_rans::variant::RansByte;
 
@@ -108,9 +121,19 @@ fn rans_64() -> i32 {
 // RansEncoderStream
 // ---------------------------------------------------------------------------
 
+/// Persistent raw encoder held by the Python `RansEncoderStream`.
+///
+/// Matches Microsoft's `RawRansEncoderStream`: one raw rANS encoder state
+/// persists across `push()` calls; `flush()` finalizes it once.
+enum PyEncoderStream {
+    None,
+    Byte(CoreEncoderStream<RansByte>),
+    S64(CoreEncoderStream<Rans64>),
+}
+
 #[pyclass(name = "RansEncoderStream")]
 struct RansEncoderStream {
-    segments: Vec<Vec<u8>>,
+    stream: PyEncoderStream,
     #[allow(dead_code)]
     variant: i32,
     #[allow(dead_code)]
@@ -119,31 +142,90 @@ struct RansEncoderStream {
     _max_size_step: usize,
 }
 
+impl RansEncoderStream {
+    /// Push a batch encoded with a RansByte entropy encoder.
+    fn push_byte(
+        &mut self,
+        encoder: &EntropyEncoder<RansByte>,
+        indices: &[i32],
+        values: &[i32],
+    ) -> PyResult<()> {
+        match &mut self.stream {
+            PyEncoderStream::Byte(s) => s
+                .push(encoder, indices, values)
+                .map_err(|e| PyValueError::new_err(format!("encode failed: {}", e))),
+            PyEncoderStream::S64(_) => Err(PyValueError::new_err(
+                "encoder stream variant mismatch: stream is Rans64, encoder is RansByte",
+            )),
+            PyEncoderStream::None => Err(PyValueError::new_err("invalid state")),
+        }
+    }
+
+    /// Push a batch encoded with a Rans64 entropy encoder.
+    fn push_64(
+        &mut self,
+        encoder: &EntropyEncoder<Rans64>,
+        indices: &[i32],
+        values: &[i32],
+    ) -> PyResult<()> {
+        match &mut self.stream {
+            PyEncoderStream::S64(s) => s
+                .push(encoder, indices, values)
+                .map_err(|e| PyValueError::new_err(format!("encode failed: {}", e))),
+            PyEncoderStream::Byte(_) => Err(PyValueError::new_err(
+                "encoder stream variant mismatch: stream is RansByte, encoder is Rans64",
+            )),
+            PyEncoderStream::None => Err(PyValueError::new_err("invalid state")),
+        }
+    }
+}
+
 #[pymethods]
 impl RansEncoderStream {
     #[new]
     #[pyo3(signature = (variant=1, *, initialSize=4096, maxSizeStep=1048576))]
-    fn new(variant: i32, initialSize: usize, maxSizeStep: usize) -> Self {
-        Self {
-            segments: Vec::new(),
+    fn new(variant: i32, initialSize: usize, maxSizeStep: usize) -> PyResult<Self> {
+        let stream = match variant {
+            1 => PyEncoderStream::Byte(CoreEncoderStream::new()),
+            0 => PyEncoderStream::S64(CoreEncoderStream::new()),
+            _ => {
+                return Err(PyValueError::new_err(format!(
+                    "unknown rANS variant value: {}",
+                    variant
+                )));
+            }
+        };
+        Ok(Self {
+            stream,
             variant,
             _initial_size: initialSize,
             _max_size_step: maxSizeStep,
-        }
+        })
     }
 
     fn flush(&mut self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let total_len: usize = self.segments.iter().map(|s| s.len()).sum();
-        let mut buffer = Vec::with_capacity(total_len);
-        for segment in self.segments.iter().rev() {
-            buffer.extend_from_slice(segment);
+        let data: Vec<u8> = match &mut self.stream {
+            PyEncoderStream::Byte(s) => s
+                .flush()
+                .map_err(|e| PyValueError::new_err(format!("flush failed: {}", e)))?,
+            PyEncoderStream::S64(s) => s
+                .flush()
+                .map_err(|e| PyValueError::new_err(format!("flush failed: {}", e)))?,
+            PyEncoderStream::None => {
+                return Err(PyValueError::new_err(
+                    "invalid state: stream not initialized",
+                ));
+            }
+        };
+
+        if data.is_empty() {
+            return Err(PyValueError::new_err("invalid state: empty output"));
         }
-        self.segments.clear();
-        // Use FFI to create PyBytes (PyBytes::new not available in PyO3 0.22 abi3)
+
         let ptr = unsafe {
             ffi::PyBytes_FromStringAndSize(
-                buffer.as_ptr() as *const ffi::Py_ssize_t as *const i8,
-                buffer.len() as ffi::Py_ssize_t,
+                data.as_ptr() as *const ffi::Py_ssize_t as *const i8,
+                data.len() as ffi::Py_ssize_t,
             )
         };
         if ptr.is_null() {
@@ -154,7 +236,11 @@ impl RansEncoderStream {
     }
 
     fn reset(&mut self) {
-        self.segments.clear();
+        match &mut self.stream {
+            PyEncoderStream::Byte(s) => s.reset(),
+            PyEncoderStream::S64(s) => s.reset(),
+            PyEncoderStream::None => {}
+        }
     }
 }
 
@@ -162,12 +248,44 @@ impl RansEncoderStream {
 // RansDecoderStream
 // ---------------------------------------------------------------------------
 
+/// Persistent decoder held by the Python `RansDecoderStream`.
+///
+/// Matches Microsoft's `RansDecoderStreamImpl`: the raw decoder is
+/// initialized on the first `decode()` and its cursor persists across
+/// subsequent calls.
+enum PyDecoderStream {
+    None,
+    Byte(CoreDecoderStream<RansByte>),
+    S64(CoreDecoderStream<Rans64>),
+}
+
 #[pyclass(name = "RansDecoderStream")]
 struct RansDecoderStream {
-    data: Option<Vec<u8>>,
-    offset: usize,
+    stream: PyDecoderStream,
     #[allow(dead_code)]
-    _variant: i32,
+    variant: i32,
+}
+
+impl RansDecoderStream {
+    fn byte_stream_mut(&mut self) -> PyResult<&mut CoreDecoderStream<RansByte>> {
+        match &mut self.stream {
+            PyDecoderStream::Byte(s) => Ok(s),
+            PyDecoderStream::S64(_) => Err(PyValueError::new_err(
+                "decoder stream variant mismatch: stream is Rans64",
+            )),
+            PyDecoderStream::None => Err(PyValueError::new_err("decoder stream is not open")),
+        }
+    }
+
+    fn s64_stream_mut(&mut self) -> PyResult<&mut CoreDecoderStream<Rans64>> {
+        match &mut self.stream {
+            PyDecoderStream::S64(s) => Ok(s),
+            PyDecoderStream::Byte(_) => Err(PyValueError::new_err(
+                "decoder stream variant mismatch: stream is RansByte",
+            )),
+            PyDecoderStream::None => Err(PyValueError::new_err("decoder stream is not open")),
+        }
+    }
 }
 
 #[pymethods]
@@ -175,45 +293,63 @@ impl RansDecoderStream {
     #[new]
     #[pyo3(signature = (data=None, *, variant=1))]
     fn new(data: Option<Bound<'_, PyAny>>, variant: i32) -> PyResult<Self> {
-        let vec = match data {
-            Some(ref obj) => Some(get_u8_buffer(obj)?),
-            None => None,
+        let stream = match variant {
+            1 => match data {
+                Some(ref obj) => {
+                    PyDecoderStream::Byte(CoreDecoderStream::open_on(&get_u8_buffer(obj)?))
+                }
+                None => PyDecoderStream::Byte(CoreDecoderStream::new()),
+            },
+            0 => match data {
+                Some(ref obj) => {
+                    PyDecoderStream::S64(CoreDecoderStream::open_on(&get_u8_buffer(obj)?))
+                }
+                None => PyDecoderStream::S64(CoreDecoderStream::new()),
+            },
+            _ => {
+                return Err(PyValueError::new_err(format!(
+                    "unknown rANS variant value: {}",
+                    variant
+                )));
+            }
         };
-        Ok(Self {
-            data: vec,
-            offset: 0,
-            _variant: variant,
-        })
+        Ok(Self { stream, variant })
     }
 
     fn open(&mut self, data: Bound<'_, PyAny>) -> PyResult<()> {
-        self.data = Some(get_u8_buffer(&data)?);
-        self.offset = 0;
+        let bytes = get_u8_buffer(&data)?;
+        match self.variant {
+            1 => {
+                self.stream = PyDecoderStream::Byte(CoreDecoderStream::open_on(&bytes));
+            }
+            0 => {
+                self.stream = PyDecoderStream::S64(CoreDecoderStream::open_on(&bytes));
+            }
+            _ => return Err(PyValueError::new_err("unknown rANS variant value")),
+        }
         Ok(())
     }
 
     fn close(&mut self) {
-        self.data = None;
-        self.offset = 0;
+        self.stream = PyDecoderStream::None;
     }
 
     #[pyo3(name = "isOpen")]
     fn is_open(&self) -> bool {
-        self.data.is_some()
+        !matches!(self.stream, PyDecoderStream::None)
     }
 
     #[pyo3(name = "decodeEOF")]
     fn decode_eof(&mut self) -> PyResult<()> {
-        if let Some(ref data) = self.data {
-            if self.offset != data.len() {
-                return Err(PyValueError::new_err(format!(
-                    "decodeEOF: stream not fully consumed (offset={}, len={})",
-                    self.offset,
-                    data.len()
-                )));
+        let result = match &mut self.stream {
+            PyDecoderStream::Byte(s) => s.decode_eof(),
+            PyDecoderStream::S64(s) => s.decode_eof(),
+            PyDecoderStream::None => {
+                return Err(PyValueError::new_err("decoder stream is not open"));
             }
-        }
-        self.close();
+        };
+        result.map_err(|e| PyValueError::new_err(format!("decodeEOF failed: {}", e)))?;
+        self.stream = PyDecoderStream::None;
         Ok(())
     }
 }
@@ -285,27 +421,23 @@ impl PyEntropyEncoder {
         let indices_vec = get_i32_buffer(&indices)?;
         let values_vec = get_i32_buffer(&values)?;
 
+        if indices_vec.len() != values_vec.len() {
+            return Err(PyValueError::new_err(
+                "indices and values must have the same length",
+            ));
+        }
+
         match self.variant {
             1 => {
                 if let Some(ref encoder) = self.byte_encoder {
-                    let mut buffer = Vec::new();
-                    encoder
-                        .encode(&indices_vec, &values_vec, &mut buffer)
-                        .map_err(|e| PyValueError::new_err(format!("encode failed: {}", e)))?;
-                    stream.segments.push(buffer);
-                    Ok(())
+                    stream.push_byte(encoder, &indices_vec, &values_vec)
                 } else {
                     Err(PyValueError::new_err("byte encoder not initialized"))
                 }
             }
             0 => {
                 if let Some(ref encoder) = self._64_encoder {
-                    let mut buffer = Vec::new();
-                    encoder
-                        .encode(&indices_vec, &values_vec, &mut buffer)
-                        .map_err(|e| PyValueError::new_err(format!("encode failed: {}", e)))?;
-                    stream.segments.push(buffer);
-                    Ok(())
+                    stream.push_64(encoder, &indices_vec, &values_vec)
                 } else {
                     Err(PyValueError::new_err("64 encoder not initialized"))
                 }
@@ -386,40 +518,31 @@ impl PyEntropyDecoder {
         // Try stream-based decode
         if let Ok(py_stream) = data.extract::<Py<RansDecoderStream>>() {
             let mut stream_ref = py_stream.borrow_mut(py);
-            let stream_data = stream_ref
-                .data
-                .as_ref()
-                .ok_or_else(|| PyValueError::new_err("RansDecoderStream is not open"))?;
-            let remaining = stream_data[stream_ref.offset..].to_vec();
-            let current_offset = stream_ref.offset;
-
             let mut decoded = vec![0i32; num_values];
 
-            let consumed = match self.variant {
+            match self.variant {
                 1 => {
                     if let Some(ref decoder) = self.byte_decoder {
-                        decoder
-                            .decode_batch(&mut decoded, &indices_vec, &remaining)
-                            .map_err(|e| PyValueError::new_err(format!("decode failed: {}", e)))?
+                        let core = stream_ref.byte_stream_mut()?;
+                        core.decode(decoder, &mut decoded, &indices_vec)
+                            .map_err(|e| PyValueError::new_err(format!("decode failed: {}", e)))?;
                     } else {
                         return Err(PyValueError::new_err("byte decoder not initialized"));
                     }
                 }
                 0 => {
                     if let Some(ref decoder) = self._64_decoder {
-                        decoder
-                            .decode_batch(&mut decoded, &indices_vec, &remaining)
-                            .map_err(|e| PyValueError::new_err(format!("decode failed: {}", e)))?
+                        let core = stream_ref.s64_stream_mut()?;
+                        core.decode(decoder, &mut decoded, &indices_vec)
+                            .map_err(|e| PyValueError::new_err(format!("decode failed: {}", e)))?;
                     } else {
                         return Err(PyValueError::new_err("64 decoder not initialized"));
                     }
                 }
                 _ => return Err(PyValueError::new_err("invalid variant")),
-            };
+            }
 
-            stream_ref.offset = current_offset + consumed;
             drop(stream_ref);
-
             write_i32_buffer(&values, &decoded)?;
             return Ok(());
         }

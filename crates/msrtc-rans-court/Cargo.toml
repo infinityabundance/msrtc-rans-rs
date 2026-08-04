@@ -8,9 +8,9 @@ description = "Differential forensic courts for msrtc_rans parity verification"
 documentation = "https://docs.rs/msrtc-rans-court"
 
 [dependencies]
-msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.2" }
-msrtc-rans = { path = "../msrtc-rans", version = "0.2" }
-msrtc-rans-casefile = { path = "../msrtc-rans-casefile", version = "0.2" }
+msrtc-rans-core = { path = "../msrtc-rans-core", version = "0.3" }
+msrtc-rans = { path = "../msrtc-rans", version = "0.3" }
+msrtc-rans-casefile = { path = "../msrtc-rans-casefile", version = "0.3" }
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
